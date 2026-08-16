@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Prime Reception AI — Hologram Receptionist</title>
+  <title>Prime Reception AI — Digital Receptionist</title>
 
   <style>
     * {
@@ -33,15 +33,15 @@
 
       background:
         radial-gradient(
-          circle at 50% 37%,
+          ellipse at 50% 38%,
           #0a1b26 0%,
-          #041018 29%,
-          #02080d 55%,
+          #05131b 27%,
+          #02080d 54%,
           #000 100%
         );
     }
 
-    /* Very subtle digital scan texture */
+    /* Fine holographic scan texture */
     #stage::before {
       content: "";
       position: absolute;
@@ -49,18 +49,18 @@
       z-index: 4;
       pointer-events: none;
 
-      opacity: 0.04;
+      opacity: 0.032;
 
       background:
         repeating-linear-gradient(
           to bottom,
           transparent 0px,
-          transparent 4px,
-          rgba(70, 225, 255, 0.16) 5px,
-          transparent 6px
+          transparent 5px,
+          rgba(71, 229, 255, 0.14) 6px,
+          transparent 7px
         );
 
-      animation: scanMove 10s linear infinite;
+      animation: scanMove 12s linear infinite;
     }
 
     @keyframes scanMove {
@@ -69,11 +69,11 @@
       }
 
       to {
-        background-position-y: 180px;
+        background-position-y: 220px;
       }
     }
 
-    /* Cinematic vignette */
+    /* Premium vignette */
     #stage::after {
       content: "";
       position: absolute;
@@ -84,13 +84,13 @@
       background:
         radial-gradient(
           ellipse at center,
-          transparent 37%,
+          transparent 36%,
           rgba(0, 0, 0, 0.10) 58%,
-          rgba(0, 0, 0, 0.76) 100%
+          rgba(0, 0, 0, 0.78) 100%
         );
     }
 
-    canvas {
+    #stage canvas {
       position: relative;
       z-index: 1;
       display: block;
@@ -103,56 +103,18 @@
       z-index: 20;
       left: 50%;
       top: 50%;
-
       transform: translate(-50%, -50%);
 
-      color: #61e8ff;
+      font-family:
+        Arial,
+        sans-serif;
 
-      font-family: Arial, sans-serif;
+      color: #67e9ff;
 
       font-size: 14px;
-      letter-spacing: 0.10em;
+      letter-spacing: 0.11em;
 
       pointer-events: none;
-    }
-
-    /*
-      Real Prime Reception AI logo.
-    */
-    #chestLogo {
-      position: fixed;
-
-      z-index: 3;
-
-      left: 0;
-      top: 0;
-
-      width: 55px;
-      height: auto;
-
-      opacity: 0;
-
-      pointer-events: none;
-
-      transform:
-        translate(-50%, -50%);
-
-      filter:
-        drop-shadow(
-          0 0 3px rgba(232, 182, 73, 0.30)
-        )
-        drop-shadow(
-          0 0 6px rgba(55, 224, 255, 0.14)
-        );
-
-      transition:
-        opacity 0.4s ease;
-    }
-
-    @media (max-width: 900px) {
-      #chestLogo {
-        width: 45px;
-      }
     }
   </style>
 </head>
@@ -165,12 +127,6 @@
     <div id="status">
       INITIALIZING PRIME RECEPTION AI…
     </div>
-
-    <img
-      id="chestLogo"
-      src="./prime-reception-logo.png"
-      alt=""
-    >
 
   </div>
 
@@ -204,14 +160,10 @@
         'stage'
       );
 
+
     const status =
       document.getElementById(
         'status'
-      );
-
-    const chestLogo =
-      document.getElementById(
-        'chestLogo'
       );
 
 
@@ -225,31 +177,49 @@
 
     const camera =
       new THREE.PerspectiveCamera(
+
         31,
-        window.innerWidth / window.innerHeight,
+
+        window.innerWidth /
+        window.innerHeight,
+
         0.01,
+
         1000
+
       );
 
 
+    /* =====================================================
+       RENDERER
+    ===================================================== */
+
     const renderer =
       new THREE.WebGLRenderer({
+
         antialias: true,
+
         alpha: true
+
       });
 
 
     renderer.setPixelRatio(
+
       Math.min(
         window.devicePixelRatio || 1,
         2
       )
+
     );
 
 
     renderer.setSize(
+
       window.innerWidth,
+
       window.innerHeight
+
     );
 
 
@@ -262,7 +232,7 @@
 
 
     renderer.toneMappingExposure =
-      1.08;
+      1.02;
 
 
     renderer.setClearColor(
@@ -280,11 +250,18 @@
        LIGHTING
     ===================================================== */
 
+    /*
+      Neutral premium ambient light.
+    */
     const ambient =
       new THREE.HemisphereLight(
-        0xe7f7ff,
-        0x020304,
-        0.86
+
+        0xe9f9ff,
+
+        0x020405,
+
+        0.88
+
       );
 
 
@@ -294,41 +271,57 @@
 
 
     /*
-      Soft front light.
+      Main frontal light.
+      Slight warmth prevents the face from
+      looking completely blue.
     */
-    const faceLight =
+    const keyLight =
       new THREE.DirectionalLight(
-        0xfffbf3,
-        2.65
+
+        0xfffaf2,
+
+        2.75
+
       );
 
 
-    faceLight.position.set(
+    keyLight.position.set(
+
       1.5,
-      4.1,
+
+      4.0,
+
       5.8
+
     );
 
 
     scene.add(
-      faceLight
+      keyLight
     );
 
 
     /*
-      Strong cyan holographic edge.
+      Left cyan silhouette light.
     */
     const cyanLeft =
       new THREE.DirectionalLight(
-        0x20dcff,
-        5.2
+
+        0x22ddff,
+
+        4.7
+
       );
 
 
     cyanLeft.position.set(
-      -4.5,
-      3.8,
-      -3.8
+
+      -4.3,
+
+      3.6,
+
+      -3.5
+
     );
 
 
@@ -337,17 +330,27 @@
     );
 
 
+    /*
+      Secondary right cyan rim.
+    */
     const cyanRight =
       new THREE.DirectionalLight(
-        0x6cecff,
-        3.1
+
+        0x69efff,
+
+        2.6
+
       );
 
 
     cyanRight.position.set(
+
       4,
-      3.2,
-      -3
+
+      3,
+
+      -3.2
+
     );
 
 
@@ -357,19 +360,27 @@
 
 
     /*
-      Gold Prime accent.
+      Prime gold accent.
+      Very restrained.
     */
     const goldLight =
       new THREE.DirectionalLight(
-        0xd9aa48,
-        1.45
+
+        0xd7aa50,
+
+        1.10
+
       );
 
 
     goldLight.position.set(
-      4,
+
+      3.5,
+
       2.6,
-      -2
+
+      -1.8
+
     );
 
 
@@ -379,20 +390,28 @@
 
 
     /*
-      Projection glow from below.
+      Bottom projector light.
     */
     const lowerGlow =
       new THREE.PointLight(
-        0x20dfff,
-        10,
+
+        0x24ddff,
+
+        9.5,
+
         8
+
       );
 
 
     lowerGlow.position.set(
+
       0,
+
       -1.5,
+
       1.5
+
     );
 
 
@@ -401,235 +420,272 @@
     );
 
 
+    /*
+      Subtle face fill.
+    */
+    const faceFill =
+      new THREE.PointLight(
+
+        0x74ebff,
+
+        0.80,
+
+        4.5
+
+      );
+
+
+    faceFill.position.set(
+
+      0,
+
+      1.6,
+
+      2.3
+
+    );
+
+
+    scene.add(
+      faceFill
+    );
+
+
     /* =====================================================
-       CHARACTER MATERIALS
+       PREMIUM AI MATERIALS
     ===================================================== */
 
     /*
-      Solid synthetic pearl body.
-
-      Important:
-      NOT transparent.
+      Synthetic body:
+      pearl-silver, not chrome.
     */
     const bodyMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xbccbd0
+            0xb8c7cb
           ),
 
         emissive:
           new THREE.Color(
-            0x042a32
+            0x03242b
           ),
 
         emissiveIntensity:
-          0.11,
+          0.075,
 
         metalness:
-          0.25,
+          0.18,
 
         roughness:
-          0.36,
+          0.39,
 
         clearcoat:
-          0.35,
+          0.30,
 
         clearcoatRoughness:
-          0.25,
+          0.28,
 
         sheen:
-          0.18,
+          0.14,
 
         sheenColor:
           new THREE.Color(
-            0x5addf0
+            0x5bdcec
           )
 
       });
 
 
     /*
-      Face remains softer.
+      Face:
+      softer, cleaner and less metallic.
     */
     const faceMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xd9e0e1
+            0xd8dfe0
           ),
 
         emissive:
           new THREE.Color(
-            0x031b20
+            0x021418
           ),
 
         emissiveIntensity:
-          0.06,
+          0.035,
 
         metalness:
-          0.08,
+          0.035,
 
         roughness:
-          0.42,
+          0.46,
 
         clearcoat:
-          0.22,
+          0.17,
 
         clearcoatRoughness:
-          0.29,
+          0.34,
 
         sheen:
-          0.08,
+          0.07,
 
         sheenColor:
           new THREE.Color(
-            0x87e8f2
+            0x78d9e6
           )
 
       });
 
 
     /*
-      Pearl-white futuristic shirt.
+      Upper uniform:
+      bright silver-white with
+      restrained technological sheen.
     */
     const shirtMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xe0e8e9
+            0xd9e3e5
           ),
 
         emissive:
           new THREE.Color(
-            0x07343d
+            0x042d35
           ),
 
         emissiveIntensity:
-          0.12,
+          0.085,
 
         metalness:
-          0.26,
+          0.24,
 
         roughness:
-          0.30,
+          0.31,
 
         clearcoat:
-          0.44,
+          0.41,
 
         clearcoatRoughness:
-          0.21,
+          0.22,
 
         sheen:
-          0.24,
+          0.21,
 
         sheenColor:
           new THREE.Color(
-            0x54e6f8
+            0x55e5f5
           )
 
       });
 
 
     /*
-      Matching lower garment.
-
-      Again: solid.
+      Lower uniform.
     */
     const leggingsMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xcbd8dc
+            0xc5d1d5
           ),
 
         emissive:
           new THREE.Color(
-            0x052d35
+            0x032830
           ),
 
         emissiveIntensity:
-          0.10,
+          0.07,
 
         metalness:
-          0.29,
+          0.27,
 
         roughness:
-          0.31,
+          0.32,
 
         clearcoat:
-          0.40,
+          0.38,
 
         clearcoatRoughness:
-          0.24,
+          0.25,
 
         sheen:
-          0.18,
+          0.17,
 
         sheenColor:
           new THREE.Color(
-            0x46ddef
+            0x45d9eb
           )
 
       });
 
 
+    /*
+      Hair stays dark to create
+      strong visual contrast.
+    */
     const hairMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0x03070a
+            0x030609
           ),
 
         emissive:
           new THREE.Color(
-            0x00171e
+            0x00141b
           ),
 
         emissiveIntensity:
-          0.13,
+          0.11,
 
         metalness:
-          0.20,
+          0.16,
 
         roughness:
-          0.38,
+          0.39,
 
         clearcoat:
-          0.28,
+          0.25,
 
         clearcoatRoughness:
-          0.27
+          0.28
 
       });
 
 
+    /*
+      AI eyes.
+    */
     const eyeMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xe7fcff
+            0xe8fcff
           ),
 
         emissive:
           new THREE.Color(
-            0x21ddf9
+            0x25d9f5
           ),
 
         emissiveIntensity:
-          0.95,
+          0.82,
 
         metalness:
           0.01,
 
         roughness:
-          0.12,
+          0.15,
 
         clearcoat:
           1,
@@ -644,19 +700,22 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          0xd6fbff,
+          0xd4faff,
 
         emissive:
-          0x075c6b,
+          0x064b57,
 
         emissiveIntensity:
-          0.26,
+          0.20,
 
         transparent:
           true,
 
         opacity:
-          0.35,
+          0.31,
+
+        metalness:
+          0,
 
         roughness:
           0.08,
@@ -673,9 +732,6 @@
         color:
           0x010203,
 
-        metalness:
-          0.08,
-
         roughness:
           0.46
 
@@ -686,10 +742,13 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          0xf5f7f7,
+          0xf5f6f4,
 
         roughness:
-          0.30
+          0.33,
+
+        clearcoat:
+          0.12
 
       });
 
@@ -698,19 +757,19 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          0xd3a447,
+          0xd2a449,
 
         emissive:
-          0x291900,
+          0x281900,
 
         emissiveIntensity:
-          0.12,
+          0.10,
 
         metalness:
-          0.75,
+          0.72,
 
         roughness:
-          0.26
+          0.27
 
       });
 
@@ -794,10 +853,6 @@
       null;
 
 
-    let chestBone =
-      null;
-
-
     let eyeLObject =
       null;
 
@@ -826,7 +881,17 @@
       null;
 
 
+    /*
+      Blink meshes.
+    */
     const blinkMeshes =
+      [];
+
+
+    /*
+      Facial meshes that contain smile morphs.
+    */
+    const smileMeshes =
       [];
 
 
@@ -872,6 +937,10 @@
           );
 
 
+        /*
+          Center dead zone prevents tiny
+          jitter when pointer is near center.
+        */
         const deadZone =
           0.055;
 
@@ -896,6 +965,9 @@
         }
 
 
+        /*
+          Smooth response curve.
+        */
         x =
           Math.sign(x) *
           Math.pow(
@@ -962,7 +1034,7 @@
     ) {
 
       const count =
-        330;
+        270;
 
 
       const positions =
@@ -981,25 +1053,31 @@
           i * 3;
 
 
-        positions[i3] =
+        positions[
+          i3
+        ] =
           (
             Math.random() -
             0.5
           ) *
           size.x *
-          3;
+          3.1;
 
 
-        positions[i3 + 1] =
+        positions[
+          i3 + 1
+        ] =
           (
             Math.random() -
-            0.45
+            0.44
           ) *
           size.y *
-          1.4;
+          1.35;
 
 
-        positions[i3 + 2] =
+        positions[
+          i3 + 2
+        ] =
           (
             Math.random() -
             0.5
@@ -1032,12 +1110,12 @@
         new THREE.PointsMaterial({
 
           color:
-            0x37dfff,
+            0x36ddff,
 
           size:
             Math.max(
               size.y *
-              0.0025,
+              0.0022,
               0.002
             ),
 
@@ -1045,7 +1123,7 @@
             true,
 
           opacity:
-            0.26,
+            0.19,
 
           depthWrite:
             false,
@@ -1071,7 +1149,7 @@
 
 
     /* =====================================================
-       WATER / HOLOGRAM PROJECTOR
+       HOLOGRAPHIC BOTTOM PLATFORM
     ===================================================== */
 
     const projectorGroup =
@@ -1091,19 +1169,17 @@
       0;
 
 
-    function createWaterSurface(
+    function createProjector(
       size
     ) {
 
       /*
-        This is deliberately below the torso.
-
-        We are NOT cutting the mesh.
-        Camera framing hides most of the lower body naturally.
+        Lower than waist.
+        Character remains intact.
       */
       projectorY =
         -size.y *
-        0.37;
+        0.39;
 
 
       const radius =
@@ -1111,7 +1187,11 @@
         0.70;
 
 
-      const geometry =
+      /* =========================================
+         ENERGY WATER SURFACE
+      ========================================= */
+
+      const waterGeometry =
         new THREE.CircleGeometry(
           radius,
           128
@@ -1148,8 +1228,7 @@
 
             void main() {
 
-              vUv =
-                uv;
+              vUv = uv;
 
               gl_Position =
                 projectionMatrix *
@@ -1177,7 +1256,7 @@
                 vec2(0.5);
 
 
-              float distanceFromCenter =
+              float d =
                 length(p) *
                 2.0;
 
@@ -1185,62 +1264,63 @@
               float mask =
                 1.0 -
                 smoothstep(
+                  0.70,
+                  1.0,
+                  d
+                );
+
+
+              float waveA =
+                sin(
+                  d *
+                  74.0 -
+                  uTime *
+                  4.0
+                );
+
+
+              float waveB =
+                sin(
+                  d *
+                  115.0 -
+                  uTime *
+                  6.1
+                );
+
+
+              waveA =
+                smoothstep(
+                  0.67,
+                  1.0,
+                  waveA
+                );
+
+
+              waveB =
+                smoothstep(
                   0.72,
                   1.0,
-                  distanceFromCenter
+                  waveB
                 );
 
 
-              float rippleA =
-                sin(
-                  distanceFromCenter *
-                  70.0 -
-                  uTime *
-                  4.8
-                );
-
-
-              float rippleB =
-                sin(
-                  distanceFromCenter *
-                  112.0 -
-                  uTime *
-                  7.0
-                );
-
-
-              float ripple =
-                max(
-                  rippleA,
-                  rippleB *
-                  0.52
-                );
-
-
-              ripple =
-                smoothstep(
-                  0.60,
-                  1.0,
-                  ripple
-                );
-
-
-              float centerGlow =
+              float center =
                 1.0 -
                 smoothstep(
                   0.0,
-                  0.72,
-                  distanceFromCenter
+                  0.62,
+                  d
                 );
 
 
               float alpha =
                 (
-                  ripple *
-                  0.46
-                  +
-                  centerGlow *
-                  0.13
+                  waveA *
+                  0.35 +
+                  waveB *
+                  0.22 +
+                  center *
+                  0.14
                 ) *
                 mask;
 
@@ -1248,7 +1328,7 @@
               gl_FragColor =
                 vec4(
                   0.05,
-                  0.82,
+                  0.80,
                   1.0,
                   alpha
                 );
@@ -1262,7 +1342,7 @@
 
       const water =
         new THREE.Mesh(
-          geometry,
+          waterGeometry,
           waterMaterial
         );
 
@@ -1280,51 +1360,39 @@
       );
 
 
-      /*
-        Crisp concentric rings.
-      */
+      /* =========================================
+         CONCENTRIC ENERGY RINGS
+      ========================================= */
 
-      const ringSettings = [
+      const ringData = [
 
-        [0.72, 0.010, 0.85],
+        [0.72, 0.009, 0.68],
 
-        [0.88, 0.006, 0.55],
+        [0.88, 0.005, 0.42],
 
-        [1.04, 0.004, 0.35],
+        [1.03, 0.0036, 0.27],
 
-        [1.24, 0.003, 0.22]
+        [1.21, 0.0025, 0.14]
 
       ];
 
 
       for (
-        const setting
-        of ringSettings
+        const values
+        of ringData
       ) {
-
-        const radiusMultiplier =
-          setting[0];
-
-
-        const thickness =
-          setting[1];
-
-
-        const opacity =
-          setting[2];
-
 
         const ringMaterial =
           new THREE.MeshBasicMaterial({
 
             color:
-              0x35e2ff,
+              0x41e8ff,
 
             transparent:
               true,
 
             opacity:
-              opacity,
+              values[2],
 
             depthWrite:
               false,
@@ -1341,10 +1409,10 @@
             new THREE.TorusGeometry(
 
               radius *
-              radiusMultiplier,
+              values[0],
 
               radius *
-              thickness,
+              values[1],
 
               10,
 
@@ -1382,18 +1450,18 @@
 
 
     /* =====================================================
-       LOWER DIGITAL PARTICLES
+       LOWER HOLOGRAPHIC PARTICLES
     ===================================================== */
 
     let lowerParticles =
       null;
 
 
-    let lowerParticlePositions =
+    let lowerPositions =
       null;
 
 
-    const lowerParticleSpeeds =
+    const lowerSpeeds =
       [];
 
 
@@ -1402,10 +1470,10 @@
     ) {
 
       const count =
-        620;
+        340;
 
 
-      lowerParticlePositions =
+      lowerPositions =
         new Float32Array(
           count * 3
         );
@@ -1421,43 +1489,49 @@
           i * 3;
 
 
-        const radius =
-          Math.sqrt(
-            Math.random()
-          ) *
-          size.x *
-          0.46;
-
-
         const angle =
           Math.random() *
           Math.PI *
           2;
 
 
-        lowerParticlePositions[i3] =
+        const radius =
+          Math.sqrt(
+            Math.random()
+          ) *
+          size.x *
+          0.42;
+
+
+        lowerPositions[
+          i3
+        ] =
           Math.cos(angle) *
           radius;
 
 
-        lowerParticlePositions[i3 + 1] =
+        lowerPositions[
+          i3 + 1
+        ] =
           projectorY +
           Math.random() *
           size.y *
-          0.20;
+          0.17;
 
 
-        lowerParticlePositions[i3 + 2] =
+        lowerPositions[
+          i3 + 2
+        ] =
           Math.sin(angle) *
           radius *
-          0.40;
+          0.38;
 
 
-        lowerParticleSpeeds.push(
+        lowerSpeeds.push(
 
-          0.0013 +
+          0.0012 +
           Math.random() *
-          0.005
+          0.0045
 
         );
 
@@ -1473,7 +1547,7 @@
         'position',
 
         new THREE.BufferAttribute(
-          lowerParticlePositions,
+          lowerPositions,
           3
         )
 
@@ -1484,20 +1558,20 @@
         new THREE.PointsMaterial({
 
           color:
-            0x3ce8ff,
+            0x43e6ff,
 
           size:
             Math.max(
               size.y *
-              0.0033,
-              0.003
+              0.0028,
+              0.0025
             ),
 
           transparent:
             true,
 
           opacity:
-            0.58,
+            0.42,
 
           depthWrite:
             false,
@@ -1529,7 +1603,7 @@
 
       if (
         !lowerParticles ||
-        !lowerParticlePositions
+        !lowerPositions
       ) {
 
         return;
@@ -1537,15 +1611,15 @@
       }
 
 
-      const maxY =
+      const upperLimit =
         projectorY +
         size.y *
-        0.20;
+        0.17;
 
 
       for (
         let i = 0;
-        i < lowerParticleSpeeds.length;
+        i < lowerSpeeds.length;
         i++
       ) {
 
@@ -1553,32 +1627,31 @@
           i * 3;
 
 
-        lowerParticlePositions[
+        lowerPositions[
           i3 + 1
         ] +=
-          lowerParticleSpeeds[i];
+          lowerSpeeds[i];
 
 
-        lowerParticlePositions[
+        lowerPositions[
           i3
         ] +=
           Math.sin(
             now *
             2 +
-            i *
-            0.7
+            i
           ) *
-          0.000025;
+          0.000018;
 
 
         if (
-          lowerParticlePositions[
+          lowerPositions[
             i3 + 1
           ] >
-          maxY
+          upperLimit
         ) {
 
-          lowerParticlePositions[
+          lowerPositions[
             i3 + 1
           ] =
             projectorY;
@@ -1599,7 +1672,248 @@
 
 
     /* =====================================================
-       MODEL LOADING
+       SMILE SYSTEM
+    ===================================================== */
+
+    /*
+      We support several common ARKit naming variants.
+    */
+    const smileLeftNames = [
+
+      'mouthSmileLeft',
+
+      'MouthSmileLeft',
+
+      'mouth_smile_left',
+
+      'SmileLeft'
+
+    ];
+
+
+    const smileRightNames = [
+
+      'mouthSmileRight',
+
+      'MouthSmileRight',
+
+      'mouth_smile_right',
+
+      'SmileRight'
+
+    ];
+
+
+    function findMorphIndex(
+      dictionary,
+      names
+    ) {
+
+      for (
+        const name
+        of names
+      ) {
+
+        if (
+          dictionary[name] !==
+          undefined
+        ) {
+
+          return dictionary[name];
+
+        }
+
+      }
+
+
+      return null;
+
+    }
+
+
+    function registerFacialMorphs(
+      object
+    ) {
+
+      if (
+        !object.morphTargetDictionary ||
+        !object.morphTargetInfluences
+      ) {
+
+        return;
+
+      }
+
+
+      const dictionary =
+        object.morphTargetDictionary;
+
+
+      /*
+        Blink registration.
+      */
+      if (
+        dictionary.eyeBlinkLeft !==
+          undefined
+        ||
+        dictionary.eyeBlinkRight !==
+          undefined
+      ) {
+
+        blinkMeshes.push(
+          object
+        );
+
+      }
+
+
+      /*
+        Smile registration.
+      */
+      const smileLeft =
+        findMorphIndex(
+          dictionary,
+          smileLeftNames
+        );
+
+
+      const smileRight =
+        findMorphIndex(
+          dictionary,
+          smileRightNames
+        );
+
+
+      if (
+        smileLeft !== null ||
+        smileRight !== null
+      ) {
+
+        smileMeshes.push({
+
+          mesh:
+            object,
+
+          left:
+            smileLeft,
+
+          right:
+            smileRight
+
+        });
+
+      }
+
+    }
+
+
+    /*
+      Professional resting smile.
+
+      0.18 = subtle.
+      We do NOT want a large grin.
+    */
+    const RESTING_SMILE =
+      0.18;
+
+
+    function applyRestingSmile() {
+
+      for (
+        const entry
+        of smileMeshes
+      ) {
+
+        const influences =
+          entry
+            .mesh
+            .morphTargetInfluences;
+
+
+        if (
+          entry.left !==
+          null
+        ) {
+
+          influences[
+            entry.left
+          ] =
+            RESTING_SMILE;
+
+        }
+
+
+        if (
+          entry.right !==
+          null
+        ) {
+
+          influences[
+            entry.right
+          ] =
+            RESTING_SMILE;
+
+        }
+
+      }
+
+    }
+
+
+    /* =====================================================
+       MODEL REFERENCES
+    ===================================================== */
+
+    let model =
+      null;
+
+
+    let modelSize =
+      null;
+
+
+    let headBone =
+      null;
+
+
+    let neck01 =
+      null;
+
+
+    let neck02 =
+      null;
+
+
+    let eyeLObject =
+      null;
+
+
+    let eyeRObject =
+      null;
+
+
+    let baseHeadRotation =
+      null;
+
+
+    let baseNeck01Rotation =
+      null;
+
+
+    let baseNeck02Rotation =
+      null;
+
+
+    let baseEyeLRotation =
+      null;
+
+
+    let baseEyeRRotation =
+      null;
+
+
+    /* =====================================================
+       LOAD CHARACTER
     ===================================================== */
 
     const loader =
@@ -1630,6 +1944,10 @@
             object
           ) {
 
+            /* =============================================
+               MESHES
+            ============================================= */
+
             if (
               object.isMesh
             ) {
@@ -1639,36 +1957,15 @@
 
 
               /*
-                Blink targets.
+                Register blink and smile morphs.
               */
-              if (
-                object.morphTargetDictionary &&
-                object.morphTargetInfluences
-              ) {
-
-                const dictionary =
-                  object.morphTargetDictionary;
-
-
-                if (
-                  dictionary.eyeBlinkLeft !==
-                    undefined
-                  ||
-                  dictionary.eyeBlinkRight !==
-                    undefined
-                ) {
-
-                  blinkMeshes.push(
-                    object
-                  );
-
-                }
-
-              }
+              registerFacialMorphs(
+                object
+              );
 
 
               /*
-                Hide only known unwanted auxiliary layers.
+                Hide known unwanted auxiliary layers.
               */
               if (
                 name ===
@@ -1766,9 +2063,7 @@
 
 
               /*
-                Restore leggings normally.
-
-                This is the critical rollback.
+                Leggings.
               */
               if (
                 name ===
@@ -1790,6 +2085,9 @@
               }
 
 
+              /*
+                Hair.
+              */
               if (
                 name ===
                   'SK_FemBase2_Hair'
@@ -1810,6 +2108,9 @@
               }
 
 
+              /*
+                Left eye.
+              */
               if (
                 name ===
                   'SK_FemBase2_EyeL'
@@ -1834,6 +2135,9 @@
               }
 
 
+              /*
+                Right eye.
+              */
               if (
                 name ===
                   'SK_FemBase2_EyeR'
@@ -1858,6 +2162,9 @@
               }
 
 
+              /*
+                Eye shell.
+              */
               if (
                 name ===
                   'SK_FemBase2_EyeShell'
@@ -1878,6 +2185,9 @@
               }
 
 
+              /*
+                Lashes / eye details.
+              */
               if (
                 name ===
                   'SK_FemBase2_Lashes'
@@ -1901,6 +2211,9 @@
               }
 
 
+              /*
+                Teeth.
+              */
               if (
                 name ===
                   'SK_FemBase2_Teeth'
@@ -1921,6 +2234,9 @@
               }
 
 
+              /*
+                Nails.
+              */
               if (
                 name ===
                   'SK_FemBase2_Nails'
@@ -1995,37 +2311,6 @@
 
               }
 
-
-              if (
-                !chestBone &&
-                (
-                  lowerName.includes(
-                    'upperchest'
-                  )
-                  ||
-                  lowerName.includes(
-                    'upper_chest'
-                  )
-                  ||
-                  lowerName.includes(
-                    'chest'
-                  )
-                  ||
-                  lowerName.includes(
-                    'spine_03'
-                  )
-                  ||
-                  lowerName.includes(
-                    'spine03'
-                  )
-                )
-              ) {
-
-                chestBone =
-                  object;
-
-              }
-
             }
 
           }
@@ -2033,8 +2318,18 @@
         );
 
 
+        /*
+          Print available smile information once.
+          Useful if we need to tune it later.
+        */
+        console.log(
+          'SMILE MORPH MESHES:',
+          smileMeshes.length
+        );
+
+
         /* =================================================
-           BASE ROTATIONS
+           SAVE ORIGINAL ROTATIONS
         ================================================= */
 
         if (
@@ -2098,7 +2393,7 @@
 
 
         /* =================================================
-           MODEL SIZE / CENTER
+           SIZE / CENTER
         ================================================= */
 
         const box =
@@ -2133,11 +2428,6 @@
 
         /* =================================================
            CAMERA
-
-           Deliberately closer than full-body.
-
-           We are using framing instead of destroying
-           the lower-body geometry.
         ================================================= */
 
         const verticalFOV =
@@ -2146,9 +2436,14 @@
           );
 
 
+        /*
+          Professional portrait framing.
+
+          Slightly closer than full-body.
+        */
         const visibleHeight =
           modelSize.y *
-          0.70;
+          0.73;
 
 
         let distance =
@@ -2163,7 +2458,7 @@
 
 
         distance *=
-          1.03;
+          1.04;
 
 
         const targetHeight =
@@ -2172,16 +2467,24 @@
 
 
         camera.position.set(
+
           0,
+
           targetHeight,
+
           distance
+
         );
 
 
         camera.lookAt(
+
           0,
+
           targetHeight,
+
           0
+
         );
 
 
@@ -2210,7 +2513,7 @@
         );
 
 
-        createWaterSurface(
+        createProjector(
           modelSize
         );
 
@@ -2220,8 +2523,10 @@
         );
 
 
-        chestLogo.style.opacity =
-          '1';
+        /*
+          Apply the smile immediately.
+        */
+        applyRestingSmile();
 
 
         status.style.display =
@@ -2233,6 +2538,10 @@
       },
 
 
+      /* ===================================================
+         PROGRESS
+      =================================================== */
+
       function (
         xhr
       ) {
@@ -2241,7 +2550,7 @@
           xhr.total
         ) {
 
-          const percent =
+          const percentage =
             Math.round(
 
               xhr.loaded /
@@ -2253,13 +2562,17 @@
 
           status.textContent =
             'INITIALIZING PRIME RECEPTION AI… ' +
-            percent +
+            percentage +
             '%';
 
         }
 
       },
 
+
+      /* ===================================================
+         ERROR
+      =================================================== */
 
       function (
         error
@@ -2287,7 +2600,7 @@
       amount
     ) {
 
-      const safe =
+      const value =
         THREE.MathUtils.clamp(
           amount,
           0,
@@ -2318,7 +2631,7 @@
           influences[
             dictionary.eyeBlinkLeft
           ] =
-            safe;
+            value;
 
         }
 
@@ -2331,7 +2644,7 @@
           influences[
             dictionary.eyeBlinkRight
           ] =
-            safe;
+            value;
 
         }
 
@@ -2369,9 +2682,9 @@
       nextBlink =
         performance.now() /
         1000 +
-        2.3 +
+        2.4 +
         Math.random() *
-        3.7;
+        3.8;
 
     }
 
@@ -2390,12 +2703,12 @@
       blinkDuration =
         0.12 +
         Math.random() *
-        0.055;
+        0.05;
 
 
       doubleBlink =
         Math.random() <
-        0.12;
+        0.10;
 
     }
 
@@ -2455,7 +2768,8 @@
 
 
       if (
-        progress <= 1
+        progress <=
+        1
       ) {
 
         setBlinkAmount(
@@ -2488,7 +2802,7 @@
             now +
             0.15 +
             Math.random() *
-            0.08;
+            0.07;
 
         }
 
@@ -2504,7 +2818,7 @@
 
 
     /* =====================================================
-       TRACKING — PRESERVING YOUR CONFIRMED AXES
+       HEAD / EYE TRACKING
     ===================================================== */
 
     const eyeHorizontalMax =
@@ -2587,128 +2901,6 @@
         )
 
       );
-
-    }
-
-
-    /* =====================================================
-       CHEST LOGO
-    ===================================================== */
-
-    const chestWorld =
-      new THREE.Vector3();
-
-
-    const chestScreen =
-      new THREE.Vector3();
-
-
-    function updateChestLogo() {
-
-      if (
-        !model ||
-        !modelSize
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        chestBone
-      ) {
-
-        chestBone.getWorldPosition(
-          chestWorld
-        );
-
-
-        /*
-          Upper right chest from viewer perspective.
-        */
-        chestWorld.x +=
-          modelSize.x *
-          0.105;
-
-
-        chestWorld.y +=
-          modelSize.y *
-          0.078;
-
-      }
-
-      else {
-
-        chestWorld.set(
-
-          modelSize.x *
-          0.10,
-
-          modelSize.y *
-          0.24,
-
-          0
-
-        );
-
-      }
-
-
-      chestScreen.copy(
-        chestWorld
-      );
-
-
-      chestScreen.project(
-        camera
-      );
-
-
-      const x =
-        (
-          chestScreen.x *
-          0.5 +
-          0.5
-        ) *
-        window.innerWidth;
-
-
-      const y =
-        (
-          -chestScreen.y *
-          0.5 +
-          0.5
-        ) *
-        window.innerHeight;
-
-
-      chestLogo.style.left =
-        x +
-        'px';
-
-
-      chestLogo.style.top =
-        y +
-        'px';
-
-
-      const width =
-        THREE.MathUtils.clamp(
-
-          window.innerHeight *
-          0.054,
-
-          40,
-
-          62
-
-        );
-
-
-      chestLogo.style.width =
-        width +
-        'px';
 
     }
 
@@ -2875,7 +3067,7 @@
 
 
       /* =========================================
-         APPLY EYE ROTATIONS
+         APPLY EYES
       ========================================= */
 
       if (
@@ -2921,7 +3113,7 @@
       /* =========================================
          APPLY HEAD
 
-         Confirmed rig mapping:
+         Confirmed mapping for this rig:
 
          X = left/right
          Z = up/down
@@ -3010,55 +3202,71 @@
 
 
       /* =========================================
-         BLINK
+         FACIAL EXPRESSION
       ========================================= */
 
+      /*
+        Keep resting smile active.
+      */
+      applyRestingSmile();
+
+
+      /*
+        Blinking can safely run after the smile
+        because it changes separate morph targets.
+      */
       updateBlink(
         now
       );
 
 
       /* =========================================
-         SUBTLE HOLOGRAPHIC LIGHT PULSE
+         HOLOGRAPHIC LIGHT BREATHING
       ========================================= */
 
       const pulse =
         0.5 +
         Math.sin(
           now *
-          1.25
+          1.15
         ) *
         0.5;
 
 
       lowerGlow.intensity =
-        8.4 +
+        8.0 +
         pulse *
-        2.1;
+        1.6;
+
+
+      faceFill.intensity =
+        0.70 +
+        pulse *
+        0.16;
 
 
       bodyMaterial.emissiveIntensity =
-        0.085 +
+        0.060 +
         pulse *
-        0.05;
+        0.028;
 
 
       shirtMaterial.emissiveIntensity =
-        0.10 +
+        0.070 +
         pulse *
-        0.05;
+        0.035;
 
 
       leggingsMaterial.emissiveIntensity =
-        0.08 +
+        0.055 +
         pulse *
-        0.04;
+        0.026;
 
 
       eyeMaterial.emissiveIntensity =
-        0.88 +
+        0.75 +
         pulse *
-        0.20;
+        0.16;
 
 
       /* =========================================
@@ -3078,9 +3286,10 @@
       }
 
 
-      /*
-        Slight independent ripple-ring breathing.
-      */
+      /* =========================================
+         PROJECTOR RINGS
+      ========================================= */
+
       for (
         let i = 1;
         i < projectorGroup.children.length;
@@ -3092,7 +3301,8 @@
 
 
         if (
-          !ring.userData.phase
+          ring.userData.phase ===
+          undefined
         ) {
 
           continue;
@@ -3100,27 +3310,27 @@
         }
 
 
-        const ringScale =
+        const scale =
           1 +
           Math.sin(
             now *
-            1.25 +
+            1.1 +
             ring.userData.phase
           ) *
-          0.018;
+          0.014;
 
 
         ring.scale.set(
-          ringScale,
-          ringScale,
-          ringScale
+          scale,
+          scale,
+          scale
         );
 
       }
 
 
       /* =========================================
-         LOWER DIGITAL FRAGMENTS
+         LOWER PARTICLES
       ========================================= */
 
       if (
@@ -3144,16 +3354,9 @@
       ) {
 
         backgroundParticles.rotation.y +=
-          0.00018;
+          0.00012;
 
       }
-
-
-      /* =========================================
-         LOGO
-      ========================================= */
-
-      updateChestLogo();
 
 
       /* =========================================
