@@ -65,7 +65,6 @@
     #status {
       position: absolute;
       z-index: 10;
-
       left: 50%;
       top: 50%;
 
@@ -465,15 +464,32 @@
       object.material =
         material;
 
-      material.map = null;
-      material.normalMap = null;
-      material.roughnessMap = null;
-      material.metalnessMap = null;
-      material.aoMap = null;
-      material.emissiveMap = null;
-      material.alphaMap = null;
-      material.lightMap = null;
-      material.displacementMap = null;
+      material.map =
+        null;
+
+      material.normalMap =
+        null;
+
+      material.roughnessMap =
+        null;
+
+      material.metalnessMap =
+        null;
+
+      material.aoMap =
+        null;
+
+      material.emissiveMap =
+        null;
+
+      material.alphaMap =
+        null;
+
+      material.lightMap =
+        null;
+
+      material.displacementMap =
+        null;
 
       material.vertexColors =
         false;
@@ -528,14 +544,25 @@
 
 
     /* =====================================================
-       MOUSE POSITION
+       CURSOR INPUT
     ===================================================== */
 
     const pointer =
-      new THREE.Vector2(0, 0);
+      new THREE.Vector2(
+        0,
+        0
+      );
+
 
     const targetPointer =
-      new THREE.Vector2(0, 0);
+      new THREE.Vector2(
+        0,
+        0
+      );
+
+
+    let mousePresent =
+      false;
 
 
     window.addEventListener(
@@ -544,20 +571,96 @@
 
       function (event) {
 
-        targetPointer.x =
+        mousePresent =
+          true;
+
+
+        let x =
           (
             event.clientX /
             window.innerWidth
           ) * 2 - 1;
 
 
-        targetPointer.y =
+        let y =
           -(
             (
               event.clientY /
               window.innerHeight
             ) * 2 - 1
           );
+
+
+        /*
+          Dead zone around center.
+
+          Tiny mouse movements will not
+          constantly twitch the character.
+        */
+
+        const deadZone =
+          0.055;
+
+
+        if (
+          Math.abs(x) <
+          deadZone
+        ) {
+
+          x =
+            0;
+
+        }
+
+
+        if (
+          Math.abs(y) <
+          deadZone
+        ) {
+
+          y =
+            0;
+
+        }
+
+
+        /*
+          Smooth nonlinear response.
+
+          This reduces movement around
+          the center but still allows a
+          useful range near the edges.
+        */
+
+        x =
+          Math.sign(x) *
+          Math.pow(
+            Math.abs(x),
+            1.15
+          );
+
+
+        y =
+          Math.sign(y) *
+          Math.pow(
+            Math.abs(y),
+            1.15
+          );
+
+
+        targetPointer.set(
+          THREE.MathUtils.clamp(
+            x,
+            -1,
+            1
+          ),
+
+          THREE.MathUtils.clamp(
+            y,
+            -1,
+            1
+          )
+        );
 
       }
 
@@ -570,6 +673,10 @@
 
       function () {
 
+        mousePresent =
+          false;
+
+
         targetPointer.set(
           0,
           0
@@ -581,7 +688,7 @@
 
 
     /* =====================================================
-       LOAD CHARACTER
+       LOAD MODEL
     ===================================================== */
 
     const loader =
@@ -609,6 +716,10 @@
           function (object) {
 
 
+            /* =============================================
+               MESHES
+            ============================================= */
+
             if (
               object.isMesh
             ) {
@@ -617,7 +728,9 @@
                 object.name;
 
 
-              /* BLINK MORPHS */
+              /* ------------------------------------------
+                 ARKIT BLINK TARGETS
+              ------------------------------------------ */
 
               if (
                 object.morphTargetDictionary &&
@@ -642,9 +755,16 @@
               }
 
 
+              /* ------------------------------------------
+                 HIDE UNUSED
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Censored_Torso' ||
-                name === 'SK_FemBase2_UnderWear'
+                name ===
+                  'SK_FemBase2_Censored_Torso'
+                ||
+                name ===
+                  'SK_FemBase2_UnderWear'
               ) {
 
                 object.visible =
@@ -654,6 +774,10 @@
 
               }
 
+
+              /* ------------------------------------------
+                 BODY
+              ------------------------------------------ */
 
               if (
                 name === 'Mesh010' ||
@@ -672,6 +796,10 @@
 
               }
 
+
+              /* ------------------------------------------
+                 FACE
+              ------------------------------------------ */
 
               if (
                 name === 'Mesh010_1' ||
@@ -692,8 +820,13 @@
               }
 
 
+              /* ------------------------------------------
+                 CLOTHING
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_TShirt'
+                name ===
+                'SK_FemBase2_TShirt'
               ) {
 
                 object.visible =
@@ -710,7 +843,8 @@
 
 
               if (
-                name === 'SK_FemBase2_Leggings'
+                name ===
+                'SK_FemBase2_Leggings'
               ) {
 
                 object.visible =
@@ -726,8 +860,13 @@
               }
 
 
+              /* ------------------------------------------
+                 HAIR
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Hair'
+                name ===
+                'SK_FemBase2_Hair'
               ) {
 
                 object.visible =
@@ -743,20 +882,28 @@
               }
 
 
+              /* ------------------------------------------
+                 EYES
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_EyeL'
+                name ===
+                'SK_FemBase2_EyeL'
               ) {
 
                 eyeLObject =
                   object;
 
+
                 object.visible =
                   true;
+
 
                 forceCleanMaterial(
                   object,
                   eyeMaterial
                 );
+
 
                 return;
 
@@ -764,19 +911,23 @@
 
 
               if (
-                name === 'SK_FemBase2_EyeR'
+                name ===
+                'SK_FemBase2_EyeR'
               ) {
 
                 eyeRObject =
                   object;
 
+
                 object.visible =
                   true;
+
 
                 forceCleanMaterial(
                   object,
                   eyeMaterial
                 );
+
 
                 return;
 
@@ -784,68 +935,94 @@
 
 
               if (
-                name === 'SK_FemBase2_EyeShell'
+                name ===
+                'SK_FemBase2_EyeShell'
               ) {
 
                 object.visible =
                   true;
+
 
                 forceCleanMaterial(
                   object,
                   eyeMaterial
                 );
 
+
                 return;
 
               }
 
 
+              /* ------------------------------------------
+                 EYE DETAILS
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Lashes' ||
-                name === 'SK_FemBase2_EyeEdge'
+                name ===
+                  'SK_FemBase2_Lashes'
+                ||
+                name ===
+                  'SK_FemBase2_EyeEdge'
               ) {
 
                 object.visible =
                   true;
+
 
                 forceCleanMaterial(
                   object,
                   darkDetailMaterial
                 );
 
+
                 return;
 
               }
 
 
+              /* ------------------------------------------
+                 TEETH
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Teeth'
+                name ===
+                'SK_FemBase2_Teeth'
               ) {
 
                 object.visible =
                   true;
+
 
                 forceCleanMaterial(
                   object,
                   teethMaterial
                 );
 
+
                 return;
 
               }
 
 
+              /* ------------------------------------------
+                 NAILS
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Nails'
+                name ===
+                'SK_FemBase2_Nails'
               ) {
 
                 object.visible =
                   true;
 
+
                 forceCleanMaterial(
                   object,
                   goldMaterial
                 );
+
 
                 return;
 
@@ -854,7 +1031,9 @@
             }
 
 
-            /* BONES */
+            /* =============================================
+               BONES
+            ============================================= */
 
             if (
               object.isBone
@@ -876,7 +1055,9 @@
 
 
               if (
-                lowerName.includes('neck_01')
+                lowerName.includes(
+                  'neck_01'
+                )
               ) {
 
                 neck01 =
@@ -886,7 +1067,9 @@
 
 
               if (
-                lowerName.includes('neck_02')
+                lowerName.includes(
+                  'neck_02'
+                )
               ) {
 
                 neck02 =
@@ -901,9 +1084,13 @@
         );
 
 
-        /* SAVE ORIGINAL POSE */
+        /* =================================================
+           SAVE ORIGINAL POSE
+        ================================================= */
 
-        if (headBone) {
+        if (
+          headBone
+        ) {
 
           baseHeadRotation =
             headBone.rotation.clone();
@@ -911,7 +1098,9 @@
         }
 
 
-        if (neck01) {
+        if (
+          neck01
+        ) {
 
           baseNeck01Rotation =
             neck01.rotation.clone();
@@ -919,7 +1108,9 @@
         }
 
 
-        if (neck02) {
+        if (
+          neck02
+        ) {
 
           baseNeck02Rotation =
             neck02.rotation.clone();
@@ -927,7 +1118,9 @@
         }
 
 
-        if (eyeLObject) {
+        if (
+          eyeLObject
+        ) {
 
           baseEyeLRotation =
             eyeLObject.rotation.clone();
@@ -935,7 +1128,9 @@
         }
 
 
-        if (eyeRObject) {
+        if (
+          eyeRObject
+        ) {
 
           baseEyeRRotation =
             eyeRObject.rotation.clone();
@@ -949,7 +1144,9 @@
 
         const box =
           new THREE.Box3()
-            .setFromObject(model);
+            .setFromObject(
+              model
+            );
 
 
         const size =
@@ -1071,6 +1268,7 @@
           error
         );
 
+
         status.innerHTML =
           'MODEL FAILED TO LOAD';
 
@@ -1080,7 +1278,7 @@
 
 
     /* =====================================================
-       BLINKING
+       BLINK SYSTEM
     ===================================================== */
 
     function setBlinkAmount(
@@ -1102,28 +1300,33 @@
         const dictionary =
           mesh.morphTargetDictionary;
 
+
         const influences =
           mesh.morphTargetInfluences;
 
 
         if (
-          dictionary.eyeBlinkLeft !== undefined
+          dictionary.eyeBlinkLeft !==
+          undefined
         ) {
 
           influences[
             dictionary.eyeBlinkLeft
-          ] = safe;
+          ] =
+            safe;
 
         }
 
 
         if (
-          dictionary.eyeBlinkRight !== undefined
+          dictionary.eyeBlinkRight !==
+          undefined
         ) {
 
           influences[
             dictionary.eyeBlinkRight
-          ] = safe;
+          ] =
+            safe;
 
         }
 
@@ -1135,17 +1338,22 @@
     let blinkActive =
       false;
 
+
     let blinkStartTime =
       0;
+
 
     let blinkDuration =
       0.15;
 
+
     let nextBlinkTime =
       Infinity;
 
+
     let pendingDoubleBlink =
       false;
+
 
     let doubleBlinkTime =
       Infinity;
@@ -1154,8 +1362,8 @@
     function randomBlinkDelay() {
 
       return (
-        2.2 +
-        Math.random() * 3.6
+        2.3 +
+        Math.random() * 3.7
       );
 
     }
@@ -1186,7 +1394,7 @@
 
 
       pendingDoubleBlink =
-        Math.random() < 0.13;
+        Math.random() < 0.12;
 
     }
 
@@ -1214,7 +1422,9 @@
         pendingDoubleBlink =
           false;
 
+
         startBlink();
+
 
         return;
 
@@ -1225,7 +1435,10 @@
         !blinkActive
       ) {
 
-        setBlinkAmount(0);
+        setBlinkAmount(
+          0
+        );
+
 
         return;
 
@@ -1244,20 +1457,24 @@
         progress <= 1
       ) {
 
-        setBlinkAmount(
-
+        const amount =
           Math.sin(
             progress *
             Math.PI
-          )
+          );
 
+
+        setBlinkAmount(
+          amount
         );
 
       }
 
       else {
 
-        setBlinkAmount(0);
+        setBlinkAmount(
+          0
+        );
 
 
         blinkActive =
@@ -1287,51 +1504,84 @@
 
 
     /* =====================================================
-       TRACKING
+       TRACKING LIMITS
     ===================================================== */
 
+    /*
+      Eyes move farther than head.
+    */
+
     const eyeHorizontalMax =
-      THREE.MathUtils.degToRad(12);
+      THREE.MathUtils.degToRad(
+        10
+      );
 
 
     const eyeVerticalMax =
-      THREE.MathUtils.degToRad(7);
+      THREE.MathUtils.degToRad(
+        6
+      );
 
+
+    /*
+      Head follows subtly.
+    */
 
     const headHorizontalMax =
-      THREE.MathUtils.degToRad(5);
+      THREE.MathUtils.degToRad(
+        4.2
+      );
 
 
     const headVerticalMax =
-      THREE.MathUtils.degToRad(2.5);
+      THREE.MathUtils.degToRad(
+        2.2
+      );
 
+
+    /*
+      Neck movement is deliberately tiny.
+    */
 
     const neckHorizontalMax =
-      THREE.MathUtils.degToRad(1.8);
+      THREE.MathUtils.degToRad(
+        1.25
+      );
 
 
     const neckVerticalMax =
-      THREE.MathUtils.degToRad(1);
+      THREE.MathUtils.degToRad(
+        0.7
+      );
 
 
     let eyeHorizontal =
       0;
 
+
     let eyeVertical =
       0;
+
 
     let headHorizontal =
       0;
 
+
     let headVertical =
       0;
+
 
     let neckHorizontal =
       0;
 
+
     let neckVertical =
       0;
 
+
+    /* =====================================================
+       SMOOTHING
+    ===================================================== */
 
     function damp(
       current,
@@ -1379,16 +1629,19 @@
 
 
       const now =
-        performance.now() / 1000;
+        performance.now() /
+        1000;
 
 
-      /* Smooth cursor */
+      /* ===================================================
+         SMOOTH RAW POINTER
+      =================================================== */
 
       pointer.x =
         damp(
           pointer.x,
           targetPointer.x,
-          8,
+          7,
           delta
         );
 
@@ -1397,79 +1650,7 @@
         damp(
           pointer.y,
           targetPointer.y,
-          8,
-          delta
-        );
-
-
-      /* ===================================================
-         EYE TARGET
-      =================================================== */
-
-      eyeHorizontal =
-        damp(
-          eyeHorizontal,
-          pointer.x *
-          eyeHorizontalMax,
-          11,
-          delta
-        );
-
-
-      eyeVertical =
-        damp(
-          eyeVertical,
-          pointer.y *
-          eyeVerticalMax,
-          11,
-          delta
-        );
-
-
-      /* ===================================================
-         HEAD TARGET
-      =================================================== */
-
-      headHorizontal =
-        damp(
-          headHorizontal,
-          pointer.x *
-          headHorizontalMax,
-          3.1,
-          delta
-        );
-
-
-      headVertical =
-        damp(
-          headVertical,
-          pointer.y *
-          headVerticalMax,
-          2.8,
-          delta
-        );
-
-
-      /* ===================================================
-         NECK TARGET
-      =================================================== */
-
-      neckHorizontal =
-        damp(
-          neckHorizontal,
-          pointer.x *
-          neckHorizontalMax,
-          2.0,
-          delta
-        );
-
-
-      neckVertical =
-        damp(
-          neckVertical,
-          pointer.y *
-          neckVerticalMax,
-          1.8,
+          7,
           delta
         );
 
@@ -1477,8 +1658,101 @@
       /* ===================================================
          EYES
 
-         We leave eye mapping as the previous
-         version for now.
+         Fastest response.
+      =================================================== */
+
+      eyeHorizontal =
+        damp(
+          eyeHorizontal,
+
+          pointer.x *
+          eyeHorizontalMax,
+
+          14,
+
+          delta
+        );
+
+
+      eyeVertical =
+        damp(
+          eyeVertical,
+
+          pointer.y *
+          eyeVerticalMax,
+
+          14,
+
+          delta
+        );
+
+
+      /* ===================================================
+         HEAD
+
+         Noticeably slower than eyes.
+      =================================================== */
+
+      headHorizontal =
+        damp(
+          headHorizontal,
+
+          pointer.x *
+          headHorizontalMax,
+
+          2.7,
+
+          delta
+        );
+
+
+      headVertical =
+        damp(
+          headVertical,
+
+          pointer.y *
+          headVerticalMax,
+
+          2.5,
+
+          delta
+        );
+
+
+      /* ===================================================
+         NECK
+
+         Slowest response.
+      =================================================== */
+
+      neckHorizontal =
+        damp(
+          neckHorizontal,
+
+          pointer.x *
+          neckHorizontalMax,
+
+          1.65,
+
+          delta
+        );
+
+
+      neckVertical =
+        damp(
+          neckVertical,
+
+          pointer.y *
+          neckVerticalMax,
+
+          1.5,
+
+          delta
+        );
+
+
+      /* ===================================================
+         EYES
       =================================================== */
 
       if (
@@ -1522,11 +1796,14 @@
 
 
       /* ===================================================
-         HEAD — CORRECTED RIG AXES
+         HEAD
 
-         X = left/right turn
-         Z = up/down pitch
-         Y remains untouched to prevent tilt.
+         CORRECT AXES FOR THIS RIG:
+
+         X = left/right
+         Z = up/down
+
+         Vertical sign has already been corrected.
       =================================================== */
 
       if (
@@ -1540,8 +1817,7 @@
 
 
         /*
-          Mouse left/right
-          controls local X.
+          Left/right.
         */
 
         headBone.rotation.x +=
@@ -1549,8 +1825,11 @@
 
 
         /*
-          Mouse up/down
-          controls local Z.
+          Up/down.
+
+          IMPORTANT:
+          This is the corrected + direction
+          you confirmed works.
         */
 
         headBone.rotation.z +=
@@ -1558,8 +1837,8 @@
 
 
         /*
-          Preserve the rig's original Y.
-          No unwanted side tilt.
+          Never modify local Y.
+          This prevents head tilting.
         */
 
         headBone.rotation.y =
@@ -1598,8 +1877,6 @@
 
       /* ===================================================
          NECK 01
-
-         Only a small fraction of movement.
       =================================================== */
 
       if (
@@ -1614,12 +1891,12 @@
 
         neck01.rotation.x +=
           neckHorizontal *
-          0.35;
+          0.30;
 
 
         neck01.rotation.z +=
           neckVertical *
-          0.25;
+          0.22;
 
 
         neck01.rotation.y =
@@ -1627,6 +1904,10 @@
 
       }
 
+
+      /* ===================================================
+         BLINK
+      =================================================== */
 
       updateBlink(
         now
