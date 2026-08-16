@@ -125,10 +125,6 @@
       new THREE.Scene();
 
 
-    /* =====================================================
-       CAMERA
-    ===================================================== */
-
     const camera =
       new THREE.PerspectiveCamera(
         32,
@@ -138,15 +134,12 @@
       );
 
 
-    /* =====================================================
-       RENDERER
-    ===================================================== */
-
     const renderer =
       new THREE.WebGLRenderer({
         antialias: true,
         alpha: true
       });
+
 
     renderer.setPixelRatio(
       Math.min(
@@ -155,24 +148,30 @@
       )
     );
 
+
     renderer.setSize(
       window.innerWidth,
       window.innerHeight
     );
 
+
     renderer.outputColorSpace =
       THREE.SRGBColorSpace;
+
 
     renderer.toneMapping =
       THREE.ACESFilmicToneMapping;
 
+
     renderer.toneMappingExposure =
       1.0;
+
 
     renderer.setClearColor(
       0x000000,
       0
     );
+
 
     stage.appendChild(
       renderer.domElement
@@ -190,9 +189,7 @@
         0.95
       );
 
-    scene.add(
-      ambient
-    );
+    scene.add(ambient);
 
 
     const faceLight =
@@ -207,9 +204,7 @@
       5.5
     );
 
-    scene.add(
-      faceLight
-    );
+    scene.add(faceLight);
 
 
     const cyanRim =
@@ -224,9 +219,7 @@
       -3
     );
 
-    scene.add(
-      cyanRim
-    );
+    scene.add(cyanRim);
 
 
     const goldRim =
@@ -241,9 +234,7 @@
       -2
     );
 
-    scene.add(
-      goldRim
-    );
+    scene.add(goldRim);
 
 
     const lowerFill =
@@ -259,9 +250,7 @@
       2.5
     );
 
-    scene.add(
-      lowerFill
-    );
+    scene.add(lowerFill);
 
 
     /* =====================================================
@@ -465,49 +454,45 @@
       object.material =
         material;
 
-      object.material.map =
+      material.map =
         null;
 
-      object.material.normalMap =
+      material.normalMap =
         null;
 
-      object.material.roughnessMap =
+      material.roughnessMap =
         null;
 
-      object.material.metalnessMap =
+      material.metalnessMap =
         null;
 
-      object.material.aoMap =
+      material.aoMap =
         null;
 
-      object.material.emissiveMap =
+      material.emissiveMap =
         null;
 
-      object.material.alphaMap =
+      material.alphaMap =
         null;
 
-      object.material.lightMap =
+      material.lightMap =
         null;
 
-      object.material.displacementMap =
+      material.displacementMap =
         null;
 
-      object.material.vertexColors =
+      material.vertexColors =
         false;
 
-      object.material.needsUpdate =
+      material.needsUpdate =
         true;
 
     }
 
 
     /* =====================================================
-       LOAD CHARACTER
+       CHARACTER REFERENCES
     ===================================================== */
-
-    const loader =
-      new GLTFLoader();
-
 
     let model =
       null;
@@ -521,8 +506,38 @@
     let neck02 =
       null;
 
-    let originalModelY =
-      0;
+
+    /*
+      Any mesh containing ARKit blink targets
+      will be added here automatically.
+    */
+
+    const blinkMeshes = [];
+
+
+    /*
+      Store the original rig rotations.
+
+      Important: we do NOT force the skeleton
+      to rotation 0 anymore.
+    */
+
+    let baseHeadRotation =
+      null;
+
+    let baseNeck01Rotation =
+      null;
+
+    let baseNeck02Rotation =
+      null;
+
+
+    /* =====================================================
+       LOAD CHARACTER
+    ===================================================== */
+
+    const loader =
+      new GLTFLoader();
 
 
     loader.load(
@@ -535,14 +550,24 @@
         model =
           gltf.scene;
 
+
         scene.add(
           model
         );
 
 
+        /* =================================================
+           FIND + STYLE EVERYTHING
+        ================================================= */
+
         model.traverse(
 
           function (object) {
+
+
+            /* =============================================
+               MESHES
+            ============================================= */
 
             if (
               object.isMesh
@@ -552,9 +577,50 @@
                 object.name;
 
 
+              /* ------------------------------------------
+                 Find ARKit blink targets automatically
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Censored_Torso' ||
-                name === 'SK_FemBase2_UnderWear'
+                object.morphTargetDictionary &&
+                object.morphTargetInfluences
+              ) {
+
+                const dictionary =
+                  object.morphTargetDictionary;
+
+
+                if (
+                  dictionary.eyeBlinkLeft !== undefined ||
+                  dictionary.eyeBlinkRight !== undefined
+                ) {
+
+                  blinkMeshes.push(
+                    object
+                  );
+
+
+                  console.log(
+                    'BLINK MESH FOUND:',
+                    name,
+                    dictionary
+                  );
+
+                }
+
+              }
+
+
+              /* ------------------------------------------
+                 Hide unwanted layers
+              ------------------------------------------ */
+
+              if (
+                name ===
+                  'SK_FemBase2_Censored_Torso'
+                ||
+                name ===
+                  'SK_FemBase2_UnderWear'
               ) {
 
                 object.visible =
@@ -565,41 +631,12 @@
               }
 
 
-              if (
-                name === 'Mesh010'
-              ) {
-
-                object.visible =
-                  true;
-
-                forceCleanMaterial(
-                  object,
-                  bodyMaterial
-                );
-
-                return;
-
-              }
-
+              /* ------------------------------------------
+                 BODY
+              ------------------------------------------ */
 
               if (
-                name === 'Mesh010_1'
-              ) {
-
-                object.visible =
-                  true;
-
-                forceCleanMaterial(
-                  object,
-                  faceMaterial
-                );
-
-                return;
-
-              }
-
-
-              if (
+                name === 'Mesh010' ||
                 name === 'SK_FemBase2_Torso'
               ) {
 
@@ -616,7 +653,12 @@
               }
 
 
+              /* ------------------------------------------
+                 FACE
+              ------------------------------------------ */
+
               if (
+                name === 'Mesh010_1' ||
                 name === 'SK_FemBase2_Head_52ArKit' ||
                 name === 'SK_FemBase2_Head_52ARKit'
               ) {
@@ -634,8 +676,13 @@
               }
 
 
+              /* ------------------------------------------
+                 SHIRT
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_TShirt'
+                name ===
+                'SK_FemBase2_TShirt'
               ) {
 
                 object.visible =
@@ -651,8 +698,13 @@
               }
 
 
+              /* ------------------------------------------
+                 LEGGINGS
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Leggings'
+                name ===
+                'SK_FemBase2_Leggings'
               ) {
 
                 object.visible =
@@ -668,8 +720,13 @@
               }
 
 
+              /* ------------------------------------------
+                 HAIR
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Hair'
+                name ===
+                'SK_FemBase2_Hair'
               ) {
 
                 object.visible =
@@ -685,10 +742,19 @@
               }
 
 
+              /* ------------------------------------------
+                 EYES
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_EyeL' ||
-                name === 'SK_FemBase2_EyeR' ||
-                name === 'SK_FemBase2_EyeShell'
+                name ===
+                  'SK_FemBase2_EyeL'
+                ||
+                name ===
+                  'SK_FemBase2_EyeR'
+                ||
+                name ===
+                  'SK_FemBase2_EyeShell'
               ) {
 
                 object.visible =
@@ -704,9 +770,16 @@
               }
 
 
+              /* ------------------------------------------
+                 EYE DETAILS
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Lashes' ||
-                name === 'SK_FemBase2_EyeEdge'
+                name ===
+                  'SK_FemBase2_Lashes'
+                ||
+                name ===
+                  'SK_FemBase2_EyeEdge'
               ) {
 
                 object.visible =
@@ -722,8 +795,13 @@
               }
 
 
+              /* ------------------------------------------
+                 TEETH
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Teeth'
+                name ===
+                'SK_FemBase2_Teeth'
               ) {
 
                 object.visible =
@@ -739,8 +817,13 @@
               }
 
 
+              /* ------------------------------------------
+                 NAILS
+              ------------------------------------------ */
+
               if (
-                name === 'SK_FemBase2_Nails'
+                name ===
+                'SK_FemBase2_Nails'
               ) {
 
                 object.visible =
@@ -758,16 +841,26 @@
             }
 
 
+            /* =============================================
+               BONES
+            ============================================= */
+
             if (
               object.isBone
             ) {
 
-              const lower =
+              const lowerName =
                 object.name.toLowerCase();
 
 
+              /*
+                Prefer a real head bone,
+                not a random helper.
+              */
+
               if (
-                lower.includes('head')
+                lowerName === 'head' ||
+                lowerName.endsWith('_head')
               ) {
 
                 headBone =
@@ -777,7 +870,9 @@
 
 
               if (
-                lower.includes('neck_01')
+                lowerName.includes(
+                  'neck_01'
+                )
               ) {
 
                 neck01 =
@@ -787,7 +882,9 @@
 
 
               if (
-                lower.includes('neck_02')
+                lowerName.includes(
+                  'neck_02'
+                )
               ) {
 
                 neck02 =
@@ -799,6 +896,52 @@
 
           }
 
+        );
+
+
+        /* =================================================
+           SAVE ORIGINAL RIG POSE
+        ================================================= */
+
+        if (
+          headBone
+        ) {
+
+          baseHeadRotation =
+            headBone.rotation.clone();
+
+        }
+
+
+        if (
+          neck01
+        ) {
+
+          baseNeck01Rotation =
+            neck01.rotation.clone();
+
+        }
+
+
+        if (
+          neck02
+        ) {
+
+          baseNeck02Rotation =
+            neck02.rotation.clone();
+
+        }
+
+
+        console.log(
+          'HEAD BONE:',
+          headBone
+        );
+
+
+        console.log(
+          'BLINK MESH COUNT:',
+          blinkMeshes.length
         );
 
 
@@ -830,10 +973,6 @@
           -center.y,
           -center.z
         );
-
-
-        originalModelY =
-          model.position.y;
 
 
         /* =================================================
@@ -897,53 +1036,38 @@
 
 
         /* =================================================
-           RESET HEAD / NECK TO NEUTRAL
+           HEAD RESTING CORRECTION
         ================================================= */
 
-        if (
-          headBone
-        ) {
 
-          headBone.rotation.x =
-            0;
+        /*
+          Small correction from the ORIGINAL
+          purchased rig pose.
 
-          headBone.rotation.y =
-            0;
-
-          headBone.rotation.z =
-            0;
-
-        }
-
+          We are no longer replacing the rig's
+          original orientation with rotation 0.
+        */
 
         if (
-          neck01
+          headBone &&
+          baseHeadRotation
         ) {
 
-          neck01.rotation.x =
-            0;
-
-          neck01.rotation.y =
-            0;
-
-          neck01.rotation.z =
-            0;
-
-        }
+          headBone.rotation.copy(
+            baseHeadRotation
+          );
 
 
-        if (
-          neck02
-        ) {
+          /*
+            Small downward pitch.
 
-          neck02.rotation.x =
-            0;
+            If this particular skeleton interprets
+            pitch in the opposite direction, we can
+            simply reverse this number next.
+          */
 
-          neck02.rotation.y =
-            0;
-
-          neck02.rotation.z =
-            0;
+          headBone.rotation.x +=
+            0.055;
 
         }
 
@@ -951,8 +1075,19 @@
         status.style.display =
           'none';
 
+
+        /*
+          Schedule first natural blink.
+        */
+
+        scheduleNextBlink();
+
       },
 
+
+      /* ===================================================
+         LOADING
+      =================================================== */
 
       function (xhr) {
 
@@ -978,6 +1113,10 @@
       },
 
 
+      /* ===================================================
+         ERROR
+      =================================================== */
+
       function (error) {
 
         console.error(
@@ -996,12 +1135,258 @@
 
 
     /* =====================================================
-       CONTROLLED IDLE LOOP
+       ARKIT BLINK SYSTEM
     ===================================================== */
 
-    const clock =
-      new THREE.Clock();
+    function setBlinkAmount(
+      amount
+    ) {
 
+      const safeAmount =
+        THREE.MathUtils.clamp(
+          amount,
+          0,
+          1
+        );
+
+
+      for (
+        const mesh of blinkMeshes
+      ) {
+
+        const dictionary =
+          mesh.morphTargetDictionary;
+
+
+        const influences =
+          mesh.morphTargetInfluences;
+
+
+        const leftIndex =
+          dictionary.eyeBlinkLeft;
+
+
+        const rightIndex =
+          dictionary.eyeBlinkRight;
+
+
+        if (
+          leftIndex !== undefined
+        ) {
+
+          influences[leftIndex] =
+            safeAmount;
+
+        }
+
+
+        if (
+          rightIndex !== undefined
+        ) {
+
+          influences[rightIndex] =
+            safeAmount;
+
+        }
+
+      }
+
+    }
+
+
+    /*
+      Blink state
+    */
+
+    let blinkActive =
+      false;
+
+    let blinkStartTime =
+      0;
+
+    let blinkDuration =
+      0.15;
+
+    let nextBlinkTime =
+      Infinity;
+
+    let pendingDoubleBlink =
+      false;
+
+    let doubleBlinkTime =
+      Infinity;
+
+
+    function randomBlinkDelay() {
+
+      /*
+        Random delay between roughly
+        2.2 and 5.8 seconds.
+      */
+
+      return (
+        2.2 +
+        Math.random() * 3.6
+      );
+
+    }
+
+
+    function scheduleNextBlink() {
+
+      nextBlinkTime =
+        performance.now() / 1000 +
+        randomBlinkDelay();
+
+    }
+
+
+    function startBlink() {
+
+      blinkActive =
+        true;
+
+
+      blinkStartTime =
+        performance.now() / 1000;
+
+
+      /*
+        Slightly varied blink speed.
+      */
+
+      blinkDuration =
+        0.12 +
+        Math.random() * 0.055;
+
+
+      /*
+        Occasionally perform a natural
+        second blink shortly afterward.
+      */
+
+      pendingDoubleBlink =
+        Math.random() < 0.13;
+
+    }
+
+
+    function updateBlink(
+      now
+    ) {
+
+      /*
+        Begin scheduled blink
+      */
+
+      if (
+        !blinkActive &&
+        now >= nextBlinkTime
+      ) {
+
+        startBlink();
+
+      }
+
+
+      /*
+        Handle second blink
+      */
+
+      if (
+        !blinkActive &&
+        pendingDoubleBlink &&
+        now >= doubleBlinkTime
+      ) {
+
+        pendingDoubleBlink =
+          false;
+
+        startBlink();
+
+        return;
+
+      }
+
+
+      if (
+        !blinkActive
+      ) {
+
+        setBlinkAmount(0);
+
+        return;
+
+      }
+
+
+      const elapsed =
+        now - blinkStartTime;
+
+
+      const progress =
+        elapsed /
+        blinkDuration;
+
+
+      /*
+        Smooth close → open curve.
+
+        0 = eyes open
+        1 = eyes fully closed
+      */
+
+      if (
+        progress <= 1
+      ) {
+
+        const blinkAmount =
+          Math.sin(
+            progress *
+            Math.PI
+          );
+
+
+        setBlinkAmount(
+          blinkAmount
+        );
+
+      }
+
+      else {
+
+        setBlinkAmount(0);
+
+
+        blinkActive =
+          false;
+
+
+        if (
+          pendingDoubleBlink
+        ) {
+
+          doubleBlinkTime =
+            now +
+            0.14 +
+            Math.random() * 0.09;
+
+        }
+
+        else {
+
+          scheduleNextBlink();
+
+        }
+
+      }
+
+    }
+
+
+    /* =====================================================
+       ANIMATION
+    ===================================================== */
 
     function animate() {
 
@@ -1010,84 +1395,86 @@
       );
 
 
-      const t =
-        clock.getElapsedTime();
+      const now =
+        performance.now() /
+        1000;
 
 
       /*
-        No vertical movement.
-        Character stays anchored.
+        Keep model physically anchored.
+        No vertical bobbing.
       */
 
       if (
         model
       ) {
 
-        model.position.y =
-          originalModelY;
+        model.rotation.x =
+          0;
 
-
-        /*
-          Almost imperceptible body sway.
-        */
+        model.rotation.y =
+          0;
 
         model.rotation.z =
-          Math.sin(t * 0.32) * 0.0012;
+          0;
 
       }
 
 
       /*
-        Head remains essentially forward.
-        Only extremely subtle horizontal drift.
+        Preserve the corrected resting pose.
+
+        No idle head wandering yet.
+        Mouse tracking comes next.
       */
 
       if (
-        headBone
+        headBone &&
+        baseHeadRotation
       ) {
 
-        headBone.rotation.x =
-          0;
+        headBone.rotation.copy(
+          baseHeadRotation
+        );
 
-        headBone.rotation.z =
-          0;
 
-        headBone.rotation.y =
-          Math.sin(t * 0.25) * 0.006;
+        headBone.rotation.x +=
+          0.055;
 
       }
 
 
       if (
-        neck02
+        neck01 &&
+        baseNeck01Rotation
       ) {
 
-        neck02.rotation.x =
-          0;
-
-        neck02.rotation.z =
-          0;
-
-        neck02.rotation.y =
-          Math.sin(t * 0.22) * 0.0025;
+        neck01.rotation.copy(
+          baseNeck01Rotation
+        );
 
       }
 
 
       if (
-        neck01
+        neck02 &&
+        baseNeck02Rotation
       ) {
 
-        neck01.rotation.x =
-          0;
-
-        neck01.rotation.y =
-          0;
-
-        neck01.rotation.z =
-          0;
+        neck02.rotation.copy(
+          baseNeck02Rotation
+        );
 
       }
+
+
+      /*
+        Natural ARKit blinking
+      */
+
+      updateBlink(
+        now
+      );
 
 
       renderer.render(
