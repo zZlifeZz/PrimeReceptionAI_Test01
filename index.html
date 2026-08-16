@@ -67,7 +67,6 @@
       z-index: 10;
       left: 50%;
       top: 50%;
-
       transform: translate(-50%, -50%);
 
       color: #73e8ff;
@@ -89,7 +88,6 @@
     </div>
   </div>
 
-
   <script type="importmap">
   {
     "imports": {
@@ -98,7 +96,6 @@
     }
   }
   </script>
-
 
   <script type="module">
 
@@ -506,21 +503,12 @@
     let neck02 =
       null;
 
+    let eyeLObject =
+      null;
 
-    /*
-      Any mesh containing ARKit blink targets
-      will be added here automatically.
-    */
+    let eyeRObject =
+      null;
 
-    const blinkMeshes = [];
-
-
-    /*
-      Store the original rig rotations.
-
-      Important: we do NOT force the skeleton
-      to rotation 0 anymore.
-    */
 
     let baseHeadRotation =
       null;
@@ -530,6 +518,81 @@
 
     let baseNeck02Rotation =
       null;
+
+    let baseEyeLRotation =
+      null;
+
+    let baseEyeRRotation =
+      null;
+
+
+    const blinkMeshes =
+      [];
+
+
+    /* =====================================================
+       POINTER TARGET
+    ===================================================== */
+
+    const pointer =
+      new THREE.Vector2(
+        0,
+        0
+      );
+
+
+    const targetPointer =
+      new THREE.Vector2(
+        0,
+        0
+      );
+
+
+    let pointerInside =
+      false;
+
+
+    window.addEventListener(
+      'pointermove',
+      function (event) {
+
+        pointerInside =
+          true;
+
+
+        targetPointer.x =
+          (
+            event.clientX /
+            window.innerWidth
+          ) * 2 - 1;
+
+
+        targetPointer.y =
+          -(
+            (
+              event.clientY /
+              window.innerHeight
+            ) * 2 - 1
+          );
+
+      }
+    );
+
+
+    document.documentElement.addEventListener(
+      'mouseleave',
+      function () {
+
+        pointerInside =
+          false;
+
+        targetPointer.set(
+          0,
+          0
+        );
+
+      }
+    );
 
 
     /* =====================================================
@@ -556,10 +619,6 @@
         );
 
 
-        /* =================================================
-           FIND + STYLE EVERYTHING
-        ================================================= */
-
         model.traverse(
 
           function (object) {
@@ -578,7 +637,7 @@
 
 
               /* ------------------------------------------
-                 Find ARKit blink targets automatically
+                 BLINK MORPHS
               ------------------------------------------ */
 
               if (
@@ -599,20 +658,13 @@
                     object
                   );
 
-
-                  console.log(
-                    'BLINK MESH FOUND:',
-                    name,
-                    dictionary
-                  );
-
                 }
 
               }
 
 
               /* ------------------------------------------
-                 Hide unwanted layers
+                 HIDE
               ------------------------------------------ */
 
               if (
@@ -748,13 +800,49 @@
 
               if (
                 name ===
-                  'SK_FemBase2_EyeL'
-                ||
+                'SK_FemBase2_EyeL'
+              ) {
+
+                eyeLObject =
+                  object;
+
+                object.visible =
+                  true;
+
+                forceCleanMaterial(
+                  object,
+                  eyeMaterial
+                );
+
+                return;
+
+              }
+
+
+              if (
                 name ===
-                  'SK_FemBase2_EyeR'
-                ||
+                'SK_FemBase2_EyeR'
+              ) {
+
+                eyeRObject =
+                  object;
+
+                object.visible =
+                  true;
+
+                forceCleanMaterial(
+                  object,
+                  eyeMaterial
+                );
+
+                return;
+
+              }
+
+
+              if (
                 name ===
-                  'SK_FemBase2_EyeShell'
+                'SK_FemBase2_EyeShell'
               ) {
 
                 object.visible =
@@ -853,11 +941,6 @@
                 object.name.toLowerCase();
 
 
-              /*
-                Prefer a real head bone,
-                not a random helper.
-              */
-
               if (
                 lowerName === 'head' ||
                 lowerName.endsWith('_head')
@@ -900,7 +983,7 @@
 
 
         /* =================================================
-           SAVE ORIGINAL RIG POSE
+           SAVE BASE ROTATIONS
         ================================================= */
 
         if (
@@ -933,16 +1016,24 @@
         }
 
 
-        console.log(
-          'HEAD BONE:',
-          headBone
-        );
+        if (
+          eyeLObject
+        ) {
+
+          baseEyeLRotation =
+            eyeLObject.rotation.clone();
+
+        }
 
 
-        console.log(
-          'BLINK MESH COUNT:',
-          blinkMeshes.length
-        );
+        if (
+          eyeRObject
+        ) {
+
+          baseEyeRRotation =
+            eyeRObject.rotation.clone();
+
+        }
 
 
         /* =================================================
@@ -1035,59 +1126,14 @@
         camera.updateProjectionMatrix();
 
 
-        /* =================================================
-           HEAD RESTING CORRECTION
-        ================================================= */
-
-
-        /*
-          Small correction from the ORIGINAL
-          purchased rig pose.
-
-          We are no longer replacing the rig's
-          original orientation with rotation 0.
-        */
-
-        if (
-          headBone &&
-          baseHeadRotation
-        ) {
-
-          headBone.rotation.copy(
-            baseHeadRotation
-          );
-
-
-          /*
-            Small downward pitch.
-
-            If this particular skeleton interprets
-            pitch in the opposite direction, we can
-            simply reverse this number next.
-          */
-
-          headBone.rotation.x +=
-            0.055;
-
-        }
-
-
         status.style.display =
           'none';
 
-
-        /*
-          Schedule first natural blink.
-        */
 
         scheduleNextBlink();
 
       },
 
-
-      /* ===================================================
-         LOADING
-      =================================================== */
 
       function (xhr) {
 
@@ -1113,10 +1159,6 @@
       },
 
 
-      /* ===================================================
-         ERROR
-      =================================================== */
-
       function (error) {
 
         console.error(
@@ -1135,7 +1177,7 @@
 
 
     /* =====================================================
-       ARKIT BLINK SYSTEM
+       BLINKING
     ===================================================== */
 
     function setBlinkAmount(
@@ -1194,10 +1236,6 @@
     }
 
 
-    /*
-      Blink state
-    */
-
     let blinkActive =
       false;
 
@@ -1218,11 +1256,6 @@
 
 
     function randomBlinkDelay() {
-
-      /*
-        Random delay between roughly
-        2.2 and 5.8 seconds.
-      */
 
       return (
         2.2 +
@@ -1251,19 +1284,10 @@
         performance.now() / 1000;
 
 
-      /*
-        Slightly varied blink speed.
-      */
-
       blinkDuration =
         0.12 +
         Math.random() * 0.055;
 
-
-      /*
-        Occasionally perform a natural
-        second blink shortly afterward.
-      */
 
       pendingDoubleBlink =
         Math.random() < 0.13;
@@ -1275,10 +1299,6 @@
       now
     ) {
 
-      /*
-        Begin scheduled blink
-      */
-
       if (
         !blinkActive &&
         now >= nextBlinkTime
@@ -1288,10 +1308,6 @@
 
       }
 
-
-      /*
-        Handle second blink
-      */
 
       if (
         !blinkActive &&
@@ -1313,7 +1329,9 @@
         !blinkActive
       ) {
 
-        setBlinkAmount(0);
+        setBlinkAmount(
+          0
+        );
 
         return;
 
@@ -1321,20 +1339,14 @@
 
 
       const elapsed =
-        now - blinkStartTime;
+        now -
+        blinkStartTime;
 
 
       const progress =
         elapsed /
         blinkDuration;
 
-
-      /*
-        Smooth close → open curve.
-
-        0 = eyes open
-        1 = eyes fully closed
-      */
 
       if (
         progress <= 1
@@ -1355,7 +1367,9 @@
 
       else {
 
-        setBlinkAmount(0);
+        setBlinkAmount(
+          0
+        );
 
 
         blinkActive =
@@ -1385,8 +1399,95 @@
 
 
     /* =====================================================
-       ANIMATION
+       TRACKING CONFIGURATION
     ===================================================== */
+
+    const eyeMaxYaw =
+      THREE.MathUtils.degToRad(
+        13
+      );
+
+    const eyeMaxPitch =
+      THREE.MathUtils.degToRad(
+        8
+      );
+
+
+    const headMaxYaw =
+      THREE.MathUtils.degToRad(
+        6
+      );
+
+    const headMaxPitch =
+      THREE.MathUtils.degToRad(
+        3
+      );
+
+
+    const neckMaxYaw =
+      THREE.MathUtils.degToRad(
+        2
+      );
+
+    const neckMaxPitch =
+      THREE.MathUtils.degToRad(
+        1.2
+      );
+
+
+    /*
+      Current smoothed rotations.
+    */
+
+    let currentEyeYaw =
+      0;
+
+    let currentEyePitch =
+      0;
+
+    let currentHeadYaw =
+      0;
+
+    let currentHeadPitch =
+      0;
+
+    let currentNeckYaw =
+      0;
+
+    let currentNeckPitch =
+      0;
+
+
+    /* =====================================================
+       DAMPING HELPER
+    ===================================================== */
+
+    function damp(
+      current,
+      target,
+      speed,
+      delta
+    ) {
+
+      return THREE.MathUtils.lerp(
+        current,
+        target,
+        1 -
+        Math.exp(
+          -speed * delta
+        )
+      );
+
+    }
+
+
+    /* =====================================================
+       ANIMATION LOOP
+    ===================================================== */
+
+    const clock =
+      new THREE.Clock();
+
 
     function animate() {
 
@@ -1395,38 +1496,186 @@
       );
 
 
+      const delta =
+        Math.min(
+          clock.getDelta(),
+          0.05
+        );
+
+
       const now =
         performance.now() /
         1000;
 
 
       /*
-        Keep model physically anchored.
-        No vertical bobbing.
+        Smooth pointer itself first.
       */
 
+      pointer.x =
+        damp(
+          pointer.x,
+          targetPointer.x,
+          8,
+          delta
+        );
+
+
+      pointer.y =
+        damp(
+          pointer.y,
+          targetPointer.y,
+          8,
+          delta
+        );
+
+
+      /*
+        EYES:
+        quickest and widest response.
+      */
+
+      const targetEyeYaw =
+        pointer.x *
+        eyeMaxYaw;
+
+
+      const targetEyePitch =
+        pointer.y *
+        eyeMaxPitch;
+
+
+      currentEyeYaw =
+        damp(
+          currentEyeYaw,
+          targetEyeYaw,
+          11,
+          delta
+        );
+
+
+      currentEyePitch =
+        damp(
+          currentEyePitch,
+          targetEyePitch,
+          11,
+          delta
+        );
+
+
+      /*
+        HEAD:
+        follows later and with less movement.
+      */
+
+      const targetHeadYaw =
+        pointer.x *
+        headMaxYaw;
+
+
+      const targetHeadPitch =
+        pointer.y *
+        headMaxPitch;
+
+
+      currentHeadYaw =
+        damp(
+          currentHeadYaw,
+          targetHeadYaw,
+          3.3,
+          delta
+        );
+
+
+      currentHeadPitch =
+        damp(
+          currentHeadPitch,
+          targetHeadPitch,
+          3.0,
+          delta
+        );
+
+
+      /*
+        NECK:
+        smallest and slowest response.
+      */
+
+      const targetNeckYaw =
+        pointer.x *
+        neckMaxYaw;
+
+
+      const targetNeckPitch =
+        pointer.y *
+        neckMaxPitch;
+
+
+      currentNeckYaw =
+        damp(
+          currentNeckYaw,
+          targetNeckYaw,
+          2.2,
+          delta
+        );
+
+
+      currentNeckPitch =
+        damp(
+          currentNeckPitch,
+          targetNeckPitch,
+          2.0,
+          delta
+        );
+
+
+      /* ===================================================
+         APPLY EYE MOVEMENT
+      =================================================== */
+
       if (
-        model
+        eyeLObject &&
+        baseEyeLRotation
       ) {
 
-        model.rotation.x =
-          0;
+        eyeLObject.rotation.copy(
+          baseEyeLRotation
+        );
 
-        model.rotation.y =
-          0;
 
-        model.rotation.z =
-          0;
+        eyeLObject.rotation.y +=
+          currentEyeYaw;
+
+
+        eyeLObject.rotation.x -=
+          currentEyePitch;
 
       }
 
 
-      /*
-        Preserve the corrected resting pose.
+      if (
+        eyeRObject &&
+        baseEyeRRotation
+      ) {
 
-        No idle head wandering yet.
-        Mouse tracking comes next.
-      */
+        eyeRObject.rotation.copy(
+          baseEyeRRotation
+        );
+
+
+        eyeRObject.rotation.y +=
+          currentEyeYaw;
+
+
+        eyeRObject.rotation.x -=
+          currentEyePitch;
+
+      }
+
+
+      /* ===================================================
+         APPLY HEAD MOVEMENT
+      =================================================== */
 
       if (
         headBone &&
@@ -1438,8 +1687,44 @@
         );
 
 
+        /*
+          Permanent forward-facing correction.
+        */
+
         headBone.rotation.x +=
           0.055;
+
+
+        headBone.rotation.y +=
+          currentHeadYaw;
+
+
+        headBone.rotation.x -=
+          currentHeadPitch;
+
+      }
+
+
+      /* ===================================================
+         APPLY NECK MOVEMENT
+      =================================================== */
+
+      if (
+        neck02 &&
+        baseNeck02Rotation
+      ) {
+
+        neck02.rotation.copy(
+          baseNeck02Rotation
+        );
+
+
+        neck02.rotation.y +=
+          currentNeckYaw;
+
+
+        neck02.rotation.x -=
+          currentNeckPitch;
 
       }
 
@@ -1453,23 +1738,20 @@
           baseNeck01Rotation
         );
 
-      }
+
+        neck01.rotation.y +=
+          currentNeckYaw * 0.45;
 
 
-      if (
-        neck02 &&
-        baseNeck02Rotation
-      ) {
-
-        neck02.rotation.copy(
-          baseNeck02Rotation
-        );
+        neck01.rotation.x -=
+          currentNeckPitch * 0.35;
 
       }
 
 
       /*
-        Natural ARKit blinking
+        Blinking continues independently
+        while she tracks the visitor.
       */
 
       updateBlink(
