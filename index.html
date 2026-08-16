@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Prime Reception AI — 3D Test</title>
+  <title>Prime Reception AI — 3D Hologram</title>
 
   <style>
     * {
@@ -21,7 +21,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #02060a;
+      background: #010305;
     }
 
     #stage {
@@ -32,48 +32,111 @@
 
       background:
         radial-gradient(
-          circle at 50% 38%,
-          #0b1820 0%,
-          #040a0f 44%,
-          #010305 72%,
+          circle at 50% 36%,
+          #0a1c26 0%,
+          #041015 30%,
+          #02070b 58%,
           #000000 100%
         );
     }
+
+    /* =========================================
+       DIGITAL SCAN LINES
+    ========================================= */
+
+    #stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      z-index: 4;
+
+      pointer-events: none;
+
+      opacity: 0.09;
+
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(62, 224, 255, 0.00) 0px,
+          rgba(62, 224, 255, 0.00) 3px,
+          rgba(62, 224, 255, 0.16) 4px,
+          rgba(62, 224, 255, 0.00) 5px
+        );
+
+      animation:
+        scanMove 8s linear infinite;
+    }
+
+    @keyframes scanMove {
+
+      from {
+        background-position-y: 0px;
+      }
+
+      to {
+        background-position-y: 120px;
+      }
+
+    }
+
+
+    /* =========================================
+       VIGNETTE
+    ========================================= */
 
     #stage::after {
       content: "";
       position: absolute;
       inset: 0;
+
+      z-index: 5;
+
       pointer-events: none;
 
       background:
         radial-gradient(
           ellipse at center,
-          transparent 42%,
-          rgba(0, 0, 0, 0.62) 100%
+          transparent 34%,
+          rgba(0, 0, 0, 0.18) 58%,
+          rgba(0, 0, 0, 0.72) 100%
         );
     }
 
+
     #stage canvas {
       position: relative;
+
       z-index: 1;
+
       display: block;
+
       width: 100%;
       height: 100%;
     }
 
+
     #status {
       position: absolute;
+
       z-index: 10;
+
       left: 50%;
       top: 50%;
 
-      transform: translate(-50%, -50%);
+      transform:
+        translate(-50%, -50%);
 
-      color: #73e8ff;
-      font-family: Arial, sans-serif;
+      color: #72edff;
+
+      font-family:
+        Arial,
+        sans-serif;
+
       font-size: 15px;
-      letter-spacing: 0.08em;
+
+      letter-spacing: 0.09em;
+
       text-align: center;
 
       pointer-events: none;
@@ -84,9 +147,11 @@
 <body>
 
   <div id="stage">
+
     <div id="status">
-      Loading Prime Reception AI…
+      INITIALIZING PRIME RECEPTION AI…
     </div>
+
   </div>
 
 
@@ -128,30 +193,46 @@
     const camera =
       new THREE.PerspectiveCamera(
         32,
-        window.innerWidth / window.innerHeight,
+        window.innerWidth /
+        window.innerHeight,
         0.01,
         1000
       );
 
 
+    /* =====================================================
+       RENDERER
+    ===================================================== */
+
     const renderer =
       new THREE.WebGLRenderer({
+
         antialias: true,
+
         alpha: true
+
       });
 
 
     renderer.setPixelRatio(
+
       Math.min(
+
         window.devicePixelRatio || 1,
+
         2
+
       )
+
     );
 
 
     renderer.setSize(
+
       window.innerWidth,
+
       window.innerHeight
+
     );
 
 
@@ -168,13 +249,18 @@
 
 
     renderer.setClearColor(
+
       0x000000,
+
       0
+
     );
 
 
     stage.appendChild(
+
       renderer.domElement
+
     );
 
 
@@ -182,150 +268,366 @@
        LIGHTING
     ===================================================== */
 
+
     const ambient =
       new THREE.HemisphereLight(
-        0xdbeff4,
-        0x06080a,
-        0.95
+
+        0xcfefff,
+
+        0x020405,
+
+        0.72
+
       );
 
+
     scene.add(
+
       ambient
+
     );
 
+
+    /*
+      Primary face illumination.
+    */
 
     const faceLight =
       new THREE.DirectionalLight(
-        0xfff8ee,
-        2.5
+
+        0xf9ffff,
+
+        2.25
+
       );
 
+
     faceLight.position.set(
-      1.3,
+
+      1.4,
+
       3.8,
+
       5.5
+
     );
+
 
     scene.add(
+
       faceLight
+
     );
 
+
+    /*
+      Strong cyan holographic rim.
+    */
 
     const cyanRim =
       new THREE.DirectionalLight(
-        0x2edfff,
-        3.6
+
+        0x22dfff,
+
+        4.4
+
       );
 
+
     cyanRim.position.set(
+
       -4,
+
       3,
-      -3
+
+      -3.5
+
     );
+
 
     scene.add(
+
       cyanRim
+
     );
 
+
+    /*
+      Secondary cyan rim.
+    */
+
+    const cyanRimRight =
+      new THREE.DirectionalLight(
+
+        0x4ceaff,
+
+        2.1
+
+      );
+
+
+    cyanRimRight.position.set(
+
+      4,
+
+      4,
+
+      -3
+
+    );
+
+
+    scene.add(
+
+      cyanRimRight
+
+    );
+
+
+    /*
+      Prime gold accent.
+    */
 
     const goldRim =
       new THREE.DirectionalLight(
-        0xd6a13f,
-        2.0
+
+        0xd3a64c,
+
+        1.55
+
       );
+
 
     goldRim.position.set(
-      4,
+
+      3.5,
+
       2,
+
       -2
+
     );
+
 
     scene.add(
+
       goldRim
+
     );
 
 
-    const lowerFill =
+    /*
+      Lower cyan hologram glow.
+    */
+
+    const lowerGlow =
       new THREE.PointLight(
-        0x1498b4,
-        6,
+
+        0x13ccea,
+
+        9,
+
         8
+
       );
 
-    lowerFill.position.set(
+
+    lowerGlow.position.set(
+
       0,
-      -1.2,
-      2.5
+
+      -1.5,
+
+      1.6
+
     );
 
+
     scene.add(
-      lowerFill
+
+      lowerGlow
+
+    );
+
+
+    /*
+      Face-area electronic glow.
+    */
+
+    const faceGlow =
+      new THREE.PointLight(
+
+        0x39e7ff,
+
+        1.5,
+
+        5
+
+      );
+
+
+    faceGlow.position.set(
+
+      0,
+
+      1.4,
+
+      2.2
+
+    );
+
+
+    scene.add(
+
+      faceGlow
+
     );
 
 
     /* =====================================================
-       MATERIALS
+       HOLOGRAPHIC MATERIALS
     ===================================================== */
+
 
     const bodyMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0xb9c4c8),
+          new THREE.Color(
+            0x9eafb5
+          ),
 
-        metalness:
-          0.34,
+        emissive:
+          new THREE.Color(
+            0x063842
+          ),
 
-        roughness:
-          0.40,
-
-        clearcoat:
-          0.30,
-
-        clearcoatRoughness:
-          0.30,
-
-        sheen:
-          0.10,
-
-        sheenColor:
-          new THREE.Color(0x55d7eb)
-
-      });
-
-
-    const faceMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(0xd7dee0),
-
-        metalness:
-          0.18,
-
-        roughness:
-          0.44,
-
-        clearcoat:
-          0.22,
-
-        clearcoatRoughness:
-          0.32
-
-      });
-
-
-    const shirtMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(0x07090c),
+        emissiveIntensity:
+          0.24,
 
         metalness:
           0.48,
 
         roughness:
+          0.32,
+
+        clearcoat:
           0.38,
+
+        clearcoatRoughness:
+          0.26,
+
+        sheen:
+          0.22,
+
+        sheenColor:
+          new THREE.Color(
+            0x36dbef
+          )
+
+      });
+
+
+    /*
+      Face deliberately less metallic
+      than the rest of the body.
+    */
+
+    const faceMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0xcbd7da
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x06272d
+          ),
+
+        emissiveIntensity:
+          0.12,
+
+        metalness:
+          0.22,
+
+        roughness:
+          0.39,
+
+        clearcoat:
+          0.25,
+
+        clearcoatRoughness:
+          0.29,
+
+        sheen:
+          0.12,
+
+        sheenColor:
+          new THREE.Color(
+            0x42cfe5
+          )
+
+      });
+
+
+    /*
+      Professional near-black uniform.
+    */
+
+    const shirtMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0x030608
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x00151a
+          ),
+
+        emissiveIntensity:
+          0.22,
+
+        metalness:
+          0.50,
+
+        roughness:
+          0.34,
+
+        clearcoat:
+          0.32,
+
+        clearcoatRoughness:
+          0.28
+
+      });
+
+
+    const leggingsMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0x030608
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x001319
+          ),
+
+        emissiveIntensity:
+          0.18,
+
+        metalness:
+          0.47,
+
+        roughness:
+          0.36,
 
         clearcoat:
           0.28,
@@ -336,44 +638,33 @@
       });
 
 
-    const leggingsMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(0x07090c),
-
-        metalness:
-          0.44,
-
-        roughness:
-          0.40,
-
-        clearcoat:
-          0.24,
-
-        clearcoatRoughness:
-          0.32
-
-      });
-
-
     const hairMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0x06090d),
+          new THREE.Color(
+            0x030609
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x001119
+          ),
+
+        emissiveIntensity:
+          0.16,
 
         metalness:
-          0.22,
+          0.28,
 
         roughness:
-          0.42,
+          0.38,
 
         clearcoat:
-          0.22,
+          0.28,
 
         clearcoatRoughness:
-          0.30
+          0.28
 
       });
 
@@ -382,25 +673,63 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0xd9fbff),
+          new THREE.Color(
+            0xe4fcff
+          ),
 
         emissive:
-          new THREE.Color(0x29dfff),
+          new THREE.Color(
+            0x23dcf8
+          ),
 
         emissiveIntensity:
-          0.6,
+          1.05,
 
         metalness:
-          0.04,
+          0.02,
 
         roughness:
-          0.16,
+          0.13,
 
         clearcoat:
-          0.9,
+          1,
 
         clearcoatRoughness:
-          0.08
+          0.06
+
+      });
+
+
+    const eyeShellMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0xc8f8ff
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x0b6372
+          ),
+
+        emissiveIntensity:
+          0.35,
+
+        transparent:
+          true,
+
+        opacity:
+          0.42,
+
+        metalness:
+          0,
+
+        roughness:
+          0.08,
+
+        clearcoat:
+          1
 
       });
 
@@ -409,13 +738,15 @@
       new THREE.MeshStandardMaterial({
 
         color:
-          new THREE.Color(0x020304),
+          new THREE.Color(
+            0x010203
+          ),
 
         metalness:
-          0.10,
+          0.12,
 
         roughness:
-          0.48
+          0.45
 
       });
 
@@ -424,7 +755,9 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0xf3f5f5),
+          new THREE.Color(
+            0xf4f7f7
+          ),
 
         metalness:
           0,
@@ -442,16 +775,26 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0xc99a3d),
+          new THREE.Color(
+            0xcfa34a
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x352308
+          ),
+
+        emissiveIntensity:
+          0.18,
 
         metalness:
-          0.70,
+          0.76,
 
         roughness:
-          0.30,
+          0.26,
 
         clearcoat:
-          0.30
+          0.35
 
       });
 
@@ -464,35 +807,46 @@
       object.material =
         material;
 
+
       material.map =
         null;
+
 
       material.normalMap =
         null;
 
+
       material.roughnessMap =
         null;
+
 
       material.metalnessMap =
         null;
 
+
       material.aoMap =
         null;
+
 
       material.emissiveMap =
         null;
 
+
       material.alphaMap =
         null;
+
 
       material.lightMap =
         null;
 
+
       material.displacementMap =
         null;
 
+
       material.vertexColors =
         false;
+
 
       material.needsUpdate =
         true;
@@ -507,17 +861,22 @@
     let model =
       null;
 
+
     let headBone =
       null;
+
 
     let neck01 =
       null;
 
+
     let neck02 =
       null;
 
+
     let eyeLObject =
       null;
+
 
     let eyeRObject =
       null;
@@ -526,14 +885,18 @@
     let baseHeadRotation =
       null;
 
+
     let baseNeck01Rotation =
       null;
+
 
     let baseNeck02Rotation =
       null;
 
+
     let baseEyeLRotation =
       null;
+
 
     let baseEyeRRotation =
       null;
@@ -544,7 +907,7 @@
 
 
     /* =====================================================
-       CURSOR INPUT
+       POINTER
     ===================================================== */
 
     const pointer =
@@ -561,19 +924,13 @@
       );
 
 
-    let mousePresent =
-      false;
-
-
     window.addEventListener(
 
       'pointermove',
 
-      function (event) {
-
-        mousePresent =
-          true;
-
+      function (
+        event
+      ) {
 
         let x =
           (
@@ -591,19 +948,14 @@
           );
 
 
-        /*
-          Dead zone around center.
-
-          Tiny mouse movements will not
-          constantly twitch the character.
-        */
-
         const deadZone =
           0.055;
 
 
         if (
-          Math.abs(x) <
+          Math.abs(
+            x
+          ) <
           deadZone
         ) {
 
@@ -614,7 +966,9 @@
 
 
         if (
-          Math.abs(y) <
+          Math.abs(
+            y
+          ) <
           deadZone
         ) {
 
@@ -624,31 +978,32 @@
         }
 
 
-        /*
-          Smooth nonlinear response.
-
-          This reduces movement around
-          the center but still allows a
-          useful range near the edges.
-        */
-
         x =
-          Math.sign(x) *
+          Math.sign(
+            x
+          ) *
           Math.pow(
-            Math.abs(x),
+            Math.abs(
+              x
+            ),
             1.15
           );
 
 
         y =
-          Math.sign(y) *
+          Math.sign(
+            y
+          ) *
           Math.pow(
-            Math.abs(y),
+            Math.abs(
+              y
+            ),
             1.15
           );
 
 
         targetPointer.set(
+
           THREE.MathUtils.clamp(
             x,
             -1,
@@ -660,6 +1015,7 @@
             -1,
             1
           )
+
         );
 
       }
@@ -673,10 +1029,6 @@
 
       function () {
 
-        mousePresent =
-          false;
-
-
         targetPointer.set(
           0,
           0
@@ -688,6 +1040,212 @@
 
 
     /* =====================================================
+       PARTICLES
+    ===================================================== */
+
+    let particleSystem =
+      null;
+
+
+    let particlePositions =
+      null;
+
+
+    const particleSpeeds =
+      [];
+
+
+    function createParticles(
+      size
+    ) {
+
+      const count =
+        480;
+
+
+      const geometry =
+        new THREE.BufferGeometry();
+
+
+      particlePositions =
+        new Float32Array(
+          count * 3
+        );
+
+
+      for (
+        let i = 0;
+        i < count;
+        i++
+      ) {
+
+        const i3 =
+          i * 3;
+
+
+        particlePositions[
+          i3
+        ] =
+          (
+            Math.random() -
+            0.5
+          ) *
+          size.x *
+          2.4;
+
+
+        particlePositions[
+          i3 + 1
+        ] =
+          (
+            Math.random() -
+            0.45
+          ) *
+          size.y *
+          1.25;
+
+
+        particlePositions[
+          i3 + 2
+        ] =
+          (
+            Math.random() -
+            0.5
+          ) *
+          size.z *
+          5;
+
+
+        particleSpeeds.push(
+
+          0.002 +
+          Math.random() *
+          0.006
+
+        );
+
+      }
+
+
+      geometry.setAttribute(
+
+        'position',
+
+        new THREE.BufferAttribute(
+          particlePositions,
+          3
+        )
+
+      );
+
+
+      const material =
+        new THREE.PointsMaterial({
+
+          color:
+            0x4be9ff,
+
+          size:
+            Math.max(
+              size.y *
+              0.0035,
+              0.003
+            ),
+
+          transparent:
+            true,
+
+          opacity:
+            0.48,
+
+          depthWrite:
+            false,
+
+          blending:
+            THREE.AdditiveBlending
+
+        });
+
+
+      particleSystem =
+        new THREE.Points(
+          geometry,
+          material
+        );
+
+
+      scene.add(
+        particleSystem
+      );
+
+    }
+
+
+    function updateParticles(
+      size
+    ) {
+
+      if (
+        !particleSystem ||
+        !particlePositions
+      ) {
+
+        return;
+
+      }
+
+
+      const positions =
+        particleSystem
+          .geometry
+          .attributes
+          .position;
+
+
+      for (
+        let i = 0;
+        i < particleSpeeds.length;
+        i++
+      ) {
+
+        const yIndex =
+          i * 3 + 1;
+
+
+        particlePositions[
+          yIndex
+        ] +=
+          particleSpeeds[
+            i
+          ];
+
+
+        if (
+          particlePositions[
+            yIndex
+          ] >
+          size.y *
+          0.65
+        ) {
+
+          particlePositions[
+            yIndex
+          ] =
+            -size.y *
+            0.62;
+
+        }
+
+      }
+
+
+      positions.needsUpdate =
+        true;
+
+    }
+
+
+    /* =====================================================
        LOAD MODEL
     ===================================================== */
 
@@ -695,12 +1253,18 @@
       new GLTFLoader();
 
 
+    let modelSize =
+      null;
+
+
     loader.load(
 
       './PrimeReceptionAI_Test01.glb',
 
 
-      function (gltf) {
+      function (
+        gltf
+      ) {
 
         model =
           gltf.scene;
@@ -713,7 +1277,9 @@
 
         model.traverse(
 
-          function (object) {
+          function (
+            object
+          ) {
 
 
             /* =============================================
@@ -728,9 +1294,9 @@
                 object.name;
 
 
-              /* ------------------------------------------
-                 ARKIT BLINK TARGETS
-              ------------------------------------------ */
+              /*
+                Find blink morphs.
+              */
 
               if (
                 object.morphTargetDictionary &&
@@ -738,12 +1304,16 @@
               ) {
 
                 const dictionary =
-                  object.morphTargetDictionary;
+                  object
+                    .morphTargetDictionary;
 
 
                 if (
-                  dictionary.eyeBlinkLeft !== undefined ||
-                  dictionary.eyeBlinkRight !== undefined
+                  dictionary.eyeBlinkLeft
+                    !== undefined
+                  ||
+                  dictionary.eyeBlinkRight
+                    !== undefined
                 ) {
 
                   blinkMeshes.push(
@@ -755,9 +1325,9 @@
               }
 
 
-              /* ------------------------------------------
-                 HIDE UNUSED
-              ------------------------------------------ */
+              /*
+                Hide unused meshes.
+              */
 
               if (
                 name ===
@@ -770,59 +1340,72 @@
                 object.visible =
                   false;
 
+
                 return;
 
               }
 
 
-              /* ------------------------------------------
-                 BODY
-              ------------------------------------------ */
+              /*
+                Synthetic body.
+              */
 
               if (
-                name === 'Mesh010' ||
-                name === 'SK_FemBase2_Torso'
+                name ===
+                  'Mesh010'
+                ||
+                name ===
+                  'SK_FemBase2_Torso'
               ) {
 
                 object.visible =
                   true;
+
 
                 forceCleanMaterial(
                   object,
                   bodyMaterial
                 );
 
+
                 return;
 
               }
 
 
-              /* ------------------------------------------
-                 FACE
-              ------------------------------------------ */
+              /*
+                Face.
+              */
 
               if (
-                name === 'Mesh010_1' ||
-                name === 'SK_FemBase2_Head_52ArKit' ||
-                name === 'SK_FemBase2_Head_52ARKit'
+                name ===
+                  'Mesh010_1'
+                ||
+                name ===
+                  'SK_FemBase2_Head_52ArKit'
+                ||
+                name ===
+                  'SK_FemBase2_Head_52ARKit'
               ) {
 
                 object.visible =
                   true;
+
 
                 forceCleanMaterial(
                   object,
                   faceMaterial
                 );
 
+
                 return;
 
               }
 
 
-              /* ------------------------------------------
-                 CLOTHING
-              ------------------------------------------ */
+              /*
+                Shirt.
+              */
 
               if (
                 name ===
@@ -832,15 +1415,21 @@
                 object.visible =
                   true;
 
+
                 forceCleanMaterial(
                   object,
                   shirtMaterial
                 );
 
+
                 return;
 
               }
 
+
+              /*
+                Leggings.
+              */
 
               if (
                 name ===
@@ -850,19 +1439,21 @@
                 object.visible =
                   true;
 
+
                 forceCleanMaterial(
                   object,
                   leggingsMaterial
                 );
+
 
                 return;
 
               }
 
 
-              /* ------------------------------------------
-                 HAIR
-              ------------------------------------------ */
+              /*
+                Hair.
+              */
 
               if (
                 name ===
@@ -872,19 +1463,21 @@
                 object.visible =
                   true;
 
+
                 forceCleanMaterial(
                   object,
                   hairMaterial
                 );
+
 
                 return;
 
               }
 
 
-              /* ------------------------------------------
-                 EYES
-              ------------------------------------------ */
+              /*
+                Left eye.
+              */
 
               if (
                 name ===
@@ -910,6 +1503,10 @@
               }
 
 
+              /*
+                Right eye.
+              */
+
               if (
                 name ===
                 'SK_FemBase2_EyeR'
@@ -934,6 +1531,10 @@
               }
 
 
+              /*
+                Eye shell.
+              */
+
               if (
                 name ===
                 'SK_FemBase2_EyeShell'
@@ -945,7 +1546,7 @@
 
                 forceCleanMaterial(
                   object,
-                  eyeMaterial
+                  eyeShellMaterial
                 );
 
 
@@ -953,10 +1554,6 @@
 
               }
 
-
-              /* ------------------------------------------
-                 EYE DETAILS
-              ------------------------------------------ */
 
               if (
                 name ===
@@ -981,13 +1578,9 @@
               }
 
 
-              /* ------------------------------------------
-                 TEETH
-              ------------------------------------------ */
-
               if (
                 name ===
-                'SK_FemBase2_Teeth'
+                  'SK_FemBase2_Teeth'
               ) {
 
                 object.visible =
@@ -1005,13 +1598,9 @@
               }
 
 
-              /* ------------------------------------------
-                 NAILS
-              ------------------------------------------ */
-
               if (
                 name ===
-                'SK_FemBase2_Nails'
+                  'SK_FemBase2_Nails'
               ) {
 
                 object.visible =
@@ -1040,12 +1629,18 @@
             ) {
 
               const lowerName =
-                object.name.toLowerCase();
+                object
+                  .name
+                  .toLowerCase();
 
 
               if (
-                lowerName === 'head' ||
-                lowerName.endsWith('_head')
+                lowerName ===
+                  'head'
+                ||
+                lowerName.endsWith(
+                  '_head'
+                )
               ) {
 
                 headBone =
@@ -1085,7 +1680,7 @@
 
 
         /* =================================================
-           SAVE ORIGINAL POSE
+           STORE BASE ROTATIONS
         ================================================= */
 
         if (
@@ -1093,7 +1688,9 @@
         ) {
 
           baseHeadRotation =
-            headBone.rotation.clone();
+            headBone
+              .rotation
+              .clone();
 
         }
 
@@ -1103,7 +1700,9 @@
         ) {
 
           baseNeck01Rotation =
-            neck01.rotation.clone();
+            neck01
+              .rotation
+              .clone();
 
         }
 
@@ -1113,7 +1712,9 @@
         ) {
 
           baseNeck02Rotation =
-            neck02.rotation.clone();
+            neck02
+              .rotation
+              .clone();
 
         }
 
@@ -1123,7 +1724,9 @@
         ) {
 
           baseEyeLRotation =
-            eyeLObject.rotation.clone();
+            eyeLObject
+              .rotation
+              .clone();
 
         }
 
@@ -1133,7 +1736,9 @@
         ) {
 
           baseEyeRRotation =
-            eyeRObject.rotation.clone();
+            eyeRObject
+              .rotation
+              .clone();
 
         }
 
@@ -1149,7 +1754,7 @@
             );
 
 
-        const size =
+        modelSize =
           box.getSize(
             new THREE.Vector3()
           );
@@ -1162,9 +1767,13 @@
 
 
         model.position.set(
+
           -center.x,
+
           -center.y,
+
           -center.z
+
         );
 
 
@@ -1179,7 +1788,8 @@
 
 
         const upperBodyHeight =
-          size.y * 0.78;
+          modelSize.y *
+          0.78;
 
 
         let distance =
@@ -1187,7 +1797,8 @@
           (
             2 *
             Math.tan(
-              verticalFOV / 2
+              verticalFOV /
+              2
             )
           );
 
@@ -1196,36 +1807,56 @@
           1.05;
 
 
-        const cameraTargetHeight =
-          size.y * 0.17;
+        const targetHeight =
+          modelSize.y *
+          0.17;
 
 
         camera.position.set(
+
           0,
-          cameraTargetHeight,
+
+          targetHeight,
+
           distance
+
         );
 
 
         camera.lookAt(
+
           0,
-          cameraTargetHeight,
+
+          targetHeight,
+
           0
+
         );
 
 
         camera.near =
           Math.max(
-            distance / 100,
+            distance /
+            100,
             0.01
           );
 
 
         camera.far =
-          distance * 100;
+          distance *
+          100;
 
 
         camera.updateProjectionMatrix();
+
+
+        /*
+          Create the holographic particle field.
+        */
+
+        createParticles(
+          modelSize
+        );
 
 
         status.style.display =
@@ -1237,23 +1868,31 @@
       },
 
 
-      function (xhr) {
+      /* =========================================
+         PROGRESS
+      ========================================= */
+
+      function (
+        xhr
+      ) {
 
         if (
           xhr.total
         ) {
 
-          const percent =
+          const percentage =
             Math.round(
+
               xhr.loaded /
               xhr.total *
               100
+
             );
 
 
           status.textContent =
-            'Loading Prime Reception AI… ' +
-            percent +
+            'INITIALIZING PRIME RECEPTION AI… ' +
+            percentage +
             '%';
 
         }
@@ -1261,15 +1900,20 @@
       },
 
 
-      function (error) {
+      /* =========================================
+         ERROR
+      ========================================= */
+
+      function (
+        error
+      ) {
 
         console.error(
-          'GLB ERROR:',
           error
         );
 
 
-        status.innerHTML =
+        status.textContent =
           'MODEL FAILED TO LOAD';
 
       }
@@ -1278,14 +1922,14 @@
 
 
     /* =====================================================
-       BLINK SYSTEM
+       BLINKING
     ===================================================== */
 
     function setBlinkAmount(
       amount
     ) {
 
-      const safe =
+      const value =
         THREE.MathUtils.clamp(
           amount,
           0,
@@ -1294,15 +1938,18 @@
 
 
       for (
-        const mesh of blinkMeshes
+        const mesh
+        of blinkMeshes
       ) {
 
         const dictionary =
-          mesh.morphTargetDictionary;
+          mesh
+            .morphTargetDictionary;
 
 
         const influences =
-          mesh.morphTargetInfluences;
+          mesh
+            .morphTargetInfluences;
 
 
         if (
@@ -1313,7 +1960,7 @@
           influences[
             dictionary.eyeBlinkLeft
           ] =
-            safe;
+            value;
 
         }
 
@@ -1326,7 +1973,7 @@
           influences[
             dictionary.eyeBlinkRight
           ] =
-            safe;
+            value;
 
         }
 
@@ -1339,7 +1986,7 @@
       false;
 
 
-    let blinkStartTime =
+    let blinkStart =
       0;
 
 
@@ -1347,54 +1994,50 @@
       0.15;
 
 
-    let nextBlinkTime =
+    let nextBlink =
       Infinity;
 
 
-    let pendingDoubleBlink =
+    let doubleBlink =
       false;
 
 
-    let doubleBlinkTime =
+    let secondBlinkAt =
       Infinity;
-
-
-    function randomBlinkDelay() {
-
-      return (
-        2.3 +
-        Math.random() * 3.7
-      );
-
-    }
 
 
     function scheduleNextBlink() {
 
-      nextBlinkTime =
-        performance.now() / 1000 +
-        randomBlinkDelay();
+      nextBlink =
+        performance.now() /
+        1000 +
+        2.3 +
+        Math.random() *
+        3.7;
 
     }
 
 
-    function startBlink() {
+    function beginBlink() {
 
       blinkActive =
         true;
 
 
-      blinkStartTime =
-        performance.now() / 1000;
+      blinkStart =
+        performance.now() /
+        1000;
 
 
       blinkDuration =
         0.12 +
-        Math.random() * 0.055;
+        Math.random() *
+        0.055;
 
 
-      pendingDoubleBlink =
-        Math.random() < 0.12;
+      doubleBlink =
+        Math.random() <
+        0.12;
 
     }
 
@@ -1405,25 +2048,27 @@
 
       if (
         !blinkActive &&
-        now >= nextBlinkTime
+        now >=
+        nextBlink
       ) {
 
-        startBlink();
+        beginBlink();
 
       }
 
 
       if (
         !blinkActive &&
-        pendingDoubleBlink &&
-        now >= doubleBlinkTime
+        doubleBlink &&
+        now >=
+        secondBlinkAt
       ) {
 
-        pendingDoubleBlink =
+        doubleBlink =
           false;
 
 
-        startBlink();
+        beginBlink();
 
 
         return;
@@ -1448,24 +2093,25 @@
       const progress =
         (
           now -
-          blinkStartTime
+          blinkStart
         ) /
         blinkDuration;
 
 
       if (
-        progress <= 1
+        progress <=
+        1
       ) {
 
-        const amount =
+        setBlinkAmount(
+
           Math.sin(
+
             progress *
             Math.PI
-          );
 
+          )
 
-        setBlinkAmount(
-          amount
         );
 
       }
@@ -1482,13 +2128,14 @@
 
 
         if (
-          pendingDoubleBlink
+          doubleBlink
         ) {
 
-          doubleBlinkTime =
+          secondBlinkAt =
             now +
             0.15 +
-            Math.random() * 0.08;
+            Math.random() *
+            0.08;
 
         }
 
@@ -1504,12 +2151,8 @@
 
 
     /* =====================================================
-       TRACKING LIMITS
+       TRACKING
     ===================================================== */
-
-    /*
-      Eyes move farther than head.
-    */
 
     const eyeHorizontalMax =
       THREE.MathUtils.degToRad(
@@ -1523,10 +2166,6 @@
       );
 
 
-    /*
-      Head follows subtly.
-    */
-
     const headHorizontalMax =
       THREE.MathUtils.degToRad(
         4.2
@@ -1538,10 +2177,6 @@
         2.2
       );
 
-
-    /*
-      Neck movement is deliberately tiny.
-    */
 
     const neckHorizontalMax =
       THREE.MathUtils.degToRad(
@@ -1579,10 +2214,6 @@
       0;
 
 
-    /* =====================================================
-       SMOOTHING
-    ===================================================== */
-
     function damp(
       current,
       target,
@@ -1598,7 +2229,8 @@
 
         1 -
         Math.exp(
-          -speed * delta
+          -speed *
+          delta
         )
 
       );
@@ -1607,7 +2239,7 @@
 
 
     /* =====================================================
-       ANIMATION
+       ANIMATION LOOP
     ===================================================== */
 
     const clock =
@@ -1623,8 +2255,11 @@
 
       const delta =
         Math.min(
+
           clock.getDelta(),
+
           0.05
+
         );
 
 
@@ -1633,36 +2268,45 @@
         1000;
 
 
-      /* ===================================================
-         SMOOTH RAW POINTER
-      =================================================== */
+      /* =========================================
+         POINTER SMOOTHING
+      ========================================= */
 
       pointer.x =
         damp(
+
           pointer.x,
+
           targetPointer.x,
+
           7,
+
           delta
+
         );
 
 
       pointer.y =
         damp(
+
           pointer.y,
+
           targetPointer.y,
+
           7,
+
           delta
+
         );
 
 
-      /* ===================================================
+      /* =========================================
          EYES
-
-         Fastest response.
-      =================================================== */
+      ========================================= */
 
       eyeHorizontal =
         damp(
+
           eyeHorizontal,
 
           pointer.x *
@@ -1671,11 +2315,13 @@
           14,
 
           delta
+
         );
 
 
       eyeVertical =
         damp(
+
           eyeVertical,
 
           pointer.y *
@@ -1684,17 +2330,17 @@
           14,
 
           delta
+
         );
 
 
-      /* ===================================================
+      /* =========================================
          HEAD
-
-         Noticeably slower than eyes.
-      =================================================== */
+      ========================================= */
 
       headHorizontal =
         damp(
+
           headHorizontal,
 
           pointer.x *
@@ -1703,11 +2349,13 @@
           2.7,
 
           delta
+
         );
 
 
       headVertical =
         damp(
+
           headVertical,
 
           pointer.y *
@@ -1716,17 +2364,17 @@
           2.5,
 
           delta
+
         );
 
 
-      /* ===================================================
+      /* =========================================
          NECK
-
-         Slowest response.
-      =================================================== */
+      ========================================= */
 
       neckHorizontal =
         damp(
+
           neckHorizontal,
 
           pointer.x *
@@ -1735,11 +2383,13 @@
           1.65,
 
           delta
+
         );
 
 
       neckVertical =
         damp(
+
           neckVertical,
 
           pointer.y *
@@ -1748,12 +2398,13 @@
           1.5,
 
           delta
+
         );
 
 
-      /* ===================================================
-         EYES
-      =================================================== */
+      /* =========================================
+         APPLY EYE ROTATIONS
+      ========================================= */
 
       if (
         eyeLObject &&
@@ -1795,16 +2446,9 @@
       }
 
 
-      /* ===================================================
-         HEAD
-
-         CORRECT AXES FOR THIS RIG:
-
-         X = left/right
-         Z = up/down
-
-         Vertical sign has already been corrected.
-      =================================================== */
+      /* =========================================
+         APPLY HEAD ROTATIONS
+      ========================================= */
 
       if (
         headBone &&
@@ -1817,7 +2461,8 @@
 
 
         /*
-          Left/right.
+          Correct rig axis:
+          X = left/right
         */
 
         headBone.rotation.x +=
@@ -1825,11 +2470,8 @@
 
 
         /*
-          Up/down.
-
-          IMPORTANT:
-          This is the corrected + direction
-          you confirmed works.
+          Correct rig axis:
+          Z = up/down
         */
 
         headBone.rotation.z +=
@@ -1837,8 +2479,7 @@
 
 
         /*
-          Never modify local Y.
-          This prevents head tilting.
+          Do not touch Y.
         */
 
         headBone.rotation.y =
@@ -1847,9 +2488,9 @@
       }
 
 
-      /* ===================================================
+      /* =========================================
          NECK 02
-      =================================================== */
+      ========================================= */
 
       if (
         neck02 &&
@@ -1875,9 +2516,9 @@
       }
 
 
-      /* ===================================================
+      /* =========================================
          NECK 01
-      =================================================== */
+      ========================================= */
 
       if (
         neck01 &&
@@ -1905,13 +2546,75 @@
       }
 
 
-      /* ===================================================
+      /* =========================================
          BLINK
-      =================================================== */
+      ========================================= */
 
       updateBlink(
         now
       );
+
+
+      /* =========================================
+         HOLOGRAPHIC LIGHT PULSE
+      ========================================= */
+
+      const pulse =
+        0.5 +
+        Math.sin(
+          now *
+          1.25
+        ) *
+        0.5;
+
+
+      lowerGlow.intensity =
+        7.5 +
+        pulse *
+        2.0;
+
+
+      faceGlow.intensity =
+        1.25 +
+        pulse *
+        0.35;
+
+
+      eyeMaterial.emissiveIntensity =
+        0.92 +
+        pulse *
+        0.18;
+
+
+      bodyMaterial.emissiveIntensity =
+        0.20 +
+        pulse *
+        0.06;
+
+
+      /* =========================================
+         PARTICLES
+      ========================================= */
+
+      if (
+        modelSize
+      ) {
+
+        updateParticles(
+          modelSize
+        );
+
+      }
+
+
+      if (
+        particleSystem
+      ) {
+
+        particleSystem.rotation.y +=
+          0.00035;
+
+      }
 
 
       renderer.render(
@@ -1944,8 +2647,11 @@
 
 
         renderer.setSize(
+
           window.innerWidth,
+
           window.innerHeight
+
         );
 
       }
