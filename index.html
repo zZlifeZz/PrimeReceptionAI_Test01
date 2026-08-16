@@ -65,8 +65,10 @@
     #status {
       position: absolute;
       z-index: 10;
+
       left: 50%;
       top: 50%;
+
       transform: translate(-50%, -50%);
 
       color: #73e8ff;
@@ -88,6 +90,7 @@
     </div>
   </div>
 
+
   <script type="importmap">
   {
     "imports": {
@@ -96,6 +99,7 @@
     }
   }
   </script>
+
 
   <script type="module">
 
@@ -186,7 +190,9 @@
         0.95
       );
 
-    scene.add(ambient);
+    scene.add(
+      ambient
+    );
 
 
     const faceLight =
@@ -201,7 +207,9 @@
       5.5
     );
 
-    scene.add(faceLight);
+    scene.add(
+      faceLight
+    );
 
 
     const cyanRim =
@@ -216,7 +224,9 @@
       -3
     );
 
-    scene.add(cyanRim);
+    scene.add(
+      cyanRim
+    );
 
 
     const goldRim =
@@ -231,7 +241,9 @@
       -2
     );
 
-    scene.add(goldRim);
+    scene.add(
+      goldRim
+    );
 
 
     const lowerFill =
@@ -247,7 +259,9 @@
       2.5
     );
 
-    scene.add(lowerFill);
+    scene.add(
+      lowerFill
+    );
 
 
     /* =====================================================
@@ -451,32 +465,15 @@
       object.material =
         material;
 
-      material.map =
-        null;
-
-      material.normalMap =
-        null;
-
-      material.roughnessMap =
-        null;
-
-      material.metalnessMap =
-        null;
-
-      material.aoMap =
-        null;
-
-      material.emissiveMap =
-        null;
-
-      material.alphaMap =
-        null;
-
-      material.lightMap =
-        null;
-
-      material.displacementMap =
-        null;
+      material.map = null;
+      material.normalMap = null;
+      material.roughnessMap = null;
+      material.metalnessMap = null;
+      material.aoMap = null;
+      material.emissiveMap = null;
+      material.alphaMap = null;
+      material.lightMap = null;
+      material.displacementMap = null;
 
       material.vertexColors =
         false;
@@ -531,34 +528,21 @@
 
 
     /* =====================================================
-       POINTER TARGET
+       MOUSE POSITION
     ===================================================== */
 
     const pointer =
-      new THREE.Vector2(
-        0,
-        0
-      );
-
+      new THREE.Vector2(0, 0);
 
     const targetPointer =
-      new THREE.Vector2(
-        0,
-        0
-      );
-
-
-    let pointerInside =
-      false;
+      new THREE.Vector2(0, 0);
 
 
     window.addEventListener(
+
       'pointermove',
+
       function (event) {
-
-        pointerInside =
-          true;
-
 
         targetPointer.x =
           (
@@ -576,15 +560,15 @@
           );
 
       }
+
     );
 
 
     document.documentElement.addEventListener(
-      'mouseleave',
-      function () {
 
-        pointerInside =
-          false;
+      'mouseleave',
+
+      function () {
 
         targetPointer.set(
           0,
@@ -592,6 +576,7 @@
         );
 
       }
+
     );
 
 
@@ -624,10 +609,6 @@
           function (object) {
 
 
-            /* =============================================
-               MESHES
-            ============================================= */
-
             if (
               object.isMesh
             ) {
@@ -636,9 +617,7 @@
                 object.name;
 
 
-              /* ------------------------------------------
-                 BLINK MORPHS
-              ------------------------------------------ */
+              /* BLINK MORPHS */
 
               if (
                 object.morphTargetDictionary &&
@@ -663,16 +642,9 @@
               }
 
 
-              /* ------------------------------------------
-                 HIDE
-              ------------------------------------------ */
-
               if (
-                name ===
-                  'SK_FemBase2_Censored_Torso'
-                ||
-                name ===
-                  'SK_FemBase2_UnderWear'
+                name === 'SK_FemBase2_Censored_Torso' ||
+                name === 'SK_FemBase2_UnderWear'
               ) {
 
                 object.visible =
@@ -682,10 +654,6 @@
 
               }
 
-
-              /* ------------------------------------------
-                 BODY
-              ------------------------------------------ */
 
               if (
                 name === 'Mesh010' ||
@@ -704,10 +672,6 @@
 
               }
 
-
-              /* ------------------------------------------
-                 FACE
-              ------------------------------------------ */
 
               if (
                 name === 'Mesh010_1' ||
@@ -728,13 +692,8 @@
               }
 
 
-              /* ------------------------------------------
-                 SHIRT
-              ------------------------------------------ */
-
               if (
-                name ===
-                'SK_FemBase2_TShirt'
+                name === 'SK_FemBase2_TShirt'
               ) {
 
                 object.visible =
@@ -750,13 +709,8 @@
               }
 
 
-              /* ------------------------------------------
-                 LEGGINGS
-              ------------------------------------------ */
-
               if (
-                name ===
-                'SK_FemBase2_Leggings'
+                name === 'SK_FemBase2_Leggings'
               ) {
 
                 object.visible =
@@ -772,13 +726,8 @@
               }
 
 
-              /* ------------------------------------------
-                 HAIR
-              ------------------------------------------ */
-
               if (
-                name ===
-                'SK_FemBase2_Hair'
+                name === 'SK_FemBase2_Hair'
               ) {
 
                 object.visible =
@@ -794,13 +743,8 @@
               }
 
 
-              /* ------------------------------------------
-                 EYES
-              ------------------------------------------ */
-
               if (
-                name ===
-                'SK_FemBase2_EyeL'
+                name === 'SK_FemBase2_EyeL'
               ) {
 
                 eyeLObject =
@@ -820,8 +764,7 @@
 
 
               if (
-                name ===
-                'SK_FemBase2_EyeR'
+                name === 'SK_FemBase2_EyeR'
               ) {
 
                 eyeRObject =
@@ -841,8 +784,7 @@
 
 
               if (
-                name ===
-                'SK_FemBase2_EyeShell'
+                name === 'SK_FemBase2_EyeShell'
               ) {
 
                 object.visible =
@@ -858,16 +800,9 @@
               }
 
 
-              /* ------------------------------------------
-                 EYE DETAILS
-              ------------------------------------------ */
-
               if (
-                name ===
-                  'SK_FemBase2_Lashes'
-                ||
-                name ===
-                  'SK_FemBase2_EyeEdge'
+                name === 'SK_FemBase2_Lashes' ||
+                name === 'SK_FemBase2_EyeEdge'
               ) {
 
                 object.visible =
@@ -883,13 +818,8 @@
               }
 
 
-              /* ------------------------------------------
-                 TEETH
-              ------------------------------------------ */
-
               if (
-                name ===
-                'SK_FemBase2_Teeth'
+                name === 'SK_FemBase2_Teeth'
               ) {
 
                 object.visible =
@@ -905,13 +835,8 @@
               }
 
 
-              /* ------------------------------------------
-                 NAILS
-              ------------------------------------------ */
-
               if (
-                name ===
-                'SK_FemBase2_Nails'
+                name === 'SK_FemBase2_Nails'
               ) {
 
                 object.visible =
@@ -929,9 +854,7 @@
             }
 
 
-            /* =============================================
-               BONES
-            ============================================= */
+            /* BONES */
 
             if (
               object.isBone
@@ -953,9 +876,7 @@
 
 
               if (
-                lowerName.includes(
-                  'neck_01'
-                )
+                lowerName.includes('neck_01')
               ) {
 
                 neck01 =
@@ -965,9 +886,7 @@
 
 
               if (
-                lowerName.includes(
-                  'neck_02'
-                )
+                lowerName.includes('neck_02')
               ) {
 
                 neck02 =
@@ -982,13 +901,9 @@
         );
 
 
-        /* =================================================
-           SAVE BASE ROTATIONS
-        ================================================= */
+        /* SAVE ORIGINAL POSE */
 
-        if (
-          headBone
-        ) {
+        if (headBone) {
 
           baseHeadRotation =
             headBone.rotation.clone();
@@ -996,9 +911,7 @@
         }
 
 
-        if (
-          neck01
-        ) {
+        if (neck01) {
 
           baseNeck01Rotation =
             neck01.rotation.clone();
@@ -1006,9 +919,7 @@
         }
 
 
-        if (
-          neck02
-        ) {
+        if (neck02) {
 
           baseNeck02Rotation =
             neck02.rotation.clone();
@@ -1016,9 +927,7 @@
         }
 
 
-        if (
-          eyeLObject
-        ) {
+        if (eyeLObject) {
 
           baseEyeLRotation =
             eyeLObject.rotation.clone();
@@ -1026,9 +935,7 @@
         }
 
 
-        if (
-          eyeRObject
-        ) {
+        if (eyeRObject) {
 
           baseEyeRRotation =
             eyeRObject.rotation.clone();
@@ -1042,9 +949,7 @@
 
         const box =
           new THREE.Box3()
-            .setFromObject(
-              model
-            );
+            .setFromObject(model);
 
 
         const size =
@@ -1166,10 +1071,8 @@
           error
         );
 
-
         status.innerHTML =
-          'MODEL FAILED TO LOAD<br>' +
-          '<small>Check browser console</small>';
+          'MODEL FAILED TO LOAD';
 
       }
 
@@ -1184,7 +1087,7 @@
       amount
     ) {
 
-      const safeAmount =
+      const safe =
         THREE.MathUtils.clamp(
           amount,
           0,
@@ -1199,35 +1102,28 @@
         const dictionary =
           mesh.morphTargetDictionary;
 
-
         const influences =
           mesh.morphTargetInfluences;
 
 
-        const leftIndex =
-          dictionary.eyeBlinkLeft;
-
-
-        const rightIndex =
-          dictionary.eyeBlinkRight;
-
-
         if (
-          leftIndex !== undefined
+          dictionary.eyeBlinkLeft !== undefined
         ) {
 
-          influences[leftIndex] =
-            safeAmount;
+          influences[
+            dictionary.eyeBlinkLeft
+          ] = safe;
 
         }
 
 
         if (
-          rightIndex !== undefined
+          dictionary.eyeBlinkRight !== undefined
         ) {
 
-          influences[rightIndex] =
-            safeAmount;
+          influences[
+            dictionary.eyeBlinkRight
+          ] = safe;
 
         }
 
@@ -1329,22 +1225,18 @@
         !blinkActive
       ) {
 
-        setBlinkAmount(
-          0
-        );
+        setBlinkAmount(0);
 
         return;
 
       }
 
 
-      const elapsed =
-        now -
-        blinkStartTime;
-
-
       const progress =
-        elapsed /
+        (
+          now -
+          blinkStartTime
+        ) /
         blinkDuration;
 
 
@@ -1352,24 +1244,20 @@
         progress <= 1
       ) {
 
-        const blinkAmount =
+        setBlinkAmount(
+
           Math.sin(
             progress *
             Math.PI
-          );
+          )
 
-
-        setBlinkAmount(
-          blinkAmount
         );
 
       }
 
       else {
 
-        setBlinkAmount(
-          0
-        );
+        setBlinkAmount(0);
 
 
         blinkActive =
@@ -1382,8 +1270,8 @@
 
           doubleBlinkTime =
             now +
-            0.14 +
-            Math.random() * 0.09;
+            0.15 +
+            Math.random() * 0.08;
 
         }
 
@@ -1399,68 +1287,51 @@
 
 
     /* =====================================================
-       TRACKING CONFIGURATION
+       TRACKING
     ===================================================== */
 
-    const eyeMaxYaw =
-      THREE.MathUtils.degToRad(
-        13
-      );
-
-    const eyeMaxPitch =
-      THREE.MathUtils.degToRad(
-        8
-      );
+    const eyeHorizontalMax =
+      THREE.MathUtils.degToRad(12);
 
 
-    const headMaxYaw =
-      THREE.MathUtils.degToRad(
-        6
-      );
-
-    const headMaxPitch =
-      THREE.MathUtils.degToRad(
-        3
-      );
+    const eyeVerticalMax =
+      THREE.MathUtils.degToRad(7);
 
 
-    const neckMaxYaw =
-      THREE.MathUtils.degToRad(
-        2
-      );
-
-    const neckMaxPitch =
-      THREE.MathUtils.degToRad(
-        1.2
-      );
+    const headHorizontalMax =
+      THREE.MathUtils.degToRad(5);
 
 
-    /*
-      Current smoothed rotations.
-    */
+    const headVerticalMax =
+      THREE.MathUtils.degToRad(2.5);
 
-    let currentEyeYaw =
+
+    const neckHorizontalMax =
+      THREE.MathUtils.degToRad(1.8);
+
+
+    const neckVerticalMax =
+      THREE.MathUtils.degToRad(1);
+
+
+    let eyeHorizontal =
       0;
 
-    let currentEyePitch =
+    let eyeVertical =
       0;
 
-    let currentHeadYaw =
+    let headHorizontal =
       0;
 
-    let currentHeadPitch =
+    let headVertical =
       0;
 
-    let currentNeckYaw =
+    let neckHorizontal =
       0;
 
-    let currentNeckPitch =
+    let neckVertical =
       0;
 
-
-    /* =====================================================
-       DAMPING HELPER
-    ===================================================== */
 
     function damp(
       current,
@@ -1470,19 +1341,23 @@
     ) {
 
       return THREE.MathUtils.lerp(
+
         current,
+
         target,
+
         1 -
         Math.exp(
           -speed * delta
         )
+
       );
 
     }
 
 
     /* =====================================================
-       ANIMATION LOOP
+       ANIMATION
     ===================================================== */
 
     const clock =
@@ -1504,13 +1379,10 @@
 
 
       const now =
-        performance.now() /
-        1000;
+        performance.now() / 1000;
 
 
-      /*
-        Smooth pointer itself first.
-      */
+      /* Smooth cursor */
 
       pointer.x =
         damp(
@@ -1530,107 +1402,83 @@
         );
 
 
-      /*
-        EYES:
-        quickest and widest response.
-      */
+      /* ===================================================
+         EYE TARGET
+      =================================================== */
 
-      const targetEyeYaw =
-        pointer.x *
-        eyeMaxYaw;
-
-
-      const targetEyePitch =
-        pointer.y *
-        eyeMaxPitch;
-
-
-      currentEyeYaw =
+      eyeHorizontal =
         damp(
-          currentEyeYaw,
-          targetEyeYaw,
+          eyeHorizontal,
+          pointer.x *
+          eyeHorizontalMax,
           11,
           delta
         );
 
 
-      currentEyePitch =
+      eyeVertical =
         damp(
-          currentEyePitch,
-          targetEyePitch,
+          eyeVertical,
+          pointer.y *
+          eyeVerticalMax,
           11,
-          delta
-        );
-
-
-      /*
-        HEAD:
-        follows later and with less movement.
-      */
-
-      const targetHeadYaw =
-        pointer.x *
-        headMaxYaw;
-
-
-      const targetHeadPitch =
-        pointer.y *
-        headMaxPitch;
-
-
-      currentHeadYaw =
-        damp(
-          currentHeadYaw,
-          targetHeadYaw,
-          3.3,
-          delta
-        );
-
-
-      currentHeadPitch =
-        damp(
-          currentHeadPitch,
-          targetHeadPitch,
-          3.0,
-          delta
-        );
-
-
-      /*
-        NECK:
-        smallest and slowest response.
-      */
-
-      const targetNeckYaw =
-        pointer.x *
-        neckMaxYaw;
-
-
-      const targetNeckPitch =
-        pointer.y *
-        neckMaxPitch;
-
-
-      currentNeckYaw =
-        damp(
-          currentNeckYaw,
-          targetNeckYaw,
-          2.2,
-          delta
-        );
-
-
-      currentNeckPitch =
-        damp(
-          currentNeckPitch,
-          targetNeckPitch,
-          2.0,
           delta
         );
 
 
       /* ===================================================
-         APPLY EYE MOVEMENT
+         HEAD TARGET
+      =================================================== */
+
+      headHorizontal =
+        damp(
+          headHorizontal,
+          pointer.x *
+          headHorizontalMax,
+          3.1,
+          delta
+        );
+
+
+      headVertical =
+        damp(
+          headVertical,
+          pointer.y *
+          headVerticalMax,
+          2.8,
+          delta
+        );
+
+
+      /* ===================================================
+         NECK TARGET
+      =================================================== */
+
+      neckHorizontal =
+        damp(
+          neckHorizontal,
+          pointer.x *
+          neckHorizontalMax,
+          2.0,
+          delta
+        );
+
+
+      neckVertical =
+        damp(
+          neckVertical,
+          pointer.y *
+          neckVerticalMax,
+          1.8,
+          delta
+        );
+
+
+      /* ===================================================
+         EYES
+
+         We leave eye mapping as the previous
+         version for now.
       =================================================== */
 
       if (
@@ -1644,11 +1492,11 @@
 
 
         eyeLObject.rotation.y +=
-          currentEyeYaw;
+          eyeHorizontal;
 
 
         eyeLObject.rotation.x -=
-          currentEyePitch;
+          eyeVertical;
 
       }
 
@@ -1664,17 +1512,21 @@
 
 
         eyeRObject.rotation.y +=
-          currentEyeYaw;
+          eyeHorizontal;
 
 
         eyeRObject.rotation.x -=
-          currentEyePitch;
+          eyeVertical;
 
       }
 
 
       /* ===================================================
-         APPLY HEAD MOVEMENT
+         HEAD — CORRECTED RIG AXES
+
+         X = left/right turn
+         Z = up/down pitch
+         Y remains untouched to prevent tilt.
       =================================================== */
 
       if (
@@ -1688,25 +1540,36 @@
 
 
         /*
-          Permanent forward-facing correction.
+          Mouse left/right
+          controls local X.
         */
 
         headBone.rotation.x +=
-          0.055;
+          headHorizontal;
 
 
-        headBone.rotation.y +=
-          currentHeadYaw;
+        /*
+          Mouse up/down
+          controls local Z.
+        */
+
+        headBone.rotation.z -=
+          headVertical;
 
 
-        headBone.rotation.x -=
-          currentHeadPitch;
+        /*
+          Preserve the rig's original Y.
+          No unwanted side tilt.
+        */
+
+        headBone.rotation.y =
+          baseHeadRotation.y;
 
       }
 
 
       /* ===================================================
-         APPLY NECK MOVEMENT
+         NECK 02
       =================================================== */
 
       if (
@@ -1719,15 +1582,25 @@
         );
 
 
-        neck02.rotation.y +=
-          currentNeckYaw;
+        neck02.rotation.x +=
+          neckHorizontal;
 
 
-        neck02.rotation.x -=
-          currentNeckPitch;
+        neck02.rotation.z -=
+          neckVertical;
+
+
+        neck02.rotation.y =
+          baseNeck02Rotation.y;
 
       }
 
+
+      /* ===================================================
+         NECK 01
+
+         Only a small fraction of movement.
+      =================================================== */
 
       if (
         neck01 &&
@@ -1739,20 +1612,21 @@
         );
 
 
-        neck01.rotation.y +=
-          currentNeckYaw * 0.45;
+        neck01.rotation.x +=
+          neckHorizontal *
+          0.35;
 
 
-        neck01.rotation.x -=
-          currentNeckPitch * 0.35;
+        neck01.rotation.z -=
+          neckVertical *
+          0.25;
+
+
+        neck01.rotation.y =
+          baseNeck01Rotation.y;
 
       }
 
-
-      /*
-        Blinking continues independently
-        while she tracks the visitor.
-      */
 
       updateBlink(
         now
