@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Prime Reception AI — 3D Test</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #02070c;
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(
+          circle at center,
+          #071722 0%,
+          #02070c 55%,
+          #000 100%
+        );
+    }
+
+    #stage canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #status {
+      position: absolute;
+      z-index: 10;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      color: #6eeaff;
+
+      font-family:
+        Arial,
+        sans-serif;
+
+      font-size: 15px;
+      letter-spacing: 0.08em;
+
+      text-align: center;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="stage">
+    <div id="status">
+      Loading Prime Reception AI…
+    </div>
+  </div>
+
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three":
+      "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+    }
+  }
+  </script>
+
+
+  <script type="module">
+
+    import * as THREE from 'three';
+
+    import {
+      GLTFLoader
+    } from
+    'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
+
+
+    const stage =
+      document.getElementById('stage');
+
+    const status =
+      document.getElementById('status');
+
+
+    /* =========================
+       SCENE
+    ========================= */
+
+    const scene =
+      new THREE.Scene();
+
+
+    /* =========================
+       CAMERA
+    ========================= */
+
+    const camera =
+      new THREE.PerspectiveCamera(
+        32,
+        window.innerWidth /
+        window.innerHeight,
+        0.01,
+        1000
+      );
+
+
+    /* =========================
+       RENDERER
+    ========================= */
+
+    const renderer =
+      new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true
+      });
+
+    renderer.setPixelRatio(
+      Math.min(
+        window.devicePixelRatio,
+        2
+      )
+    );
+
+    renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    );
+
+    renderer.outputColorSpace =
+      THREE.SRGBColorSpace;
+
+    renderer.setClearColor(
+      0x000000,
+      0
+    );
+
+    stage.appendChild(
+      renderer.domElement
+    );
+
+
+    /* =========================
+       LIGHTS
+    ========================= */
+
+    const hemisphere =
+      new THREE.HemisphereLight(
+        0xffffff,
+        0x122334,
+        2.5
+      );
+
+    scene.add(hemisphere);
+
+
+    const key =
+      new THREE.DirectionalLight(
+        0xffffff,
+        4
+      );
+
+    key.position.set(
+      3,
+      4,
+      5
+    );
+
+    scene.add(key);
+
+
+    const fill =
+      new THREE.DirectionalLight(
+        0x8feaff,
+        2
+      );
+
+    fill.position.set(
+      -4,
+      1,
+      3
+    );
+
+    scene.add(fill);
+
+
+    const rim =
+      new THREE.DirectionalLight(
+        0x20dfff,
+        5
+      );
+
+    rim.position.set(
+      -3,
+      4,
+      -4
+    );
+
+    scene.add(rim);
+
+
+    /* =========================
+       GLB
+    ========================= */
+
+    const loader =
+      new GLTFLoader();
+
+
+    loader.load(
+
+      './PrimeReceptionAI_Test01.glb',
+
+
+      /* SUCCESS */
+
+      function (gltf) {
+
+        const model =
+          gltf.scene;
+
+        scene.add(model);
+
+
+        /* Find model dimensions */
+
+        const box =
+          new THREE.Box3()
+            .setFromObject(model);
+
+        const size =
+          box.getSize(
+            new THREE.Vector3()
+          );
+
+        const center =
+          box.getCenter(
+            new THREE.Vector3()
+          );
+
+
+        /* Center model */
+
+        model.position.set(
+          -center.x,
+          -center.y,
+          -center.z
+        );
+
+
+        /* Calculate camera distance */
+
+        const verticalFOV =
+          THREE.MathUtils.degToRad(
+            camera.fov
+          );
+
+        const fitHeightDistance =
+          size.y /
+          (
+            2 *
+            Math.tan(
+              verticalFOV / 2
+            )
+          );
+
+        const fitWidthDistance =
+          size.x /
+          (
+            2 *
+            Math.tan(
+              verticalFOV / 2
+            ) *
+            camera.aspect
+          );
+
+        let distance =
+          Math.max(
+            fitHeightDistance,
+            fitWidthDistance
+          );
+
+        distance *= 1.15;
+
+
+        camera.position.set(
+          0,
+          0,
+          distance
+        );
+
+        camera.lookAt(
+          0,
+          0,
+          0
+        );
+
+
+        camera.near =
+          Math.max(
+            distance / 100,
+            0.01
+          );
+
+        camera.far =
+          distance * 100;
+
+        camera.updateProjectionMatrix();
+
+
+        /* Inspect character */
+
+        model.traverse(
+          function (object) {
+
+            if (!object.isMesh) {
+              return;
+            }
+
+            console.log(
+              'MESH:',
+              object.name
+            );
+
+
+            if (
+              object.morphTargetDictionary
+            ) {
+
+              console.log(
+                'MORPH TARGETS:',
+                object.name,
+                object.morphTargetDictionary
+              );
+
+            }
+
+          }
+        );
+
+
+        console.log(
+          'GLB SUCCESSFULLY LOADED:',
+          gltf
+        );
+
+
+        status.style.display =
+          'none';
+
+      },
+
+
+      /* PROGRESS */
+
+      function (xhr) {
+
+        if (xhr.total) {
+
+          const percent =
+            Math.round(
+              xhr.loaded /
+              xhr.total *
+              100
+            );
+
+          status.textContent =
+            'Loading Prime Reception AI… ' +
+            percent +
+            '%';
+
+        } else {
+
+          const mb =
+            (
+              xhr.loaded /
+              1024 /
+              1024
+            ).toFixed(1);
+
+          status.textContent =
+            'Loading Prime Reception AI… ' +
+            mb +
+            ' MB';
+
+        }
+
+      },
+
+
+      /* ERROR */
+
+      function (error) {
+
+        console.error(
+          'GLB ERROR:',
+          error
+        );
+
+        status.innerHTML =
+          'MODEL FAILED TO LOAD<br>' +
+          '<small>Check browser console</small>';
+
+      }
+
+    );
+
+
+    /* =========================
+       RENDER LOOP
+    ========================= */
+
+    function animate() {
+
+      requestAnimationFrame(
+        animate
+      );
+
+      renderer.render(
+        scene,
+        camera
+      );
+
+    }
+
+    animate();
+
+
+    /* =========================
+       RESIZE
+    ========================= */
+
+    window.addEventListener(
+      'resize',
+      function () {
+
+        camera.aspect =
+          window.innerWidth /
+          window.innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+          window.innerWidth,
+          window.innerHeight
+        );
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
