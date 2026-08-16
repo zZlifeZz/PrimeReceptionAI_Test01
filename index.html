@@ -65,12 +65,9 @@
     #status {
       position: absolute;
       z-index: 10;
-
       left: 50%;
       top: 50%;
-
-      transform:
-        translate(-50%, -50%);
+      transform: translate(-50%, -50%);
 
       color: #6eeaff;
 
@@ -202,10 +199,6 @@
     );
 
 
-    /*
-      Front / face light
-    */
-
     const faceLight =
       new THREE.DirectionalLight(
         0xffffff,
@@ -222,10 +215,6 @@
       faceLight
     );
 
-
-    /*
-      Cyan technological rim
-    */
 
     const cyanRim =
       new THREE.DirectionalLight(
@@ -244,10 +233,6 @@
     );
 
 
-    /*
-      Prime gold rim
-    */
-
     const goldRim =
       new THREE.DirectionalLight(
         0xd9a441,
@@ -264,10 +249,6 @@
       goldRim
     );
 
-
-    /*
-      Soft lower fill
-    */
 
     const lowerFill =
       new THREE.PointLight(
@@ -288,16 +269,8 @@
 
 
     /* =====================================================
-       PRIME MATERIALS
+       MATERIALS
     ===================================================== */
-
-
-    /*
-      Synthetic face / body.
-
-      Still readable as a person,
-      but no longer plain white plastic.
-    */
 
     const syntheticSkin =
       new THREE.MeshPhysicalMaterial({
@@ -322,10 +295,6 @@
       });
 
 
-    /*
-      Professional graphite uniform
-    */
-
     const uniformMaterial =
       new THREE.MeshPhysicalMaterial({
 
@@ -349,10 +318,6 @@
       });
 
 
-    /*
-      Dark metallic hair
-    */
-
     const hairMaterial =
       new THREE.MeshStandardMaterial({
 
@@ -370,10 +335,6 @@
       });
 
 
-    /*
-      Dark eye surrounds / lashes
-    */
-
     const darkDetailMaterial =
       new THREE.MeshStandardMaterial({
 
@@ -390,10 +351,6 @@
 
       });
 
-
-    /*
-      Cyan AI eyes
-    */
 
     const eyeMaterial =
       new THREE.MeshPhysicalMaterial({
@@ -426,10 +383,6 @@
       });
 
 
-    /*
-      Teeth
-    */
-
     const teethMaterial =
       new THREE.MeshStandardMaterial({
 
@@ -446,11 +399,6 @@
 
       });
 
-
-    /*
-      Small Prime-gold accent material.
-      We can use this more extensively later.
-    */
 
     const goldMaterial =
       new THREE.MeshPhysicalMaterial({
@@ -473,7 +421,7 @@
 
 
     /* =====================================================
-       LOAD CHARACTER
+       LOADER
     ===================================================== */
 
     const loader =
@@ -496,9 +444,8 @@
 
 
         /* =================================================
-           MATERIAL / MESH MAPPING
+           MESH + MATERIAL INSPECTION
         ================================================= */
-
 
         model.traverse(
 
@@ -521,12 +468,93 @@
             );
 
 
-            /*
-              Hide underwear / censored covering.
+            /* ---------------------------------------------
+               MATERIAL DEBUG INFORMATION
+            --------------------------------------------- */
 
-              We want the proper clothing meshes
-              to define the visible outfit.
-            */
+            console.log(
+              'MATERIAL INFO:',
+              name,
+              Array.isArray(
+                object.material
+              )
+
+                ? object.material.map(
+                    function (material) {
+
+                      return {
+
+                        name:
+                          material
+                            ? material.name
+                            : null,
+
+                        type:
+                          material
+                            ? material.type
+                            : null,
+
+                        map:
+                          material &&
+                          material.map
+                            ? material.map.name
+                            : null,
+
+                        normalMap:
+                          material &&
+                          material.normalMap
+                            ? material.normalMap.name
+                            : null,
+
+                        roughnessMap:
+                          material &&
+                          material.roughnessMap
+                            ? material.roughnessMap.name
+                            : null
+
+                      };
+
+                    }
+                  )
+
+                : {
+
+                    name:
+                      object.material
+                        ? object.material.name
+                        : null,
+
+                    type:
+                      object.material
+                        ? object.material.type
+                        : null,
+
+                    map:
+                      object.material &&
+                      object.material.map
+                        ? object.material.map.name
+                        : null,
+
+                    normalMap:
+                      object.material &&
+                      object.material.normalMap
+                        ? object.material.normalMap.name
+                        : null,
+
+                    roughnessMap:
+                      object.material &&
+                      object.material.roughnessMap
+                        ? object.material.roughnessMap.name
+                        : null
+
+                  }
+
+            );
+
+
+            /* =================================================
+               VISIBILITY
+            ================================================= */
 
             if (
               name.includes(
@@ -541,12 +569,13 @@
                 false;
 
               return;
+
             }
 
 
-            /*
-              Head / face
-            */
+            /* =================================================
+               MATERIAL ASSIGNMENTS
+            ================================================= */
 
             if (
               name.includes(
@@ -560,10 +589,6 @@
             }
 
 
-            /*
-              Main body / torso
-            */
-
             else if (
               name.includes(
                 'Torso'
@@ -575,10 +600,6 @@
 
             }
 
-
-            /*
-              Professional clothing
-            */
 
             else if (
               name.includes(
@@ -598,10 +619,6 @@
             }
 
 
-            /*
-              Hair
-            */
-
             else if (
               name.includes(
                 'Hair'
@@ -614,30 +631,13 @@
             }
 
 
-            /*
-              Actual eyeballs
-            */
-
             else if (
               name.includes(
                 'EyeL'
               ) ||
               name.includes(
                 'EyeR'
-              )
-            ) {
-
-              object.material =
-                eyeMaterial;
-
-            }
-
-
-            /*
-              Eye shell
-            */
-
-            else if (
+              ) ||
               name.includes(
                 'EyeShell'
               )
@@ -648,10 +648,6 @@
 
             }
 
-
-            /*
-              Eyelashes / eye edges
-            */
 
             else if (
               name.includes(
@@ -668,10 +664,6 @@
             }
 
 
-            /*
-              Teeth
-            */
-
             else if (
               name.includes(
                 'Teeth'
@@ -683,10 +675,6 @@
 
             }
 
-
-            /*
-              Nails — subtle Prime gold
-            */
 
             else if (
               name.includes(
@@ -705,7 +693,7 @@
 
 
         /* =================================================
-           CHARACTER DIMENSIONS
+           DIMENSIONS
         ================================================= */
 
         const box =
@@ -727,10 +715,6 @@
           );
 
 
-        /*
-          Center character
-        */
-
         model.position.set(
           -center.x,
           -center.y,
@@ -739,7 +723,7 @@
 
 
         /* =================================================
-           CURRENT CAMERA FRAMING
+           CAMERA FRAMING
         ================================================= */
 
         const verticalFOV =
@@ -799,16 +783,21 @@
 
 
         /* =================================================
-           DEBUG / FUTURE INTERACTION REFERENCES
+           FUTURE INTERACTION REFERENCES
         ================================================= */
 
-
         const importantObjects = {
+
           head: null,
+
           eyeL: null,
+
           eyeR: null,
+
           neck01: null,
+
           neck02: null
+
         };
 
 
@@ -889,10 +878,6 @@
         );
 
 
-        /*
-          Keep available for next stage.
-        */
-
         window.PrimeAI = {
 
           THREE,
@@ -917,7 +902,7 @@
 
 
       /* ===================================================
-         LOAD PROGRESS
+         PROGRESS
       =================================================== */
 
       function (xhr) {
@@ -983,7 +968,7 @@
 
 
     /* =====================================================
-       ANIMATION LOOP
+       RENDER LOOP
     ===================================================== */
 
     function animate() {
