@@ -68,17 +68,11 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-
       color: #6eeaff;
-
-      font-family:
-        Arial,
-        sans-serif;
-
+      font-family: Arial, sans-serif;
       font-size: 15px;
       letter-spacing: 0.08em;
       text-align: center;
-
       pointer-events: none;
     }
   </style>
@@ -120,31 +114,18 @@
       document.getElementById('status');
 
 
-    /* =====================================================
-       SCENE
-    ===================================================== */
-
     const scene =
       new THREE.Scene();
 
 
-    /* =====================================================
-       CAMERA
-    ===================================================== */
-
     const camera =
       new THREE.PerspectiveCamera(
         32,
-        window.innerWidth /
-        window.innerHeight,
+        window.innerWidth / window.innerHeight,
         0.01,
         1000
       );
 
-
-    /* =====================================================
-       RENDERER
-    ===================================================== */
 
     const renderer =
       new THREE.WebGLRenderer({
@@ -152,47 +133,37 @@
         alpha: true
       });
 
-
     renderer.setPixelRatio(
-      Math.min(
-        window.devicePixelRatio || 1,
-        2
-      )
+      Math.min(window.devicePixelRatio || 1, 2)
     );
-
 
     renderer.setSize(
       window.innerWidth,
       window.innerHeight
     );
 
-
     renderer.outputColorSpace =
       THREE.SRGBColorSpace;
-
 
     renderer.toneMapping =
       THREE.ACESFilmicToneMapping;
 
-
     renderer.toneMappingExposure =
       1.1;
-
 
     renderer.setClearColor(
       0x000000,
       0
     );
 
-
     stage.appendChild(
       renderer.domElement
     );
 
 
-    /* =====================================================
-       LIGHTING
-    ===================================================== */
+    /* =========================
+       LIGHTS
+    ========================= */
 
     const ambient =
       new THREE.HemisphereLight(
@@ -201,9 +172,7 @@
         1.25
       );
 
-    scene.add(
-      ambient
-    );
+    scene.add(ambient);
 
 
     const faceLight =
@@ -218,9 +187,7 @@
       5
     );
 
-    scene.add(
-      faceLight
-    );
+    scene.add(faceLight);
 
 
     const cyanRim =
@@ -235,9 +202,7 @@
       -3
     );
 
-    scene.add(
-      cyanRim
-    );
+    scene.add(cyanRim);
 
 
     const goldRim =
@@ -252,9 +217,7 @@
       -2
     );
 
-    scene.add(
-      goldRim
-    );
+    scene.add(goldRim);
 
 
     const lowerFill =
@@ -270,45 +233,21 @@
       2
     );
 
-    scene.add(
-      lowerFill
-    );
+    scene.add(lowerFill);
 
 
-    /* =====================================================
-       PRIME MATERIALS
-    ===================================================== */
+    /* =========================
+       MATERIALS
+    ========================= */
 
     const bodyMaterial =
       new THREE.MeshPhysicalMaterial({
 
-        color:
-          new THREE.Color(
-            0xc7d3d8
-          ),
-
-        metalness:
-          0.52,
-
-        roughness:
-          0.31,
-
-        clearcoat:
-          0.48,
-
-        clearcoatRoughness:
-          0.22,
-
-        sheen:
-          0.18,
-
-        sheenColor:
-          new THREE.Color(
-            0x72dff5
-          ),
-
-        envMapIntensity:
-          1.0
+        color: new THREE.Color(0xc7d3d8),
+        metalness: 0.52,
+        roughness: 0.31,
+        clearcoat: 0.48,
+        clearcoatRoughness: 0.22
 
       });
 
@@ -316,22 +255,11 @@
     const faceMaterial =
       new THREE.MeshPhysicalMaterial({
 
-        color:
-          new THREE.Color(
-            0xd6e1e4
-          ),
-
-        metalness:
-          0.30,
-
-        roughness:
-          0.38,
-
-        clearcoat:
-          0.35,
-
-        clearcoatRoughness:
-          0.28
+        color: new THREE.Color(0xd6e1e4),
+        metalness: 0.30,
+        roughness: 0.38,
+        clearcoat: 0.35,
+        clearcoatRoughness: 0.28
 
       });
 
@@ -339,25 +267,11 @@
     const shirtMaterial =
       new THREE.MeshPhysicalMaterial({
 
-        color:
-          new THREE.Color(
-            0x05070a
-          ),
-
-        metalness:
-          0.70,
-
-        roughness:
-          0.25,
-
-        clearcoat:
-          0.58,
-
-        clearcoatRoughness:
-          0.17,
-
-        envMapIntensity:
-          1.2
+        color: new THREE.Color(0x05070a),
+        metalness: 0.70,
+        roughness: 0.25,
+        clearcoat: 0.58,
+        clearcoatRoughness: 0.17
 
       });
 
@@ -365,25 +279,11 @@
     const leggingsMaterial =
       new THREE.MeshPhysicalMaterial({
 
-        color:
-          new THREE.Color(
-            0x05070a
-          ),
-
-        metalness:
-          0.67,
-
-        roughness:
-          0.27,
-
-        clearcoat:
-          0.52,
-
-        clearcoatRoughness:
-          0.19,
-
-        envMapIntensity:
-          1.15
+        color: new THREE.Color(0x05070a),
+        metalness: 0.67,
+        roughness: 0.27,
+        clearcoat: 0.52,
+        clearcoatRoughness: 0.19
 
       });
 
@@ -391,22 +291,11 @@
     const hairMaterial =
       new THREE.MeshPhysicalMaterial({
 
-        color:
-          new THREE.Color(
-            0x05090d
-          ),
-
-        metalness:
-          0.35,
-
-        roughness:
-          0.32,
-
-        clearcoat:
-          0.32,
-
-        clearcoatRoughness:
-          0.28
+        color: new THREE.Color(0x05090d),
+        metalness: 0.35,
+        roughness: 0.32,
+        clearcoat: 0.32,
+        clearcoatRoughness: 0.28
 
       });
 
@@ -414,56 +303,13 @@
     const eyeMaterial =
       new THREE.MeshPhysicalMaterial({
 
-        color:
-          new THREE.Color(
-            0xbffaff
-          ),
-
-        emissive:
-          new THREE.Color(
-            0x28dfff
-          ),
-
-        emissiveIntensity:
-          0.8,
-
-        metalness:
-          0.05,
-
-        roughness:
-          0.15,
-
-        clearcoat:
-          1,
-
-        clearcoatRoughness:
-          0.08
-
-      });
-
-
-    const eyeShellMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(
-            0xdffcff
-          ),
-
-        transparent:
-          true,
-
-        opacity:
-          0.38,
-
-        metalness:
-          0,
-
-        roughness:
-          0.08,
-
-        clearcoat:
-          1
+        color: new THREE.Color(0xbffaff),
+        emissive: new THREE.Color(0x28dfff),
+        emissiveIntensity: 0.8,
+        metalness: 0.05,
+        roughness: 0.15,
+        clearcoat: 1,
+        clearcoatRoughness: 0.08
 
       });
 
@@ -471,16 +317,9 @@
     const darkDetailMaterial =
       new THREE.MeshStandardMaterial({
 
-        color:
-          new THREE.Color(
-            0x020304
-          ),
-
-        metalness:
-          0.15,
-
-        roughness:
-          0.42
+        color: new THREE.Color(0x020304),
+        metalness: 0.15,
+        roughness: 0.42
 
       });
 
@@ -488,19 +327,10 @@
     const teethMaterial =
       new THREE.MeshPhysicalMaterial({
 
-        color:
-          new THREE.Color(
-            0xf1f4f4
-          ),
-
-        metalness:
-          0,
-
-        roughness:
-          0.28,
-
-        clearcoat:
-          0.25
+        color: new THREE.Color(0xf1f4f4),
+        metalness: 0,
+        roughness: 0.28,
+        clearcoat: 0.25
 
       });
 
@@ -508,26 +338,33 @@
     const goldMaterial =
       new THREE.MeshPhysicalMaterial({
 
-        color:
-          new THREE.Color(
-            0xc99a3d
-          ),
-
-        metalness:
-          0.78,
-
-        roughness:
-          0.25,
-
-        clearcoat:
-          0.5
+        color: new THREE.Color(0xc99a3d),
+        metalness: 0.78,
+        roughness: 0.25,
+        clearcoat: 0.5
 
       });
 
 
-    /* =====================================================
+    /* Diagnostic colors */
+    const mesh010Material =
+      new THREE.MeshStandardMaterial({
+        color: new THREE.Color(0xff3b3b),
+        roughness: 0.4,
+        metalness: 0.1
+      });
+
+    const mesh010_1Material =
+      new THREE.MeshStandardMaterial({
+        color: new THREE.Color(0x35ff75),
+        roughness: 0.4,
+        metalness: 0.1
+      });
+
+
+    /* =========================
        LOAD CHARACTER
-    ===================================================== */
+    ========================= */
 
     const loader =
       new GLTFLoader();
@@ -538,32 +375,19 @@
       './PrimeReceptionAI_Test01.glb',
 
 
-      /* ===================================================
-         SUCCESS
-      =================================================== */
-
       function (gltf) {
 
         const model =
           gltf.scene;
 
+        scene.add(model);
 
-        scene.add(
-          model
-        );
-
-
-        /* =================================================
-           EXACT MESH MAPPING
-        ================================================= */
 
         model.traverse(
 
           function (object) {
 
-            if (
-              !object.isMesh
-            ) {
+            if (!object.isMesh) {
               return;
             }
 
@@ -578,17 +402,158 @@
             );
 
 
-            /* ---------------------------------------------
-               HIDE UNWANTED MESHES
-            --------------------------------------------- */
+            /* Hide unwanted layers */
 
             if (
-              name ===
-              'SK_FemBase2_Censored_Torso'
+              name === 'SK_FemBase2_Censored_Torso' ||
+              name === 'SK_FemBase2_UnderWear'
             ) {
 
-              object.visible =
-                false;
+              object.visible = false;
+              return;
+
+            }
+
+
+            /* Main body */
+
+            if (
+              name === 'SK_FemBase2_Torso'
+            ) {
+
+              object.visible = true;
+              object.material = bodyMaterial;
+              return;
+
+            }
+
+
+            /* Face */
+
+            if (
+              name === 'SK_FemBase2_Head_52ArKit' ||
+              name === 'SK_FemBase2_Head_52ARKit'
+            ) {
+
+              object.visible = true;
+              object.material = faceMaterial;
+              return;
+
+            }
+
+
+            /* Shirt */
+
+            if (
+              name === 'SK_FemBase2_TShirt'
+            ) {
+
+              object.visible = true;
+              object.material = shirtMaterial;
+              return;
+
+            }
+
+
+            /* Leggings */
+
+            if (
+              name === 'SK_FemBase2_Leggings'
+            ) {
+
+              object.visible = true;
+              object.material = leggingsMaterial;
+              return;
+
+            }
+
+
+            /* Hair */
+
+            if (
+              name === 'SK_FemBase2_Hair'
+            ) {
+
+              object.visible = true;
+              object.material = hairMaterial;
+              return;
+
+            }
+
+
+            /* Eyes */
+
+            if (
+              name === 'SK_FemBase2_EyeL' ||
+              name === 'SK_FemBase2_EyeR'
+            ) {
+
+              object.visible = true;
+              object.material = eyeMaterial;
+              return;
+
+            }
+
+
+            if (
+              name === 'SK_FemBase2_EyeShell'
+            ) {
+
+              object.visible = true;
+              object.material = eyeMaterial;
+              return;
+
+            }
+
+
+            if (
+              name === 'SK_FemBase2_Lashes' ||
+              name === 'SK_FemBase2_EyeEdge'
+            ) {
+
+              object.visible = true;
+              object.material = darkDetailMaterial;
+              return;
+
+            }
+
+
+            if (
+              name === 'SK_FemBase2_Teeth'
+            ) {
+
+              object.visible = true;
+              object.material = teethMaterial;
+              return;
+
+            }
+
+
+            if (
+              name === 'SK_FemBase2_Nails'
+            ) {
+
+              object.visible = true;
+              object.material = goldMaterial;
+              return;
+
+            }
+
+
+            /* =========================
+               DIAGNOSTIC TEST
+            ========================= */
+
+            if (
+              name === 'Mesh010'
+            ) {
+
+              object.visible = true;
+              object.material = mesh010Material;
+
+              console.log(
+                'Mesh010 painted RED'
+              );
 
               return;
 
@@ -596,230 +561,20 @@
 
 
             if (
-              name ===
-              'SK_FemBase2_UnderWear'
+              name === 'Mesh010_1'
             ) {
 
-              object.visible =
-                false;
+              object.visible = true;
+              object.material = mesh010_1Material;
+
+              console.log(
+                'Mesh010_1 painted GREEN'
+              );
 
               return;
 
             }
 
-
-            /* ---------------------------------------------
-               MAIN BODY
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_Torso'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                bodyMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               HEAD / ARKIT FACE
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_Head_52ArKit'
-              ||
-              name ===
-              'SK_FemBase2_Head_52ARKit'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                faceMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               PROFESSIONAL TOP
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_TShirt'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                shirtMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               LEGGINGS
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_Leggings'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                leggingsMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               HAIR
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_Hair'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                hairMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               EYES
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_EyeL'
-              ||
-              name ===
-              'SK_FemBase2_EyeR'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                eyeMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               EYE SHELL
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_EyeShell'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                eyeShellMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               LASHES + EYE EDGE
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_Lashes'
-              ||
-              name ===
-              'SK_FemBase2_EyeEdge'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                darkDetailMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               TEETH
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_Teeth'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                teethMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               NAILS
-            --------------------------------------------- */
-
-            if (
-              name ===
-              'SK_FemBase2_Nails'
-            ) {
-
-              object.visible =
-                true;
-
-              object.material =
-                goldMaterial;
-
-              return;
-
-            }
-
-
-            /* ---------------------------------------------
-               UNKNOWN / EXTRA GEOMETRY
-            --------------------------------------------- */
 
             console.log(
               'UNMAPPED PRIME MESH:',
@@ -831,22 +586,18 @@
         );
 
 
-        /* =================================================
-           CHARACTER DIMENSIONS
-        ================================================= */
+        /* =========================
+           CENTER + CAMERA
+        ========================= */
 
         const box =
           new THREE.Box3()
-            .setFromObject(
-              model
-            );
-
+            .setFromObject(model);
 
         const size =
           box.getSize(
             new THREE.Vector3()
           );
-
 
         const center =
           box.getCenter(
@@ -860,10 +611,6 @@
           -center.z
         );
 
-
-        /* =================================================
-           CAMERA FRAMING
-        ================================================= */
 
         const verticalFOV =
           THREE.MathUtils.degToRad(
@@ -885,8 +632,7 @@
           );
 
 
-        distance *=
-          1.05;
+        distance *= 1.05;
 
 
         const cameraTargetHeight =
@@ -913,163 +659,10 @@
             0.01
           );
 
-
         camera.far =
           distance * 100;
 
-
         camera.updateProjectionMatrix();
-
-
-        /* =================================================
-           FIND INTERACTION OBJECTS
-        ================================================= */
-
-        const importantObjects = {
-
-          head:
-            null,
-
-          eyeL:
-            null,
-
-          eyeR:
-            null,
-
-          neck01:
-            null,
-
-          neck02:
-            null,
-
-          faceMesh:
-            null
-
-        };
-
-
-        model.traverse(
-
-          function (object) {
-
-            const lowerName =
-              object.name.toLowerCase();
-
-
-            if (
-              object.isBone &&
-              lowerName.includes(
-                'head'
-              )
-            ) {
-
-              importantObjects.head =
-                object;
-
-            }
-
-
-            if (
-              lowerName.includes(
-                'neck_01'
-              )
-            ) {
-
-              importantObjects.neck01 =
-                object;
-
-            }
-
-
-            if (
-              lowerName.includes(
-                'neck_02'
-              )
-            ) {
-
-              importantObjects.neck02 =
-                object;
-
-            }
-
-
-            if (
-              object.name ===
-              'SK_FemBase2_EyeL'
-            ) {
-
-              importantObjects.eyeL =
-                object;
-
-            }
-
-
-            if (
-              object.name ===
-              'SK_FemBase2_EyeR'
-            ) {
-
-              importantObjects.eyeR =
-                object;
-
-            }
-
-
-            if (
-              object.name ===
-              'SK_FemBase2_Head_52ArKit'
-              ||
-              object.name ===
-              'SK_FemBase2_Head_52ARKit'
-            ) {
-
-              importantObjects.faceMesh =
-                object;
-
-            }
-
-          }
-
-        );
-
-
-        console.log(
-          'PRIME AI REFERENCES:',
-          importantObjects
-        );
-
-
-        if (
-          importantObjects.faceMesh &&
-          importantObjects.faceMesh
-            .morphTargetDictionary
-        ) {
-
-          console.log(
-            'ARKIT MORPHS:',
-            importantObjects
-              .faceMesh
-              .morphTargetDictionary
-          );
-
-        }
-
-
-        window.PrimeAI = {
-
-          THREE,
-
-          scene,
-
-          camera,
-
-          renderer,
-
-          model,
-
-          importantObjects
-
-        };
 
 
         status.style.display =
@@ -1078,15 +671,9 @@
       },
 
 
-      /* ===================================================
-         PROGRESS
-      =================================================== */
-
       function (xhr) {
 
-        if (
-          xhr.total
-        ) {
+        if (xhr.total) {
 
           const percent =
             Math.round(
@@ -1095,7 +682,6 @@
               100
             );
 
-
           status.textContent =
             'Loading Prime Reception AI… ' +
             percent +
@@ -1103,29 +689,8 @@
 
         }
 
-        else {
-
-          const mb =
-            (
-              xhr.loaded /
-              1024 /
-              1024
-            ).toFixed(1);
-
-
-          status.textContent =
-            'Loading Prime Reception AI… ' +
-            mb +
-            ' MB';
-
-        }
-
       },
 
-
-      /* ===================================================
-         ERROR
-      =================================================== */
 
       function (error) {
 
@@ -1133,7 +698,6 @@
           'GLB ERROR:',
           error
         );
-
 
         status.innerHTML =
           'MODEL FAILED TO LOAD<br>' +
@@ -1144,16 +708,11 @@
     );
 
 
-    /* =====================================================
-       RENDER LOOP
-    ===================================================== */
-
     function animate() {
 
       requestAnimationFrame(
         animate
       );
-
 
       renderer.render(
         scene,
@@ -1166,10 +725,6 @@
     animate();
 
 
-    /* =====================================================
-       RESPONSIVE
-    ===================================================== */
-
     window.addEventListener(
 
       'resize',
@@ -1180,9 +735,7 @@
           window.innerWidth /
           window.innerHeight;
 
-
         camera.updateProjectionMatrix();
-
 
         renderer.setSize(
           window.innerWidth,
