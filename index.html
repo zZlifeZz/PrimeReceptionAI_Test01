@@ -267,52 +267,46 @@
         );
 
 
-        /* Calculate camera distance */
+/* Upper-body homepage framing */
 
-        const verticalFOV =
-          THREE.MathUtils.degToRad(
-            camera.fov
-          );
+const verticalFOV =
+  THREE.MathUtils.degToRad(
+    camera.fov
+  );
 
-        const fitHeightDistance =
-          size.y /
-          (
-            2 *
-            Math.tan(
-              verticalFOV / 2
-            )
-          );
+/* Use only part of the full body height
+   so the model appears much closer */
+const upperBodyHeight =
+  size.y * 0.52;
 
-        const fitWidthDistance =
-          size.x /
-          (
-            2 *
-            Math.tan(
-              verticalFOV / 2
-            ) *
-            camera.aspect
-          );
+let distance =
+  upperBodyHeight /
+  (
+    2 *
+    Math.tan(
+      verticalFOV / 2
+    )
+  );
 
-        let distance =
-          Math.max(
-            fitHeightDistance,
-            fitWidthDistance
-          );
-
-        distance *= 1.15;
+distance *= 1.05;
 
 
-        camera.position.set(
-          0,
-          0,
-          distance
-        );
+/* Move camera upward toward chest/head */
 
-        camera.lookAt(
-          0,
-          0,
-          0
-        );
+camera.position.set(
+  0,
+  size.y * 0.17,
+  distance
+);
+
+
+/* Look slightly above the model center */
+
+camera.lookAt(
+  0,
+  size.y * 0.17,
+  0
+);
 
 
         camera.near =
