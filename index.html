@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Prime Reception AI — 3D Receptionist</title>
+  <title>Prime Reception AI — Live Hologram</title>
 
   <style>
     * {
@@ -21,62 +21,54 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-
-      background:
-        #010305;
+      background: #000;
     }
 
     #stage {
       position: fixed;
       inset: 0;
-
       width: 100%;
       height: 100%;
-
       overflow: hidden;
 
       background:
         radial-gradient(
-          circle at 50% 35%,
-          #0b2130 0%,
-          #06131c 27%,
-          #02080d 55%,
+          circle at 50% 38%,
+          #0a1b25 0%,
+          #041018 30%,
+          #01060a 58%,
           #000000 100%
         );
     }
 
     /*
-      Fine screen atmosphere.
-      Much softer than the previous full-screen scan effect.
+      Very subtle global scan texture.
     */
     #stage::before {
       content: "";
-
       position: absolute;
       inset: 0;
-
       z-index: 4;
-
       pointer-events: none;
 
-      opacity: 0.045;
+      opacity: 0.05;
 
       background:
         repeating-linear-gradient(
           to bottom,
           transparent 0px,
           transparent 4px,
-          rgba(65, 225, 255, 0.16) 5px,
+          rgba(64, 224, 255, 0.17) 5px,
           transparent 6px
         );
 
       animation:
-        scanMove 10s linear infinite;
+        globalScan 9s linear infinite;
     }
 
-    @keyframes scanMove {
+    @keyframes globalScan {
       from {
-        background-position-y: 0;
+        background-position-y: 0px;
       }
 
       to {
@@ -85,90 +77,65 @@
     }
 
     /*
-      Controlled vignette.
+      Dark cinematic vignette.
     */
     #stage::after {
       content: "";
-
       position: absolute;
       inset: 0;
-
       z-index: 5;
-
       pointer-events: none;
 
       background:
         radial-gradient(
           ellipse at center,
-          transparent 35%,
-          rgba(0, 0, 0, 0.12) 58%,
+          transparent 32%,
+          rgba(0, 0, 0, 0.10) 55%,
           rgba(0, 0, 0, 0.72) 100%
         );
     }
 
     #stage canvas {
       position: relative;
-
       z-index: 1;
-
       display: block;
-
       width: 100%;
       height: 100%;
     }
 
     #status {
       position: absolute;
-
       z-index: 20;
-
       left: 50%;
       top: 50%;
+      transform: translate(-50%, -50%);
 
-      transform:
-        translate(-50%, -50%);
-
-      color:
-        #6eeaff;
+      color: #68eaff;
 
       font-family:
         Arial,
         sans-serif;
 
-      font-size:
-        14px;
+      font-size: 14px;
+      letter-spacing: 0.11em;
 
-      letter-spacing:
-        0.11em;
-
-      text-align:
-        center;
-
-      pointer-events:
-        none;
+      pointer-events: none;
     }
 
     /*
-      REAL PRIME RECEPTION AI LOGO
-
-      We project a real 3D chest anchor to screen space.
-      This means we do not need to rebuild or re-export
-      the GLB just to add branding.
+      Real Prime Reception AI chest logo.
     */
     #chestLogo {
       position: fixed;
-
       z-index: 3;
 
       left: 0;
       top: 0;
 
-      width: 76px;
+      width: 58px;
       height: auto;
 
       opacity: 0;
-
-      pointer-events: none;
 
       transform:
         translate(-50%, -50%);
@@ -176,12 +143,14 @@
       transform-origin:
         center;
 
+      pointer-events: none;
+
       filter:
         drop-shadow(
-          0 0 4px rgba(255, 203, 91, 0.20)
+          0 0 4px rgba(255, 199, 71, 0.28)
         )
         drop-shadow(
-          0 0 8px rgba(63, 222, 255, 0.14)
+          0 0 7px rgba(57, 224, 255, 0.18)
         );
 
       transition:
@@ -190,7 +159,7 @@
 
     @media (max-width: 900px) {
       #chestLogo {
-        width: 58px;
+        width: 46px;
       }
     }
   </style>
@@ -233,17 +202,19 @@
     'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
 
 
+    /* =====================================================
+       DOM
+    ===================================================== */
+
     const stage =
       document.getElementById(
         'stage'
       );
 
-
     const status =
       document.getElementById(
         'status'
       );
-
 
     const chestLogo =
       document.getElementById(
@@ -281,11 +252,9 @@
     const renderer =
       new THREE.WebGLRenderer({
 
-        antialias:
-          true,
+        antialias: true,
 
-        alpha:
-          true
+        alpha: true
 
       });
 
@@ -293,12 +262,8 @@
     renderer.setPixelRatio(
 
       Math.min(
-
-        window.devicePixelRatio ||
-        1,
-
+        window.devicePixelRatio || 1,
         2
-
       )
 
     );
@@ -326,11 +291,8 @@
 
 
     renderer.setClearColor(
-
       0x000000,
-
       0
-
     );
 
 
@@ -343,19 +305,14 @@
        LIGHTING
     ===================================================== */
 
-
-    /*
-      Soft overall illumination.
-    */
-
     const ambient =
       new THREE.HemisphereLight(
 
-        0xe6f8ff,
+        0xcff5ff,
 
-        0x030506,
+        0x010304,
 
-        0.88
+        0.72
 
       );
 
@@ -366,30 +323,22 @@
 
 
     /*
-      Soft frontal key light.
-
-      Slightly warm so the face does not look
-      completely blue/gray.
+      Face / front illumination.
     */
-
     const faceLight =
       new THREE.DirectionalLight(
 
-        0xfff9f1,
+        0xf5fcff,
 
-        2.9
+        2.3
 
       );
 
 
     faceLight.position.set(
-
       1.5,
-
-      4.0,
-
-      5.8
-
+      4,
+      5.5
     );
 
 
@@ -399,27 +348,22 @@
 
 
     /*
-      Left cyan edge.
+      Strong left holographic rim.
     */
-
     const cyanRimLeft =
       new THREE.DirectionalLight(
 
-        0x24dfff,
+        0x19ddff,
 
-        5.0
+        5.6
 
       );
 
 
     cyanRimLeft.position.set(
-
       -4.5,
-
-      3.4,
-
-      -3.8
-
+      3.5,
+      -3.5
     );
 
 
@@ -429,27 +373,22 @@
 
 
     /*
-      Right cyan edge.
+      Secondary cyan rim.
     */
-
     const cyanRimRight =
       new THREE.DirectionalLight(
 
-        0x62ecff,
+        0x72efff,
 
-        2.8
+        3.1
 
       );
 
 
     cyanRimRight.position.set(
-
-      4.0,
-
-      3.0,
-
-      -3.2
-
+      4,
+      3,
+      -3
     );
 
 
@@ -460,28 +399,21 @@
 
     /*
       Prime gold accent.
-
-      Kept subtle so cyan remains dominant.
     */
-
     const goldRim =
       new THREE.DirectionalLight(
 
-        0xe0b451,
+        0xd6a643,
 
-        1.75
+        1.25
 
       );
 
 
     goldRim.position.set(
-
-      4.1,
-
-      2.7,
-
-      -1.8
-
+      3.8,
+      2.3,
+      -2
     );
 
 
@@ -491,45 +423,36 @@
 
 
     /*
-      Lower holographic illumination.
+      Strong projection light from below.
     */
-
-    const lowerGlow =
+    const projectorGlow =
       new THREE.PointLight(
 
-        0x19d8ff,
+        0x18ddff,
 
-        9,
+        12,
 
         9
 
       );
 
 
-    lowerGlow.position.set(
-
+    projectorGlow.position.set(
       0,
-
-      -1.5,
-
-      1.7
-
+      -1,
+      1.4
     );
 
 
     scene.add(
-      lowerGlow
+      projectorGlow
     );
 
-
-    /*
-      Soft face-area cyan glow.
-    */
 
     const faceGlow =
       new THREE.PointLight(
 
-        0x4beaff,
+        0x49e8ff,
 
         1.3,
 
@@ -539,13 +462,9 @@
 
 
     faceGlow.position.set(
-
       0,
-
-      1.3,
-
-      2.4
-
+      1.5,
+      2.2
     );
 
 
@@ -555,254 +474,222 @@
 
 
     /* =====================================================
-       PREMIUM SYNTHETIC MATERIALS
+       HOLOGRAM CHARACTER MATERIALS
     ===================================================== */
-
-
-    /*
-      Synthetic exposed body.
-
-      Silver pearl rather than chrome.
-    */
 
     const bodyMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xc6d3d7
+            0xbcd4da
           ),
 
         emissive:
           new THREE.Color(
-            0x062a31
+            0x0b6575
           ),
 
         emissiveIntensity:
-          0.11,
+          0.28,
 
         metalness:
-          0.24,
+          0.16,
 
         roughness:
-          0.39,
-
-        clearcoat:
           0.34,
 
+        clearcoat:
+          0.30,
+
         clearcoatRoughness:
-          0.27,
+          0.25,
 
         sheen:
-          0.17,
+          0.28,
 
         sheenColor:
           new THREE.Color(
-            0x67dff0
-          )
+            0x55e8ff
+          ),
+
+        transparent:
+          true,
+
+        opacity:
+          0.82,
+
+        depthWrite:
+          true
 
       });
 
 
     /*
-      Face is softer and slightly warmer.
+      Face remains the most solid part.
     */
-
     const faceMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xe1e4e1
+            0xd8e4e6
           ),
 
         emissive:
           new THREE.Color(
-            0x03171b
+            0x08424d
           ),
 
         emissiveIntensity:
-          0.055,
+          0.15,
 
         metalness:
-          0.08,
+          0.05,
 
         roughness:
-          0.44,
+          0.40,
 
         clearcoat:
-          0.23,
+          0.22,
 
         clearcoatRoughness:
-          0.30,
+          0.28,
 
-        sheen:
-          0.10,
+        transparent:
+          true,
 
-        sheenColor:
-          new THREE.Color(
-            0x90e4ee
-          )
+        opacity:
+          0.94
 
       });
 
 
     /*
-      FUTURISTIC PEARL-WHITE TOP
-
-      Geometry remains the purchased shirt,
-      but the visual treatment now moves toward
-      the concept image.
+      Luminous white/silver upper uniform.
     */
-
     const shirtMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xdce5e7
+            0xd7e5e8
           ),
 
         emissive:
           new THREE.Color(
-            0x07333c
+            0x087082
           ),
 
         emissiveIntensity:
-          0.16,
+          0.27,
 
         metalness:
-          0.29,
+          0.20,
 
         roughness:
-          0.31,
+          0.29,
 
         clearcoat:
           0.42,
 
         clearcoatRoughness:
-          0.23,
+          0.20,
 
         sheen:
-          0.25,
+          0.31,
 
         sheenColor:
           new THREE.Color(
-            0x51e1f5
-          )
+            0x48e7ff
+          ),
+
+        transparent:
+          true,
+
+        opacity:
+          0.85
 
       });
 
 
     /*
-      Matching lower suit.
+      We will hide the normal leggings completely.
+      This material remains only as a fallback.
     */
-
     const leggingsMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(
-            0xcdd9dc
-          ),
+          0xaed7df,
 
-        emissive:
-          new THREE.Color(
-            0x062b33
-          ),
+        transparent:
+          true,
 
-        emissiveIntensity:
-          0.14,
-
-        metalness:
-          0.32,
-
-        roughness:
-          0.32,
-
-        clearcoat:
-          0.40,
-
-        clearcoatRoughness:
-          0.24,
-
-        sheen:
-          0.21,
-
-        sheenColor:
-          new THREE.Color(
-            0x45d9ee
-          )
+        opacity:
+          0.05
 
       });
 
-
-    /*
-      Dark premium hair.
-    */
 
     const hairMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0x05080b
+            0x03070a
           ),
 
         emissive:
           new THREE.Color(
-            0x00151c
+            0x003542
           ),
 
         emissiveIntensity:
-          0.14,
+          0.22,
 
         metalness:
-          0.19,
+          0.16,
 
         roughness:
-          0.39,
+          0.35,
 
         clearcoat:
-          0.30,
+          0.25,
 
         clearcoatRoughness:
-          0.26
+          0.25
 
       });
 
-
-    /*
-      Cyan AI eyes.
-    */
 
     const eyeMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xe8fdff
+            0xeaffff
           ),
 
         emissive:
           new THREE.Color(
-            0x22dcfa
+            0x21e4ff
           ),
 
         emissiveIntensity:
-          0.90,
+          1.25,
 
         metalness:
-          0.01,
+          0,
 
         roughness:
-          0.13,
+          0.10,
 
         clearcoat:
           1,
 
         clearcoatRoughness:
-          0.05
+          0.04
 
       });
 
@@ -811,29 +698,22 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(
-            0xd5faff
-          ),
+          0xcaf9ff,
 
         emissive:
-          new THREE.Color(
-            0x075765
-          ),
+          0x08768a,
 
         emissiveIntensity:
-          0.24,
+          0.45,
 
         transparent:
           true,
 
         opacity:
-          0.36,
-
-        metalness:
-          0,
+          0.28,
 
         roughness:
-          0.09,
+          0.06,
 
         clearcoat:
           1
@@ -845,15 +725,10 @@
       new THREE.MeshStandardMaterial({
 
         color:
-          new THREE.Color(
-            0x010203
-          ),
-
-        metalness:
-          0.10,
+          0x010203,
 
         roughness:
-          0.47
+          0.46
 
       });
 
@@ -862,50 +737,31 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(
-            0xf5f7f6
-          ),
-
-        metalness:
-          0,
+          0xf4f7f7,
 
         roughness:
-          0.31,
-
-        clearcoat:
-          0.18
+          0.28
 
       });
 
-
-    /*
-      Genuine Prime gold accent.
-    */
 
     const goldMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(
-            0xd6aa4b
-          ),
+          0xd3a649,
 
         emissive:
-          new THREE.Color(
-            0x241703
-          ),
+          0x2c1b02,
 
         emissiveIntensity:
-          0.12,
+          0.14,
 
         metalness:
-          0.72,
+          0.75,
 
         roughness:
-          0.27,
-
-        clearcoat:
-          0.38
+          0.25
 
       });
 
@@ -918,115 +774,68 @@
       object.material =
         material;
 
+      material.map = null;
 
-      material.map =
-        null;
+      material.normalMap = null;
 
+      material.roughnessMap = null;
 
-      material.normalMap =
-        null;
+      material.metalnessMap = null;
 
+      material.aoMap = null;
 
-      material.roughnessMap =
-        null;
+      material.emissiveMap = null;
 
+      material.alphaMap = null;
 
-      material.metalnessMap =
-        null;
+      material.lightMap = null;
 
+      material.displacementMap = null;
 
-      material.aoMap =
-        null;
+      material.vertexColors = false;
 
-
-      material.emissiveMap =
-        null;
-
-
-      material.alphaMap =
-        null;
-
-
-      material.lightMap =
-        null;
-
-
-      material.displacementMap =
-        null;
-
-
-      material.vertexColors =
-        false;
-
-
-      material.needsUpdate =
-        true;
+      material.needsUpdate = true;
 
     }
 
 
     /* =====================================================
-       CHARACTER REFERENCES
+       MODEL REFERENCES
     ===================================================== */
 
-    let model =
-      null;
+    let model = null;
+
+    let modelSize = null;
+
+    let headBone = null;
+
+    let neck01 = null;
+
+    let neck02 = null;
+
+    let chestBone = null;
+
+    let eyeLObject = null;
+
+    let eyeRObject = null;
 
 
-    let modelSize =
-      null;
+    let baseHeadRotation = null;
+
+    let baseNeck01Rotation = null;
+
+    let baseNeck02Rotation = null;
+
+    let baseEyeLRotation = null;
+
+    let baseEyeRRotation = null;
 
 
-    let headBone =
-      null;
-
-
-    let neck01 =
-      null;
-
-
-    let neck02 =
-      null;
-
-
-    let chestBone =
-      null;
-
-
-    let eyeLObject =
-      null;
-
-
-    let eyeRObject =
-      null;
-
-
-    let baseHeadRotation =
-      null;
-
-
-    let baseNeck01Rotation =
-      null;
-
-
-    let baseNeck02Rotation =
-      null;
-
-
-    let baseEyeLRotation =
-      null;
-
-
-    let baseEyeRRotation =
-      null;
-
-
-    const blinkMeshes =
-      [];
+    const blinkMeshes = [];
 
 
     /* =====================================================
-       POINTER TRACKING
+       POINTER INPUT
     ===================================================== */
 
     const pointer =
@@ -1072,51 +881,37 @@
 
 
         if (
-          Math.abs(
-            x
-          ) <
+          Math.abs(x) <
           deadZone
         ) {
 
-          x =
-            0;
+          x = 0;
 
         }
 
 
         if (
-          Math.abs(
-            y
-          ) <
+          Math.abs(y) <
           deadZone
         ) {
 
-          y =
-            0;
+          y = 0;
 
         }
 
 
         x =
-          Math.sign(
-            x
-          ) *
+          Math.sign(x) *
           Math.pow(
-            Math.abs(
-              x
-            ),
+            Math.abs(x),
             1.15
           );
 
 
         y =
-          Math.sign(
-            y
-          ) *
+          Math.sign(y) *
           Math.pow(
-            Math.abs(
-              y
-            ),
+            Math.abs(y),
             1.15
           );
 
@@ -1159,19 +954,14 @@
 
 
     /* =====================================================
-       PARTICLES
+       BACKGROUND PARTICLES
     ===================================================== */
 
-    let particleSystem =
-      null;
+    let particleSystem = null;
 
+    let particlePositions = null;
 
-    let particlePositions =
-      null;
-
-
-    const particleSpeeds =
-      [];
+    const particleSpeeds = [];
 
 
     function createParticles(
@@ -1179,7 +969,7 @@
     ) {
 
       const count =
-        360;
+        420;
 
 
       const geometry =
@@ -1202,47 +992,40 @@
           i * 3;
 
 
-        particlePositions[
-          i3
-        ] =
+        particlePositions[i3] =
           (
             Math.random() -
             0.5
           ) *
           size.x *
-          2.2;
+          2.5;
 
 
-        particlePositions[
-          i3 + 1
-        ] =
+        particlePositions[i3 + 1] =
           (
             Math.random() -
-            0.45
+            0.42
           ) *
           size.y *
-          1.15;
+          1.2;
 
 
-        particlePositions[
-          i3 + 2
-        ] =
+        particlePositions[i3 + 2] =
           (
             Math.random() -
             0.5
           ) *
           Math.max(
-            size.z *
-            4,
+            size.z * 5,
             size.x
           );
 
 
         particleSpeeds.push(
 
-          0.0015 +
+          0.001 +
           Math.random() *
-          0.0045
+          0.004
 
         );
 
@@ -1265,12 +1048,11 @@
         new THREE.PointsMaterial({
 
           color:
-            0x52eaff,
+            0x38dcff,
 
           size:
             Math.max(
-              size.y *
-              0.0027,
+              size.y * 0.0028,
               0.002
             ),
 
@@ -1278,7 +1060,7 @@
             true,
 
           opacity:
-            0.34,
+            0.36,
 
           depthWrite:
             false,
@@ -1317,13 +1099,6 @@
       }
 
 
-      const positions =
-        particleSystem
-          .geometry
-          .attributes
-          .position;
-
-
       for (
         let i = 0;
         i < particleSpeeds.length;
@@ -1334,41 +1109,35 @@
           i * 3 + 1;
 
 
-        particlePositions[
-          yIndex
-        ] +=
-          particleSpeeds[
-            i
-          ];
+        particlePositions[yIndex] +=
+          particleSpeeds[i];
 
 
         if (
-          particlePositions[
-            yIndex
-          ] >
-          size.y *
-          0.60
+          particlePositions[yIndex] >
+          size.y * 0.62
         ) {
 
-          particlePositions[
-            yIndex
-          ] =
-            -size.y *
-            0.58;
+          particlePositions[yIndex] =
+            -size.y * 0.58;
 
         }
 
       }
 
 
-      positions.needsUpdate =
-        true;
+      particleSystem
+        .geometry
+        .attributes
+        .position
+        .needsUpdate =
+          true;
 
     }
 
 
     /* =====================================================
-       HOLOGRAPHIC ENERGY PLATFORM
+       HOLOGRAM PROJECTOR SYSTEM
     ===================================================== */
 
     const holoGroup =
@@ -1380,159 +1149,673 @@
     );
 
 
-    const ringMaterialA =
-      new THREE.MeshBasicMaterial({
+    let waterMaterial = null;
 
-        color:
-          0x36e5ff,
+    let energyCurtainMaterial = null;
 
-        transparent:
-          true,
+    let dissolveParticles = null;
 
-        opacity:
-          0.42,
+    let dissolvePositions = null;
 
-        depthWrite:
-          false,
-
-        blending:
-          THREE.AdditiveBlending
-
-      });
+    const dissolveSpeeds = [];
 
 
-    const ringMaterialB =
-      new THREE.MeshBasicMaterial({
-
-        color:
-          0x91f3ff,
-
-        transparent:
-          true,
-
-        opacity:
-          0.20,
-
-        depthWrite:
-          false,
-
-        blending:
-          THREE.AdditiveBlending
-
-      });
-
-
-    function createHologramPlatform(
-      size
+    /*
+      Animated water / liquid projection surface.
+    */
+    function createWaterSurface(
+      size,
+      ringY
     ) {
 
-      /*
-        Position around lower torso / hip region,
-        closer to the concept image.
-      */
-
-      const y =
-        -size.y *
-        0.31;
-
-
       const radius =
-        size.x *
-        0.54;
+        size.x * 0.57;
 
 
-      const ring1 =
-        new THREE.Mesh(
-
-          new THREE.TorusGeometry(
-            radius,
-            radius * 0.010,
-            10,
-            100
-          ),
-
-          ringMaterialA
-
+      const geometry =
+        new THREE.CircleGeometry(
+          radius,
+          128
         );
 
 
-      ring1.rotation.x =
-        Math.PI / 2;
+      waterMaterial =
+        new THREE.ShaderMaterial({
+
+          transparent:
+            true,
+
+          depthWrite:
+            false,
+
+          side:
+            THREE.DoubleSide,
+
+          blending:
+            THREE.AdditiveBlending,
+
+          uniforms: {
+
+            uTime: {
+              value: 0
+            }
+
+          },
+
+          vertexShader: `
+            varying vec2 vUv;
+
+            void main() {
+
+              vUv = uv;
+
+              gl_Position =
+                projectionMatrix *
+                modelViewMatrix *
+                vec4(position, 1.0);
+
+            }
+          `,
+
+          fragmentShader: `
+            uniform float uTime;
+
+            varying vec2 vUv;
+
+            void main() {
+
+              vec2 p =
+                vUv -
+                vec2(0.5);
+
+              float d =
+                length(p) *
+                2.0;
+
+              float outerMask =
+                1.0 -
+                smoothstep(
+                  0.72,
+                  1.0,
+                  d
+                );
+
+              float ring1 =
+                sin(
+                  d * 72.0 -
+                  uTime * 5.0
+                );
+
+              float ring2 =
+                sin(
+                  d * 116.0 -
+                  uTime * 7.5
+                );
+
+              float waves =
+                max(
+                  ring1,
+                  ring2 * 0.55
+                );
+
+              waves =
+                smoothstep(
+                  0.55,
+                  1.0,
+                  waves
+                );
+
+              float centerGlow =
+                1.0 -
+                smoothstep(
+                  0.0,
+                  0.65,
+                  d
+                );
+
+              float alpha =
+                (
+                  waves * 0.48 +
+                  centerGlow * 0.22
+                ) *
+                outerMask;
+
+              vec3 cyan =
+                vec3(
+                  0.08,
+                  0.80,
+                  1.0
+                );
+
+              gl_FragColor =
+                vec4(
+                  cyan,
+                  alpha
+                );
+
+            }
+          `
+
+        });
 
 
-      ring1.position.y =
-        y;
-
-
-      holoGroup.add(
-        ring1
-      );
-
-
-      const ring2 =
+      const water =
         new THREE.Mesh(
-
-          new THREE.TorusGeometry(
-            radius * 1.16,
-            radius * 0.006,
-            10,
-            100
-          ),
-
-          ringMaterialB
-
+          geometry,
+          waterMaterial
         );
 
 
-      ring2.rotation.x =
-        Math.PI / 2;
+      water.rotation.x =
+        -Math.PI / 2;
 
 
-      ring2.position.y =
-        y;
-
-
-      holoGroup.add(
-        ring2
-      );
-
-
-      const ring3 =
-        new THREE.Mesh(
-
-          new THREE.TorusGeometry(
-            radius * 1.36,
-            radius * 0.004,
-            10,
-            100
-          ),
-
-          ringMaterialB
-
-        );
-
-
-      ring3.rotation.x =
-        Math.PI / 2;
-
-
-      ring3.position.y =
-        y;
+      water.position.y =
+        ringY;
 
 
       holoGroup.add(
-        ring3
+        water
       );
 
     }
 
 
+    /*
+      Bright concentric projector rings.
+    */
+    function createProjectorRings(
+      size,
+      ringY
+    ) {
+
+      const baseRadius =
+        size.x * 0.50;
+
+
+      const configs = [
+
+        {
+          radius: 0.78,
+          thickness: 0.010,
+          opacity: 0.80
+        },
+
+        {
+          radius: 0.94,
+          thickness: 0.006,
+          opacity: 0.48
+        },
+
+        {
+          radius: 1.10,
+          thickness: 0.004,
+          opacity: 0.31
+        },
+
+        {
+          radius: 1.30,
+          thickness: 0.003,
+          opacity: 0.20
+        }
+
+      ];
+
+
+      for (
+        const config
+        of configs
+      ) {
+
+        const material =
+          new THREE.MeshBasicMaterial({
+
+            color:
+              0x38e4ff,
+
+            transparent:
+              true,
+
+            opacity:
+              config.opacity,
+
+            depthWrite:
+              false,
+
+            blending:
+              THREE.AdditiveBlending
+
+          });
+
+
+        const ring =
+          new THREE.Mesh(
+
+            new THREE.TorusGeometry(
+
+              baseRadius *
+              config.radius,
+
+              baseRadius *
+              config.thickness,
+
+              12,
+
+              128
+
+            ),
+
+            material
+
+          );
+
+
+        ring.rotation.x =
+          Math.PI / 2;
+
+
+        ring.position.y =
+          ringY;
+
+
+        ring.userData.baseScale =
+          config.radius;
+
+
+        holoGroup.add(
+          ring
+        );
+
+      }
+
+    }
+
+
+    /*
+      Semi-transparent energy curtain between
+      the waist and water surface.
+
+      This replaces the normal visible legs.
+    */
+    function createEnergyCurtain(
+      size,
+      ringY
+    ) {
+
+      const height =
+        size.y * 0.23;
+
+
+      const radiusTop =
+        size.x * 0.28;
+
+
+      const radiusBottom =
+        size.x * 0.47;
+
+
+      const geometry =
+        new THREE.CylinderGeometry(
+
+          radiusTop,
+
+          radiusBottom,
+
+          height,
+
+          96,
+
+          20,
+
+          true
+
+        );
+
+
+      energyCurtainMaterial =
+        new THREE.ShaderMaterial({
+
+          transparent:
+            true,
+
+          depthWrite:
+            false,
+
+          side:
+            THREE.DoubleSide,
+
+          blending:
+            THREE.AdditiveBlending,
+
+          uniforms: {
+
+            uTime: {
+              value: 0
+            }
+
+          },
+
+          vertexShader: `
+            varying vec2 vUv;
+
+            void main() {
+
+              vUv = uv;
+
+              gl_Position =
+                projectionMatrix *
+                modelViewMatrix *
+                vec4(position, 1.0);
+
+            }
+          `,
+
+          fragmentShader: `
+            uniform float uTime;
+
+            varying vec2 vUv;
+
+            void main() {
+
+              /*
+                Stronger near top,
+                dissolving toward bottom.
+              */
+              float verticalFade =
+                smoothstep(
+                  0.0,
+                  0.82,
+                  vUv.y
+                );
+
+              float digitalBands =
+                sin(
+                  vUv.y * 145.0 -
+                  uTime * 8.0 +
+                  sin(vUv.x * 34.0) * 2.0
+                );
+
+              digitalBands =
+                smoothstep(
+                  0.52,
+                  1.0,
+                  digitalBands
+                );
+
+              float columns =
+                sin(
+                  vUv.x * 95.0 +
+                  uTime * 1.6
+                );
+
+              columns =
+                smoothstep(
+                  0.70,
+                  1.0,
+                  columns
+                );
+
+              float alpha =
+                verticalFade *
+                (
+                  0.06 +
+                  digitalBands * 0.12 +
+                  columns * 0.10
+                );
+
+              vec3 cyan =
+                vec3(
+                  0.08,
+                  0.82,
+                  1.0
+                );
+
+              gl_FragColor =
+                vec4(
+                  cyan,
+                  alpha
+                );
+
+            }
+          `
+
+        });
+
+
+      const curtain =
+        new THREE.Mesh(
+          geometry,
+          energyCurtainMaterial
+        );
+
+
+      curtain.position.y =
+        ringY +
+        height * 0.50;
+
+
+      holoGroup.add(
+        curtain
+      );
+
+    }
+
+
+    /*
+      Digital fragments rising from the water
+      toward the lower torso.
+    */
+    function createDissolveParticles(
+      size,
+      ringY
+    ) {
+
+      const count =
+        650;
+
+
+      dissolvePositions =
+        new Float32Array(
+          count * 3
+        );
+
+
+      for (
+        let i = 0;
+        i < count;
+        i++
+      ) {
+
+        const i3 =
+          i * 3;
+
+
+        const angle =
+          Math.random() *
+          Math.PI *
+          2;
+
+
+        const radius =
+          Math.sqrt(
+            Math.random()
+          ) *
+          size.x *
+          0.37;
+
+
+        dissolvePositions[i3] =
+          Math.cos(angle) *
+          radius;
+
+
+        dissolvePositions[i3 + 1] =
+          ringY +
+          Math.random() *
+          size.y *
+          0.25;
+
+
+        dissolvePositions[i3 + 2] =
+          Math.sin(angle) *
+          radius *
+          0.48;
+
+
+        dissolveSpeeds.push(
+
+          0.0015 +
+          Math.random() *
+          0.006
+
+        );
+
+      }
+
+
+      const geometry =
+        new THREE.BufferGeometry();
+
+
+      geometry.setAttribute(
+
+        'position',
+
+        new THREE.BufferAttribute(
+          dissolvePositions,
+          3
+        )
+
+      );
+
+
+      const material =
+        new THREE.PointsMaterial({
+
+          color:
+            0x4cecff,
+
+          size:
+            Math.max(
+              size.y * 0.004,
+              0.003
+            ),
+
+          transparent:
+            true,
+
+          opacity:
+            0.74,
+
+          depthWrite:
+            false,
+
+          blending:
+            THREE.AdditiveBlending
+
+        });
+
+
+      dissolveParticles =
+        new THREE.Points(
+          geometry,
+          material
+        );
+
+
+      holoGroup.add(
+        dissolveParticles
+      );
+
+    }
+
+
+    function updateDissolveParticles(
+      size,
+      ringY
+    ) {
+
+      if (
+        !dissolveParticles ||
+        !dissolvePositions
+      ) {
+
+        return;
+
+      }
+
+
+      const maxY =
+        ringY +
+        size.y *
+        0.25;
+
+
+      for (
+        let i = 0;
+        i < dissolveSpeeds.length;
+        i++
+      ) {
+
+        const i3 =
+          i * 3;
+
+
+        dissolvePositions[
+          i3 + 1
+        ] +=
+          dissolveSpeeds[i];
+
+
+        /*
+          Slight electronic drift.
+        */
+        dissolvePositions[i3] +=
+          Math.sin(
+            performance.now() *
+            0.001 +
+            i
+          ) *
+          0.00003;
+
+
+        if (
+          dissolvePositions[
+            i3 + 1
+          ] >
+          maxY
+        ) {
+
+          dissolvePositions[
+            i3 + 1
+          ] =
+            ringY;
+
+        }
+
+      }
+
+
+      dissolveParticles
+        .geometry
+        .attributes
+        .position
+        .needsUpdate =
+          true;
+
+    }
+
+
     /* =====================================================
-       LOAD MODEL
+       LOAD GLB
     ===================================================== */
 
     const loader =
       new GLTFLoader();
+
+
+    let hologramRingY =
+      0;
 
 
     loader.load(
@@ -1559,7 +1842,6 @@
             object
           ) {
 
-
             /* =============================================
                MESHES
             ============================================= */
@@ -1573,9 +1855,8 @@
 
 
               /*
-                Find ARKit blink shapes.
+                Discover ARKit blink targets.
               */
-
               if (
                 object.morphTargetDictionary &&
                 object.morphTargetInfluences
@@ -1587,11 +1868,11 @@
 
 
                 if (
-                  dictionary.eyeBlinkLeft
-                    !== undefined
+                  dictionary.eyeBlinkLeft !==
+                    undefined
                   ||
-                  dictionary.eyeBlinkRight
-                    !== undefined
+                  dictionary.eyeBlinkRight !==
+                    undefined
                 ) {
 
                   blinkMeshes.push(
@@ -1604,9 +1885,8 @@
 
 
               /*
-                Hide the unwanted original censor layers.
+                Hide purchased censor / underwear layer.
               */
-
               if (
                 name ===
                   'SK_FemBase2_Censored_Torso'
@@ -1618,16 +1898,14 @@
                 object.visible =
                   false;
 
-
                 return;
 
               }
 
 
               /*
-                Synthetic body.
+                Exposed synthetic body.
               */
-
               if (
                 name ===
                   'Mesh010'
@@ -1654,7 +1932,6 @@
               /*
                 Face.
               */
-
               if (
                 name ===
                   'Mesh010_1'
@@ -1682,12 +1959,11 @@
 
 
               /*
-                Pearl-white upper suit.
+                Upper futuristic garment.
               */
-
               if (
                 name ===
-                'SK_FemBase2_TShirt'
+                  'SK_FemBase2_TShirt'
               ) {
 
                 object.visible =
@@ -1706,22 +1982,19 @@
 
 
               /*
-                Pearl-white lower suit.
-              */
+                IMPORTANT:
 
+                Hide the normal legs entirely.
+                They are replaced by the hologram
+                water + dissolve system.
+              */
               if (
                 name ===
-                'SK_FemBase2_Leggings'
+                  'SK_FemBase2_Leggings'
               ) {
 
                 object.visible =
-                  true;
-
-
-                forceCleanMaterial(
-                  object,
-                  leggingsMaterial
-                );
+                  false;
 
 
                 return;
@@ -1732,10 +2005,9 @@
               /*
                 Hair.
               */
-
               if (
                 name ===
-                'SK_FemBase2_Hair'
+                  'SK_FemBase2_Hair'
               ) {
 
                 object.visible =
@@ -1756,10 +2028,9 @@
               /*
                 Eyes.
               */
-
               if (
                 name ===
-                'SK_FemBase2_EyeL'
+                  'SK_FemBase2_EyeL'
               ) {
 
                 eyeLObject =
@@ -1783,7 +2054,7 @@
 
               if (
                 name ===
-                'SK_FemBase2_EyeR'
+                  'SK_FemBase2_EyeR'
               ) {
 
                 eyeRObject =
@@ -1807,7 +2078,7 @@
 
               if (
                 name ===
-                'SK_FemBase2_EyeShell'
+                  'SK_FemBase2_EyeShell'
               ) {
 
                 object.visible =
@@ -1850,7 +2121,7 @@
 
               if (
                 name ===
-                'SK_FemBase2_Teeth'
+                  'SK_FemBase2_Teeth'
               ) {
 
                 object.visible =
@@ -1870,7 +2141,7 @@
 
               if (
                 name ===
-                'SK_FemBase2_Nails'
+                  'SK_FemBase2_Nails'
               ) {
 
                 object.visible =
@@ -1904,13 +2175,8 @@
                   .toLowerCase();
 
 
-              /*
-                Head.
-              */
-
               if (
-                lowerName ===
-                  'head'
+                lowerName === 'head'
                 ||
                 lowerName.endsWith(
                   '_head'
@@ -1922,10 +2188,6 @@
 
               }
 
-
-              /*
-                Neck.
-              */
 
               if (
                 lowerName.includes(
@@ -1950,13 +2212,6 @@
 
               }
 
-
-              /*
-                Locate the best chest anchor available.
-
-                Different rigs use different names,
-                so we check several common conventions.
-              */
 
               if (
                 !chestBone &&
@@ -2000,7 +2255,7 @@
 
 
         /* =================================================
-           STORE BASE ROTATIONS
+           SAVE BASE ROTATIONS
         ================================================= */
 
         if (
@@ -2064,7 +2319,7 @@
 
 
         /* =================================================
-           CENTER MODEL
+           MODEL SIZE / CENTER
         ================================================= */
 
         const box =
@@ -2097,6 +2352,16 @@
         );
 
 
+        /*
+          Projection surface position.
+
+          Around lower torso / upper hip region.
+        */
+        hologramRingY =
+          -modelSize.y *
+          0.29;
+
+
         /* =================================================
            CAMERA
         ================================================= */
@@ -2107,13 +2372,17 @@
           );
 
 
-        const upperBodyHeight =
+        /*
+          We no longer need to frame the legs,
+          so move closer to the upper body.
+        */
+        const visibleHeight =
           modelSize.y *
-          0.78;
+          0.62;
 
 
         let distance =
-          upperBodyHeight /
+          visibleHeight /
           (
             2 *
             Math.tan(
@@ -2124,12 +2393,12 @@
 
 
         distance *=
-          1.05;
+          1.12;
 
 
         const targetHeight =
           modelSize.y *
-          0.17;
+          0.14;
 
 
         camera.position.set(
@@ -2156,22 +2425,20 @@
 
         camera.near =
           Math.max(
-            distance /
-            100,
+            distance / 100,
             0.01
           );
 
 
         camera.far =
-          distance *
-          100;
+          distance * 100;
 
 
         camera.updateProjectionMatrix();
 
 
         /* =================================================
-           EFFECTS
+           HOLOGRAPHIC EFFECTS
         ================================================= */
 
         createParticles(
@@ -2179,31 +2446,42 @@
         );
 
 
-        createHologramPlatform(
-          modelSize
+        createWaterSurface(
+          modelSize,
+          hologramRingY
         );
 
 
-        /*
-          Reveal logo once the model is ready.
-        */
+        createProjectorRings(
+          modelSize,
+          hologramRingY
+        );
 
-        chestLogo.style.opacity =
-          '1';
+
+        createEnergyCurtain(
+          modelSize,
+          hologramRingY
+        );
+
+
+        createDissolveParticles(
+          modelSize,
+          hologramRingY
+        );
 
 
         status.style.display =
           'none';
 
 
+        chestLogo.style.opacity =
+          '1';
+
+
         scheduleNextBlink();
 
       },
 
-
-      /* ===================================================
-         PROGRESS
-      =================================================== */
 
       function (
         xhr
@@ -2233,10 +2511,6 @@
       },
 
 
-      /* ===================================================
-         ERROR
-      =================================================== */
-
       function (
         error
       ) {
@@ -2255,7 +2529,7 @@
 
 
     /* =====================================================
-       BLINKING
+       BLINK SYSTEM
     ===================================================== */
 
     function setBlinkAmount(
@@ -2381,8 +2655,7 @@
 
       if (
         !blinkActive &&
-        now >=
-        nextBlink
+        now >= nextBlink
       ) {
 
         beginBlink();
@@ -2393,8 +2666,7 @@
       if (
         !blinkActive &&
         doubleBlink &&
-        now >=
-        secondBlinkAt
+        now >= secondBlinkAt
       ) {
 
         doubleBlink =
@@ -2432,17 +2704,14 @@
 
 
       if (
-        progress <=
-        1
+        progress <= 1
       ) {
 
         setBlinkAmount(
 
           Math.sin(
-
             progress *
             Math.PI
-
           )
 
         );
@@ -2523,28 +2792,17 @@
       );
 
 
-    let eyeHorizontal =
-      0;
+    let eyeHorizontal = 0;
 
+    let eyeVertical = 0;
 
-    let eyeVertical =
-      0;
+    let headHorizontal = 0;
 
+    let headVertical = 0;
 
-    let headHorizontal =
-      0;
+    let neckHorizontal = 0;
 
-
-    let headVertical =
-      0;
-
-
-    let neckHorizontal =
-      0;
-
-
-    let neckVertical =
-      0;
+    let neckVertical = 0;
 
 
     function damp(
@@ -2572,7 +2830,7 @@
 
 
     /* =====================================================
-       CHEST LOGO PROJECTION
+       CHEST LOGO
     ===================================================== */
 
     const chestWorldPosition =
@@ -2605,39 +2863,31 @@
 
 
         /*
-          Move from the skeletal chest center
-          slightly toward the upper-right chest area
-          where a corporate emblem normally sits.
+          Move to upper-right chest.
 
-          Since the torso itself stays mostly fixed,
-          this gives a stable premium placement.
+          This is intentionally much higher
+          than the previous version.
         */
-
         chestWorldPosition.x +=
           modelSize.x *
-          0.105;
+          0.10;
 
 
         chestWorldPosition.y +=
           modelSize.y *
-          0.010;
+          0.115;
 
       }
 
       else {
 
-        /*
-          Fallback if the rig uses an unexpected
-          chest bone name.
-        */
-
         chestWorldPosition.set(
 
           modelSize.x *
-          0.105,
+          0.10,
 
           modelSize.y *
-          0.155,
+          0.27,
 
           0
 
@@ -2684,32 +2934,28 @@
         'px';
 
 
-      /*
-        Scale automatically with viewport/model size.
-      */
-
-      const logoWidth =
+      const width =
         THREE.MathUtils.clamp(
 
           window.innerHeight *
-          0.070,
+          0.058,
 
-          46,
+          42,
 
-          82
+          66
 
         );
 
 
       chestLogo.style.width =
-        logoWidth +
+        width +
         'px';
 
     }
 
 
     /* =====================================================
-       ANIMATION LOOP
+       ANIMATION
     ===================================================== */
 
     const clock =
@@ -2725,11 +2971,8 @@
 
       const delta =
         Math.min(
-
           clock.getDelta(),
-
           0.05
-
         );
 
 
@@ -2739,7 +2982,7 @@
 
 
       /* =========================================
-         POINTER SMOOTHING
+         POINTER DAMPING
       ========================================= */
 
       pointer.x =
@@ -2873,7 +3116,7 @@
 
 
       /* =========================================
-         APPLY EYE ROTATIONS
+         APPLY EYES
       ========================================= */
 
       if (
@@ -2917,11 +3160,9 @@
 
 
       /* =========================================
-         APPLY HEAD ROTATIONS
+         APPLY HEAD
 
-         IMPORTANT:
-         This preserves the corrected axis mapping
-         we already confirmed with your model.
+         Correct rig axes remain preserved:
 
          X = left/right
          Z = up/down
@@ -3019,61 +3260,131 @@
 
 
       /* =========================================
-         SUBTLE ELECTRONIC PULSE
+         HOLOGRAM MATERIAL PULSE
       ========================================= */
 
       const pulse =
         0.5 +
         Math.sin(
           now *
-          1.15
+          1.4
         ) *
         0.5;
 
 
-      lowerGlow.intensity =
-        7.7 +
-        pulse *
-        1.6;
-
-
-      faceGlow.intensity =
-        1.15 +
-        pulse *
-        0.25;
-
-
-      eyeMaterial.emissiveIntensity =
-        0.82 +
-        pulse *
-        0.17;
-
-
       bodyMaterial.emissiveIntensity =
-        0.09 +
+        0.23 +
         pulse *
-        0.035;
+        0.10;
 
 
       shirtMaterial.emissiveIntensity =
-        0.13 +
+        0.22 +
         pulse *
-        0.045;
+        0.11;
 
 
-      leggingsMaterial.emissiveIntensity =
-        0.11 +
+      faceMaterial.emissiveIntensity =
+        0.12 +
         pulse *
-        0.040;
+        0.055;
+
+
+      eyeMaterial.emissiveIntensity =
+        1.10 +
+        pulse *
+        0.32;
+
+
+      projectorGlow.intensity =
+        10 +
+        pulse *
+        4;
+
+
+      faceGlow.intensity =
+        1.10 +
+        pulse *
+        0.35;
 
 
       /* =========================================
-         PARTICLES
+         WATER
+      ========================================= */
+
+      if (
+        waterMaterial
+      ) {
+
+        waterMaterial
+          .uniforms
+          .uTime
+          .value =
+            now;
+
+      }
+
+
+      /* =========================================
+         ENERGY CURTAIN
+      ========================================= */
+
+      if (
+        energyCurtainMaterial
+      ) {
+
+        energyCurtainMaterial
+          .uniforms
+          .uTime
+          .value =
+            now;
+
+      }
+
+
+      /* =========================================
+         HOLOGRAM RING PULSE
+      ========================================= */
+
+      if (
+        holoGroup
+      ) {
+
+        const scale =
+          1 +
+          Math.sin(
+            now *
+            1.5
+          ) *
+          0.025;
+
+
+        holoGroup.scale.x =
+          scale;
+
+
+        holoGroup.scale.z =
+          scale;
+
+      }
+
+
+      /* =========================================
+         DISSOLVE
       ========================================= */
 
       if (
         modelSize
       ) {
+
+        updateDissolveParticles(
+
+          modelSize,
+
+          hologramRingY
+
+        );
+
 
         updateParticles(
           modelSize
@@ -3087,41 +3398,7 @@
       ) {
 
         particleSystem.rotation.y +=
-          0.00022;
-
-      }
-
-
-      /* =========================================
-         HOLOGRAPHIC PLATFORM
-      ========================================= */
-
-      if (
-        holoGroup.children.length
-      ) {
-
-        holoGroup.rotation.y +=
-          0.0011;
-
-
-        const platformPulse =
-          0.92 +
-          Math.sin(
-            now *
-            1.7
-          ) *
-          0.08;
-
-
-        holoGroup.scale.set(
-
-          platformPulse,
-
-          1,
-
-          platformPulse
-
-        );
+          0.00020;
 
       }
 
