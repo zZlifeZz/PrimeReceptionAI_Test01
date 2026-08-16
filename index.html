@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Prime Reception AI — 3D Hologram</title>
+  <title>Prime Reception AI — 3D Receptionist</title>
 
   <style>
     * {
@@ -21,31 +21,37 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #010305;
+
+      background:
+        #010305;
     }
 
     #stage {
       position: fixed;
       inset: 0;
+
       width: 100%;
       height: 100%;
 
+      overflow: hidden;
+
       background:
         radial-gradient(
-          circle at 50% 36%,
-          #0a1c26 0%,
-          #041015 30%,
-          #02070b 58%,
+          circle at 50% 35%,
+          #0b2130 0%,
+          #06131c 27%,
+          #02080d 55%,
           #000000 100%
         );
     }
 
-    /* =========================================
-       DIGITAL SCAN LINES
-    ========================================= */
-
+    /*
+      Fine screen atmosphere.
+      Much softer than the previous full-screen scan effect.
+    */
     #stage::before {
       content: "";
+
       position: absolute;
       inset: 0;
 
@@ -53,40 +59,37 @@
 
       pointer-events: none;
 
-      opacity: 0.09;
+      opacity: 0.045;
 
       background:
         repeating-linear-gradient(
           to bottom,
-          rgba(62, 224, 255, 0.00) 0px,
-          rgba(62, 224, 255, 0.00) 3px,
-          rgba(62, 224, 255, 0.16) 4px,
-          rgba(62, 224, 255, 0.00) 5px
+          transparent 0px,
+          transparent 4px,
+          rgba(65, 225, 255, 0.16) 5px,
+          transparent 6px
         );
 
       animation:
-        scanMove 8s linear infinite;
+        scanMove 10s linear infinite;
     }
 
     @keyframes scanMove {
-
       from {
-        background-position-y: 0px;
+        background-position-y: 0;
       }
 
       to {
-        background-position-y: 120px;
+        background-position-y: 180px;
       }
-
     }
 
-
-    /* =========================================
-       VIGNETTE
-    ========================================= */
-
+    /*
+      Controlled vignette.
+    */
     #stage::after {
       content: "";
+
       position: absolute;
       inset: 0;
 
@@ -97,12 +100,11 @@
       background:
         radial-gradient(
           ellipse at center,
-          transparent 34%,
-          rgba(0, 0, 0, 0.18) 58%,
+          transparent 35%,
+          rgba(0, 0, 0, 0.12) 58%,
           rgba(0, 0, 0, 0.72) 100%
         );
     }
-
 
     #stage canvas {
       position: relative;
@@ -115,11 +117,10 @@
       height: 100%;
     }
 
-
     #status {
       position: absolute;
 
-      z-index: 10;
+      z-index: 20;
 
       left: 50%;
       top: 50%;
@@ -127,19 +128,70 @@
       transform:
         translate(-50%, -50%);
 
-      color: #72edff;
+      color:
+        #6eeaff;
 
       font-family:
         Arial,
         sans-serif;
 
-      font-size: 15px;
+      font-size:
+        14px;
 
-      letter-spacing: 0.09em;
+      letter-spacing:
+        0.11em;
 
-      text-align: center;
+      text-align:
+        center;
+
+      pointer-events:
+        none;
+    }
+
+    /*
+      REAL PRIME RECEPTION AI LOGO
+
+      We project a real 3D chest anchor to screen space.
+      This means we do not need to rebuild or re-export
+      the GLB just to add branding.
+    */
+    #chestLogo {
+      position: fixed;
+
+      z-index: 3;
+
+      left: 0;
+      top: 0;
+
+      width: 76px;
+      height: auto;
+
+      opacity: 0;
 
       pointer-events: none;
+
+      transform:
+        translate(-50%, -50%);
+
+      transform-origin:
+        center;
+
+      filter:
+        drop-shadow(
+          0 0 4px rgba(255, 203, 91, 0.20)
+        )
+        drop-shadow(
+          0 0 8px rgba(63, 222, 255, 0.14)
+        );
+
+      transition:
+        opacity 0.5s ease;
+    }
+
+    @media (max-width: 900px) {
+      #chestLogo {
+        width: 58px;
+      }
     }
   </style>
 </head>
@@ -151,6 +203,12 @@
     <div id="status">
       INITIALIZING PRIME RECEPTION AI…
     </div>
+
+    <img
+      id="chestLogo"
+      src="./prime-reception-logo.png"
+      alt=""
+    >
 
   </div>
 
@@ -176,10 +234,21 @@
 
 
     const stage =
-      document.getElementById('stage');
+      document.getElementById(
+        'stage'
+      );
+
 
     const status =
-      document.getElementById('status');
+      document.getElementById(
+        'status'
+      );
+
+
+    const chestLogo =
+      document.getElementById(
+        'chestLogo'
+      );
 
 
     /* =====================================================
@@ -192,11 +261,16 @@
 
     const camera =
       new THREE.PerspectiveCamera(
+
         32,
+
         window.innerWidth /
         window.innerHeight,
+
         0.01,
+
         1000
+
       );
 
 
@@ -207,9 +281,11 @@
     const renderer =
       new THREE.WebGLRenderer({
 
-        antialias: true,
+        antialias:
+          true,
 
-        alpha: true
+        alpha:
+          true
 
       });
 
@@ -218,7 +294,8 @@
 
       Math.min(
 
-        window.devicePixelRatio || 1,
+        window.devicePixelRatio ||
+        1,
 
         2
 
@@ -245,7 +322,7 @@
 
 
     renderer.toneMappingExposure =
-      1.0;
+      1.08;
 
 
     renderer.setClearColor(
@@ -258,9 +335,7 @@
 
 
     stage.appendChild(
-
       renderer.domElement
-
     );
 
 
@@ -269,165 +344,164 @@
     ===================================================== */
 
 
+    /*
+      Soft overall illumination.
+    */
+
     const ambient =
       new THREE.HemisphereLight(
 
-        0xcfefff,
+        0xe6f8ff,
 
-        0x020405,
+        0x030506,
 
-        0.72
+        0.88
 
       );
 
 
     scene.add(
-
       ambient
-
     );
 
 
     /*
-      Primary face illumination.
+      Soft frontal key light.
+
+      Slightly warm so the face does not look
+      completely blue/gray.
     */
 
     const faceLight =
       new THREE.DirectionalLight(
 
-        0xf9ffff,
+        0xfff9f1,
 
-        2.25
+        2.9
 
       );
 
 
     faceLight.position.set(
 
-      1.4,
+      1.5,
 
-      3.8,
+      4.0,
 
-      5.5
+      5.8
 
     );
 
 
     scene.add(
-
       faceLight
-
     );
 
 
     /*
-      Strong cyan holographic rim.
+      Left cyan edge.
     */
 
-    const cyanRim =
+    const cyanRimLeft =
       new THREE.DirectionalLight(
 
-        0x22dfff,
+        0x24dfff,
 
-        4.4
+        5.0
 
       );
 
 
-    cyanRim.position.set(
+    cyanRimLeft.position.set(
 
-      -4,
+      -4.5,
 
-      3,
+      3.4,
 
-      -3.5
+      -3.8
 
     );
 
 
     scene.add(
-
-      cyanRim
-
+      cyanRimLeft
     );
 
 
     /*
-      Secondary cyan rim.
+      Right cyan edge.
     */
 
     const cyanRimRight =
       new THREE.DirectionalLight(
 
-        0x4ceaff,
+        0x62ecff,
 
-        2.1
+        2.8
 
       );
 
 
     cyanRimRight.position.set(
 
-      4,
+      4.0,
 
-      4,
+      3.0,
 
-      -3
+      -3.2
 
     );
 
 
     scene.add(
-
       cyanRimRight
-
     );
 
 
     /*
       Prime gold accent.
+
+      Kept subtle so cyan remains dominant.
     */
 
     const goldRim =
       new THREE.DirectionalLight(
 
-        0xd3a64c,
+        0xe0b451,
 
-        1.55
+        1.75
 
       );
 
 
     goldRim.position.set(
 
-      3.5,
+      4.1,
 
-      2,
+      2.7,
 
-      -2
+      -1.8
 
     );
 
 
     scene.add(
-
       goldRim
-
     );
 
 
     /*
-      Lower cyan hologram glow.
+      Lower holographic illumination.
     */
 
     const lowerGlow =
       new THREE.PointLight(
 
-        0x13ccea,
+        0x19d8ff,
 
         9,
 
-        8
+        9
 
       );
 
@@ -438,28 +512,26 @@
 
       -1.5,
 
-      1.6
+      1.7
 
     );
 
 
     scene.add(
-
       lowerGlow
-
     );
 
 
     /*
-      Face-area electronic glow.
+      Soft face-area cyan glow.
     */
 
     const faceGlow =
       new THREE.PointLight(
 
-        0x39e7ff,
+        0x4beaff,
 
-        1.5,
+        1.3,
 
         5
 
@@ -470,67 +542,70 @@
 
       0,
 
-      1.4,
+      1.3,
 
-      2.2
+      2.4
 
     );
 
 
     scene.add(
-
       faceGlow
-
     );
 
 
     /* =====================================================
-       HOLOGRAPHIC MATERIALS
+       PREMIUM SYNTHETIC MATERIALS
     ===================================================== */
 
+
+    /*
+      Synthetic exposed body.
+
+      Silver pearl rather than chrome.
+    */
 
     const bodyMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0x9eafb5
+            0xc6d3d7
           ),
 
         emissive:
           new THREE.Color(
-            0x063842
+            0x062a31
           ),
 
         emissiveIntensity:
-          0.24,
+          0.11,
 
         metalness:
-          0.48,
+          0.24,
 
         roughness:
-          0.32,
+          0.39,
 
         clearcoat:
-          0.38,
+          0.34,
 
         clearcoatRoughness:
-          0.26,
+          0.27,
 
         sheen:
-          0.22,
+          0.17,
 
         sheenColor:
           new THREE.Color(
-            0x36dbef
+            0x67dff0
           )
 
       });
 
 
     /*
-      Face deliberately less metallic
-      than the rest of the body.
+      Face is softer and slightly warmer.
     */
 
     const faceMaterial =
@@ -538,42 +613,46 @@
 
         color:
           new THREE.Color(
-            0xcbd7da
+            0xe1e4e1
           ),
 
         emissive:
           new THREE.Color(
-            0x06272d
+            0x03171b
           ),
 
         emissiveIntensity:
-          0.12,
+          0.055,
 
         metalness:
-          0.22,
+          0.08,
 
         roughness:
-          0.39,
+          0.44,
 
         clearcoat:
-          0.25,
+          0.23,
 
         clearcoatRoughness:
-          0.29,
+          0.30,
 
         sheen:
-          0.12,
+          0.10,
 
         sheenColor:
           new THREE.Color(
-            0x42cfe5
+            0x90e4ee
           )
 
       });
 
 
     /*
-      Professional near-black uniform.
+      FUTURISTIC PEARL-WHITE TOP
+
+      Geometry remains the purchased shirt,
+      but the visual treatment now moves toward
+      the concept image.
     */
 
     const shirtMaterial =
@@ -581,112 +660,140 @@
 
         color:
           new THREE.Color(
-            0x030608
+            0xdce5e7
           ),
 
         emissive:
           new THREE.Color(
-            0x00151a
-          ),
-
-        emissiveIntensity:
-          0.22,
-
-        metalness:
-          0.50,
-
-        roughness:
-          0.34,
-
-        clearcoat:
-          0.32,
-
-        clearcoatRoughness:
-          0.28
-
-      });
-
-
-    const leggingsMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(
-            0x030608
-          ),
-
-        emissive:
-          new THREE.Color(
-            0x001319
-          ),
-
-        emissiveIntensity:
-          0.18,
-
-        metalness:
-          0.47,
-
-        roughness:
-          0.36,
-
-        clearcoat:
-          0.28,
-
-        clearcoatRoughness:
-          0.30
-
-      });
-
-
-    const hairMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(
-            0x030609
-          ),
-
-        emissive:
-          new THREE.Color(
-            0x001119
+            0x07333c
           ),
 
         emissiveIntensity:
           0.16,
 
         metalness:
-          0.28,
+          0.29,
 
         roughness:
-          0.38,
+          0.31,
 
         clearcoat:
-          0.28,
+          0.42,
 
         clearcoatRoughness:
-          0.28
+          0.23,
+
+        sheen:
+          0.25,
+
+        sheenColor:
+          new THREE.Color(
+            0x51e1f5
+          )
 
       });
 
+
+    /*
+      Matching lower suit.
+    */
+
+    const leggingsMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0xcdd9dc
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x062b33
+          ),
+
+        emissiveIntensity:
+          0.14,
+
+        metalness:
+          0.32,
+
+        roughness:
+          0.32,
+
+        clearcoat:
+          0.40,
+
+        clearcoatRoughness:
+          0.24,
+
+        sheen:
+          0.21,
+
+        sheenColor:
+          new THREE.Color(
+            0x45d9ee
+          )
+
+      });
+
+
+    /*
+      Dark premium hair.
+    */
+
+    const hairMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0x05080b
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x00151c
+          ),
+
+        emissiveIntensity:
+          0.14,
+
+        metalness:
+          0.19,
+
+        roughness:
+          0.39,
+
+        clearcoat:
+          0.30,
+
+        clearcoatRoughness:
+          0.26
+
+      });
+
+
+    /*
+      Cyan AI eyes.
+    */
 
     const eyeMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xe4fcff
+            0xe8fdff
           ),
 
         emissive:
           new THREE.Color(
-            0x23dcf8
+            0x22dcfa
           ),
 
         emissiveIntensity:
-          1.05,
+          0.90,
 
         metalness:
-          0.02,
+          0.01,
 
         roughness:
           0.13,
@@ -695,7 +802,7 @@
           1,
 
         clearcoatRoughness:
-          0.06
+          0.05
 
       });
 
@@ -705,28 +812,28 @@
 
         color:
           new THREE.Color(
-            0xc8f8ff
+            0xd5faff
           ),
 
         emissive:
           new THREE.Color(
-            0x0b6372
+            0x075765
           ),
 
         emissiveIntensity:
-          0.35,
+          0.24,
 
         transparent:
           true,
 
         opacity:
-          0.42,
+          0.36,
 
         metalness:
           0,
 
         roughness:
-          0.08,
+          0.09,
 
         clearcoat:
           1
@@ -743,10 +850,10 @@
           ),
 
         metalness:
-          0.12,
+          0.10,
 
         roughness:
-          0.45
+          0.47
 
       });
 
@@ -756,14 +863,14 @@
 
         color:
           new THREE.Color(
-            0xf4f7f7
+            0xf5f7f6
           ),
 
         metalness:
           0,
 
         roughness:
-          0.30,
+          0.31,
 
         clearcoat:
           0.18
@@ -771,30 +878,34 @@
       });
 
 
+    /*
+      Genuine Prime gold accent.
+    */
+
     const goldMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xcfa34a
+            0xd6aa4b
           ),
 
         emissive:
           new THREE.Color(
-            0x352308
+            0x241703
           ),
 
         emissiveIntensity:
-          0.18,
+          0.12,
 
         metalness:
-          0.76,
+          0.72,
 
         roughness:
-          0.26,
+          0.27,
 
         clearcoat:
-          0.35
+          0.38
 
       });
 
@@ -862,6 +973,10 @@
       null;
 
 
+    let modelSize =
+      null;
+
+
     let headBone =
       null;
 
@@ -871,6 +986,10 @@
 
 
     let neck02 =
+      null;
+
+
+    let chestBone =
       null;
 
 
@@ -907,7 +1026,7 @@
 
 
     /* =====================================================
-       POINTER
+       POINTER TRACKING
     ===================================================== */
 
     const pointer =
@@ -1060,7 +1179,7 @@
     ) {
 
       const count =
-        480;
+        360;
 
 
       const geometry =
@@ -1091,7 +1210,7 @@
             0.5
           ) *
           size.x *
-          2.4;
+          2.2;
 
 
         particlePositions[
@@ -1102,7 +1221,7 @@
             0.45
           ) *
           size.y *
-          1.25;
+          1.15;
 
 
         particlePositions[
@@ -1112,15 +1231,18 @@
             Math.random() -
             0.5
           ) *
-          size.z *
-          5;
+          Math.max(
+            size.z *
+            4,
+            size.x
+          );
 
 
         particleSpeeds.push(
 
-          0.002 +
+          0.0015 +
           Math.random() *
-          0.006
+          0.0045
 
         );
 
@@ -1143,20 +1265,20 @@
         new THREE.PointsMaterial({
 
           color:
-            0x4be9ff,
+            0x52eaff,
 
           size:
             Math.max(
               size.y *
-              0.0035,
-              0.003
+              0.0027,
+              0.002
             ),
 
           transparent:
             true,
 
           opacity:
-            0.48,
+            0.34,
 
           depthWrite:
             false,
@@ -1225,14 +1347,14 @@
             yIndex
           ] >
           size.y *
-          0.65
+          0.60
         ) {
 
           particlePositions[
             yIndex
           ] =
             -size.y *
-            0.62;
+            0.58;
 
         }
 
@@ -1246,15 +1368,171 @@
 
 
     /* =====================================================
+       HOLOGRAPHIC ENERGY PLATFORM
+    ===================================================== */
+
+    const holoGroup =
+      new THREE.Group();
+
+
+    scene.add(
+      holoGroup
+    );
+
+
+    const ringMaterialA =
+      new THREE.MeshBasicMaterial({
+
+        color:
+          0x36e5ff,
+
+        transparent:
+          true,
+
+        opacity:
+          0.42,
+
+        depthWrite:
+          false,
+
+        blending:
+          THREE.AdditiveBlending
+
+      });
+
+
+    const ringMaterialB =
+      new THREE.MeshBasicMaterial({
+
+        color:
+          0x91f3ff,
+
+        transparent:
+          true,
+
+        opacity:
+          0.20,
+
+        depthWrite:
+          false,
+
+        blending:
+          THREE.AdditiveBlending
+
+      });
+
+
+    function createHologramPlatform(
+      size
+    ) {
+
+      /*
+        Position around lower torso / hip region,
+        closer to the concept image.
+      */
+
+      const y =
+        -size.y *
+        0.31;
+
+
+      const radius =
+        size.x *
+        0.54;
+
+
+      const ring1 =
+        new THREE.Mesh(
+
+          new THREE.TorusGeometry(
+            radius,
+            radius * 0.010,
+            10,
+            100
+          ),
+
+          ringMaterialA
+
+        );
+
+
+      ring1.rotation.x =
+        Math.PI / 2;
+
+
+      ring1.position.y =
+        y;
+
+
+      holoGroup.add(
+        ring1
+      );
+
+
+      const ring2 =
+        new THREE.Mesh(
+
+          new THREE.TorusGeometry(
+            radius * 1.16,
+            radius * 0.006,
+            10,
+            100
+          ),
+
+          ringMaterialB
+
+        );
+
+
+      ring2.rotation.x =
+        Math.PI / 2;
+
+
+      ring2.position.y =
+        y;
+
+
+      holoGroup.add(
+        ring2
+      );
+
+
+      const ring3 =
+        new THREE.Mesh(
+
+          new THREE.TorusGeometry(
+            radius * 1.36,
+            radius * 0.004,
+            10,
+            100
+          ),
+
+          ringMaterialB
+
+        );
+
+
+      ring3.rotation.x =
+        Math.PI / 2;
+
+
+      ring3.position.y =
+        y;
+
+
+      holoGroup.add(
+        ring3
+      );
+
+    }
+
+
+    /* =====================================================
        LOAD MODEL
     ===================================================== */
 
     const loader =
       new GLTFLoader();
-
-
-    let modelSize =
-      null;
 
 
     loader.load(
@@ -1295,7 +1573,7 @@
 
 
               /*
-                Find blink morphs.
+                Find ARKit blink shapes.
               */
 
               if (
@@ -1326,7 +1604,7 @@
 
 
               /*
-                Hide unused meshes.
+                Hide the unwanted original censor layers.
               */
 
               if (
@@ -1404,7 +1682,7 @@
 
 
               /*
-                Shirt.
+                Pearl-white upper suit.
               */
 
               if (
@@ -1428,7 +1706,7 @@
 
 
               /*
-                Leggings.
+                Pearl-white lower suit.
               */
 
               if (
@@ -1476,7 +1754,7 @@
 
 
               /*
-                Left eye.
+                Eyes.
               */
 
               if (
@@ -1503,10 +1781,6 @@
               }
 
 
-              /*
-                Right eye.
-              */
-
               if (
                 name ===
                 'SK_FemBase2_EyeR'
@@ -1530,10 +1804,6 @@
 
               }
 
-
-              /*
-                Eye shell.
-              */
 
               if (
                 name ===
@@ -1580,7 +1850,7 @@
 
               if (
                 name ===
-                  'SK_FemBase2_Teeth'
+                'SK_FemBase2_Teeth'
               ) {
 
                 object.visible =
@@ -1600,7 +1870,7 @@
 
               if (
                 name ===
-                  'SK_FemBase2_Nails'
+                'SK_FemBase2_Nails'
               ) {
 
                 object.visible =
@@ -1634,6 +1904,10 @@
                   .toLowerCase();
 
 
+              /*
+                Head.
+              */
+
               if (
                 lowerName ===
                   'head'
@@ -1648,6 +1922,10 @@
 
               }
 
+
+              /*
+                Neck.
+              */
 
               if (
                 lowerName.includes(
@@ -1668,6 +1946,48 @@
               ) {
 
                 neck02 =
+                  object;
+
+              }
+
+
+              /*
+                Locate the best chest anchor available.
+
+                Different rigs use different names,
+                so we check several common conventions.
+              */
+
+              if (
+                !chestBone &&
+                (
+                  lowerName.includes(
+                    'upperchest'
+                  )
+                  ||
+                  lowerName.includes(
+                    'upper_chest'
+                  )
+                  ||
+                  lowerName.includes(
+                    'chest'
+                  )
+                  ||
+                  lowerName.includes(
+                    'spine_03'
+                  )
+                  ||
+                  lowerName.includes(
+                    'spine03'
+                  )
+                  ||
+                  lowerName.includes(
+                    'spine_3'
+                  )
+                )
+              ) {
+
+                chestBone =
                   object;
 
               }
@@ -1850,13 +2170,26 @@
         camera.updateProjectionMatrix();
 
 
-        /*
-          Create the holographic particle field.
-        */
+        /* =================================================
+           EFFECTS
+        ================================================= */
 
         createParticles(
           modelSize
         );
+
+
+        createHologramPlatform(
+          modelSize
+        );
+
+
+        /*
+          Reveal logo once the model is ready.
+        */
+
+        chestLogo.style.opacity =
+          '1';
 
 
         status.style.display =
@@ -1868,9 +2201,9 @@
       },
 
 
-      /* =========================================
+      /* ===================================================
          PROGRESS
-      ========================================= */
+      =================================================== */
 
       function (
         xhr
@@ -1900,9 +2233,9 @@
       },
 
 
-      /* =========================================
+      /* ===================================================
          ERROR
-      ========================================= */
+      =================================================== */
 
       function (
         error
@@ -2239,6 +2572,143 @@
 
 
     /* =====================================================
+       CHEST LOGO PROJECTION
+    ===================================================== */
+
+    const chestWorldPosition =
+      new THREE.Vector3();
+
+
+    const projectedChest =
+      new THREE.Vector3();
+
+
+    function updateChestLogo() {
+
+      if (
+        !model ||
+        !modelSize
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        chestBone
+      ) {
+
+        chestBone.getWorldPosition(
+          chestWorldPosition
+        );
+
+
+        /*
+          Move from the skeletal chest center
+          slightly toward the upper-right chest area
+          where a corporate emblem normally sits.
+
+          Since the torso itself stays mostly fixed,
+          this gives a stable premium placement.
+        */
+
+        chestWorldPosition.x +=
+          modelSize.x *
+          0.105;
+
+
+        chestWorldPosition.y +=
+          modelSize.y *
+          0.010;
+
+      }
+
+      else {
+
+        /*
+          Fallback if the rig uses an unexpected
+          chest bone name.
+        */
+
+        chestWorldPosition.set(
+
+          modelSize.x *
+          0.105,
+
+          modelSize.y *
+          0.155,
+
+          0
+
+        );
+
+      }
+
+
+      projectedChest.copy(
+        chestWorldPosition
+      );
+
+
+      projectedChest.project(
+        camera
+      );
+
+
+      const screenX =
+        (
+          projectedChest.x *
+          0.5 +
+          0.5
+        ) *
+        window.innerWidth;
+
+
+      const screenY =
+        (
+          -projectedChest.y *
+          0.5 +
+          0.5
+        ) *
+        window.innerHeight;
+
+
+      chestLogo.style.left =
+        screenX +
+        'px';
+
+
+      chestLogo.style.top =
+        screenY +
+        'px';
+
+
+      /*
+        Scale automatically with viewport/model size.
+      */
+
+      const logoWidth =
+        THREE.MathUtils.clamp(
+
+          window.innerHeight *
+          0.070,
+
+          46,
+
+          82
+
+        );
+
+
+      chestLogo.style.width =
+        logoWidth +
+        'px';
+
+    }
+
+
+    /* =====================================================
        ANIMATION LOOP
     ===================================================== */
 
@@ -2448,6 +2918,13 @@
 
       /* =========================================
          APPLY HEAD ROTATIONS
+
+         IMPORTANT:
+         This preserves the corrected axis mapping
+         we already confirmed with your model.
+
+         X = left/right
+         Z = up/down
       ========================================= */
 
       if (
@@ -2460,27 +2937,13 @@
         );
 
 
-        /*
-          Correct rig axis:
-          X = left/right
-        */
-
         headBone.rotation.x +=
           headHorizontal;
 
 
-        /*
-          Correct rig axis:
-          Z = up/down
-        */
-
         headBone.rotation.z +=
           headVertical;
 
-
-        /*
-          Do not touch Y.
-        */
 
         headBone.rotation.y =
           baseHeadRotation.y;
@@ -2556,40 +3019,52 @@
 
 
       /* =========================================
-         HOLOGRAPHIC LIGHT PULSE
+         SUBTLE ELECTRONIC PULSE
       ========================================= */
 
       const pulse =
         0.5 +
         Math.sin(
           now *
-          1.25
+          1.15
         ) *
         0.5;
 
 
       lowerGlow.intensity =
-        7.5 +
+        7.7 +
         pulse *
-        2.0;
+        1.6;
 
 
       faceGlow.intensity =
-        1.25 +
+        1.15 +
         pulse *
-        0.35;
+        0.25;
 
 
       eyeMaterial.emissiveIntensity =
-        0.92 +
+        0.82 +
         pulse *
-        0.18;
+        0.17;
 
 
       bodyMaterial.emissiveIntensity =
-        0.20 +
+        0.09 +
         pulse *
-        0.06;
+        0.035;
+
+
+      shirtMaterial.emissiveIntensity =
+        0.13 +
+        pulse *
+        0.045;
+
+
+      leggingsMaterial.emissiveIntensity =
+        0.11 +
+        pulse *
+        0.040;
 
 
       /* =========================================
@@ -2612,10 +3087,55 @@
       ) {
 
         particleSystem.rotation.y +=
-          0.00035;
+          0.00022;
 
       }
 
+
+      /* =========================================
+         HOLOGRAPHIC PLATFORM
+      ========================================= */
+
+      if (
+        holoGroup.children.length
+      ) {
+
+        holoGroup.rotation.y +=
+          0.0011;
+
+
+        const platformPulse =
+          0.92 +
+          Math.sin(
+            now *
+            1.7
+          ) *
+          0.08;
+
+
+        holoGroup.scale.set(
+
+          platformPulse,
+
+          1,
+
+          platformPulse
+
+        );
+
+      }
+
+
+      /* =========================================
+         LOGO
+      ========================================= */
+
+      updateChestLogo();
+
+
+      /* =========================================
+         RENDER
+      ========================================= */
 
       renderer.render(
         scene,
