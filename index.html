@@ -812,10 +812,12 @@
               model
             );
 
+
         const size =
           box.getSize(
             new THREE.Vector3()
           );
+
 
         const center =
           box.getCenter(
@@ -894,6 +896,58 @@
         camera.updateProjectionMatrix();
 
 
+        /* =================================================
+           RESET HEAD / NECK TO NEUTRAL
+        ================================================= */
+
+        if (
+          headBone
+        ) {
+
+          headBone.rotation.x =
+            0;
+
+          headBone.rotation.y =
+            0;
+
+          headBone.rotation.z =
+            0;
+
+        }
+
+
+        if (
+          neck01
+        ) {
+
+          neck01.rotation.x =
+            0;
+
+          neck01.rotation.y =
+            0;
+
+          neck01.rotation.z =
+            0;
+
+        }
+
+
+        if (
+          neck02
+        ) {
+
+          neck02.rotation.x =
+            0;
+
+          neck02.rotation.y =
+            0;
+
+          neck02.rotation.z =
+            0;
+
+        }
+
+
         status.style.display =
           'none';
 
@@ -942,7 +996,7 @@
 
 
     /* =====================================================
-       SUBTLE IDLE MOTION
+       CONTROLLED IDLE LOOP
     ===================================================== */
 
     const clock =
@@ -960,45 +1014,46 @@
         clock.getElapsedTime();
 
 
+      /*
+        No vertical movement.
+        Character stays anchored.
+      */
+
       if (
         model
       ) {
 
-        /*
-          Very small vertical breathing drift.
-        */
-
         model.position.y =
-          originalModelY +
-          Math.sin(t * 1.15) * 0.003;
+          originalModelY;
 
 
         /*
-          Small body sway.
+          Almost imperceptible body sway.
         */
 
         model.rotation.z =
-          Math.sin(t * 0.45) * 0.0025;
+          Math.sin(t * 0.32) * 0.0012;
 
       }
 
 
       /*
-        Tiny head / neck movement.
-
-        This is intentionally subtle.
-        Mouse tracking comes later.
+        Head remains essentially forward.
+        Only extremely subtle horizontal drift.
       */
 
       if (
         headBone
       ) {
 
-        headBone.rotation.y =
-          Math.sin(t * 0.33) * 0.018;
-
         headBone.rotation.x =
-          Math.sin(t * 0.27) * 0.008;
+          0;
+
+        headBone.rotation.z =
+          0;
+
+        headBone.rotation.y =
+          Math.sin(t * 0.25) * 0.006;
 
       }
 
@@ -1007,8 +1062,14 @@
         neck02
       ) {
 
+        neck02.rotation.x =
+          0;
+
+        neck02.rotation.z =
+          0;
+
         neck02.rotation.y =
-          Math.sin(t * 0.30) * 0.007;
+          Math.sin(t * 0.22) * 0.0025;
 
       }
 
@@ -1017,8 +1078,14 @@
         neck01
       ) {
 
+        neck01.rotation.x =
+          0;
+
+        neck01.rotation.y =
+          0;
+
         neck01.rotation.z =
-          Math.sin(t * 0.25) * 0.003;
+          0;
 
       }
 
