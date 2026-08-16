@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -31,10 +32,10 @@
 
       background:
         radial-gradient(
-          circle at 50% 40%,
-          #0a1720 0%,
-          #03090e 45%,
-          #010305 75%,
+          circle at 50% 38%,
+          #0b1820 0%,
+          #040a0f 44%,
+          #010305 72%,
           #000000 100%
         );
     }
@@ -49,7 +50,7 @@
         radial-gradient(
           ellipse at center,
           transparent 42%,
-          rgba(0, 0, 0, 0.58) 100%
+          rgba(0, 0, 0, 0.62) 100%
         );
     }
 
@@ -67,14 +68,14 @@
       left: 50%;
       top: 50%;
 
-      transform:
-        translate(-50%, -50%);
+      transform: translate(-50%, -50%);
 
-      color: #6eeaff;
+      color: #73e8ff;
       font-family: Arial, sans-serif;
       font-size: 15px;
       letter-spacing: 0.08em;
       text-align: center;
+
       pointer-events: none;
     }
   </style>
@@ -166,7 +167,7 @@
       THREE.ACESFilmicToneMapping;
 
     renderer.toneMappingExposure =
-      1.08;
+      1.0;
 
     renderer.setClearColor(
       0x000000,
@@ -179,38 +180,42 @@
 
 
     /* =====================================================
-       LIGHTS
+       LIGHTING
     ===================================================== */
 
     const ambient =
       new THREE.HemisphereLight(
-        0xdff9ff,
-        0x050608,
-        1.15
+        0xdbeff4,
+        0x06080a,
+        0.95
       );
 
-    scene.add(ambient);
+    scene.add(
+      ambient
+    );
 
 
     const faceLight =
       new THREE.DirectionalLight(
-        0xffffff,
-        2.8
+        0xfff8ee,
+        2.5
       );
 
     faceLight.position.set(
-      1.5,
-      3.5,
-      5
+      1.3,
+      3.8,
+      5.5
     );
 
-    scene.add(faceLight);
+    scene.add(
+      faceLight
+    );
 
 
     const cyanRim =
       new THREE.DirectionalLight(
-        0x39ddff,
-        3.8
+        0x2edfff,
+        3.6
       );
 
     cyanRim.position.set(
@@ -219,38 +224,44 @@
       -3
     );
 
-    scene.add(cyanRim);
+    scene.add(
+      cyanRim
+    );
 
 
     const goldRim =
       new THREE.DirectionalLight(
-        0xd9a441,
-        2.4
+        0xd6a13f,
+        2.0
       );
 
     goldRim.position.set(
       4,
-      1.5,
+      2,
       -2
     );
 
-    scene.add(goldRim);
+    scene.add(
+      goldRim
+    );
 
 
     const lowerFill =
       new THREE.PointLight(
-        0x1eaac7,
-        8,
+        0x1498b4,
+        6,
         8
       );
 
     lowerFill.position.set(
       0,
-      -1.5,
-      2
+      -1.2,
+      2.5
     );
 
-    scene.add(lowerFill);
+    scene.add(
+      lowerFill
+    );
 
 
     /* =====================================================
@@ -261,19 +272,25 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0xaebbc1),
+          new THREE.Color(0xb9c4c8),
 
         metalness:
-          0.58,
+          0.34,
 
         roughness:
-          0.32,
+          0.40,
 
         clearcoat:
-          0.45,
+          0.30,
 
         clearcoatRoughness:
-          0.24
+          0.30,
+
+        sheen:
+          0.10,
+
+        sheenColor:
+          new THREE.Color(0x55d7eb)
 
       });
 
@@ -282,19 +299,19 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0xcfd9dd),
+          new THREE.Color(0xd7dee0),
 
         metalness:
-          0.34,
+          0.18,
 
         roughness:
-          0.36,
+          0.44,
 
         clearcoat:
-          0.32,
+          0.22,
 
         clearcoatRoughness:
-          0.26
+          0.32
 
       });
 
@@ -303,19 +320,19 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0x05070a),
+          new THREE.Color(0x07090c),
 
         metalness:
-          0.70,
+          0.48,
 
         roughness:
-          0.25,
+          0.38,
 
         clearcoat:
-          0.58,
+          0.28,
 
         clearcoatRoughness:
-          0.17
+          0.30
 
       });
 
@@ -324,19 +341,19 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0x05070a),
+          new THREE.Color(0x07090c),
 
         metalness:
-          0.67,
+          0.44,
 
         roughness:
-          0.27,
+          0.40,
 
         clearcoat:
-          0.52,
+          0.24,
 
         clearcoatRoughness:
-          0.19
+          0.32
 
       });
 
@@ -345,19 +362,19 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0x05090d),
+          new THREE.Color(0x06090d),
 
         metalness:
-          0.35,
+          0.22,
 
         roughness:
-          0.32,
+          0.42,
 
         clearcoat:
-          0.32,
+          0.22,
 
         clearcoatRoughness:
-          0.28
+          0.30
 
       });
 
@@ -366,22 +383,22 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0xbffaff),
+          new THREE.Color(0xd9fbff),
 
         emissive:
-          new THREE.Color(0x28dfff),
+          new THREE.Color(0x29dfff),
 
         emissiveIntensity:
-          0.85,
+          0.6,
 
         metalness:
-          0.05,
+          0.04,
 
         roughness:
-          0.15,
+          0.16,
 
         clearcoat:
-          1,
+          0.9,
 
         clearcoatRoughness:
           0.08
@@ -396,10 +413,10 @@
           new THREE.Color(0x020304),
 
         metalness:
-          0.15,
+          0.10,
 
         roughness:
-          0.42
+          0.48
 
       });
 
@@ -408,16 +425,16 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0xf1f4f4),
+          new THREE.Color(0xf3f5f5),
 
         metalness:
           0,
 
         roughness:
-          0.28,
+          0.30,
 
         clearcoat:
-          0.25
+          0.18
 
       });
 
@@ -429,20 +446,16 @@
           new THREE.Color(0xc99a3d),
 
         metalness:
-          0.78,
+          0.70,
 
         roughness:
-          0.25,
+          0.30,
 
         clearcoat:
-          0.5
+          0.30
 
       });
 
-
-    /* =====================================================
-       HELPER — FORCE CLEAN MATERIAL
-    ===================================================== */
 
     function forceCleanMaterial(
       object,
@@ -496,6 +509,22 @@
       new GLTFLoader();
 
 
+    let model =
+      null;
+
+    let headBone =
+      null;
+
+    let neck01 =
+      null;
+
+    let neck02 =
+      null;
+
+    let originalModelY =
+      0;
+
+
     loader.load(
 
       './PrimeReceptionAI_Test01.glb',
@@ -503,273 +532,268 @@
 
       function (gltf) {
 
-        const model =
+        model =
           gltf.scene;
 
-        scene.add(model);
+        scene.add(
+          model
+        );
 
 
         model.traverse(
 
           function (object) {
 
-            if (!object.isMesh) {
-              return;
-            }
-
-
-            const name =
-              object.name;
-
-
-            /* ---------------------------------------------
-               HIDE UNWANTED LAYERS
-            --------------------------------------------- */
-
             if (
-              name === 'SK_FemBase2_Censored_Torso' ||
-              name === 'SK_FemBase2_UnderWear'
+              object.isMesh
             ) {
 
-              object.visible =
-                false;
+              const name =
+                object.name;
 
-              return;
 
-            }
+              if (
+                name === 'SK_FemBase2_Censored_Torso' ||
+                name === 'SK_FemBase2_UnderWear'
+              ) {
 
+                object.visible =
+                  false;
 
-            /* ---------------------------------------------
-               BODY SURFACE
-            --------------------------------------------- */
+                return;
 
-            if (
-              name === 'Mesh010'
-            ) {
+              }
 
-              object.visible =
-                true;
 
-              forceCleanMaterial(
-                object,
-                bodyMaterial
-              );
+              if (
+                name === 'Mesh010'
+              ) {
 
-              return;
+                object.visible =
+                  true;
 
-            }
+                forceCleanMaterial(
+                  object,
+                  bodyMaterial
+                );
 
+                return;
 
-            /* ---------------------------------------------
-               FACE / HEAD SURFACE
-            --------------------------------------------- */
+              }
 
-            if (
-              name === 'Mesh010_1'
-            ) {
 
-              object.visible =
-                true;
+              if (
+                name === 'Mesh010_1'
+              ) {
 
-              forceCleanMaterial(
-                object,
-                faceMaterial
-              );
+                object.visible =
+                  true;
 
-              return;
+                forceCleanMaterial(
+                  object,
+                  faceMaterial
+                );
 
-            }
+                return;
 
+              }
 
-            /* ---------------------------------------------
-               KNOWN TORSO MESH
-            --------------------------------------------- */
 
-            if (
-              name === 'SK_FemBase2_Torso'
-            ) {
+              if (
+                name === 'SK_FemBase2_Torso'
+              ) {
 
-              object.visible =
-                true;
+                object.visible =
+                  true;
 
-              forceCleanMaterial(
-                object,
-                bodyMaterial
-              );
+                forceCleanMaterial(
+                  object,
+                  bodyMaterial
+                );
 
-              return;
+                return;
 
-            }
+              }
 
 
-            /* ---------------------------------------------
-               ARKIT HEAD
-            --------------------------------------------- */
+              if (
+                name === 'SK_FemBase2_Head_52ArKit' ||
+                name === 'SK_FemBase2_Head_52ARKit'
+              ) {
 
-            if (
-              name === 'SK_FemBase2_Head_52ArKit' ||
-              name === 'SK_FemBase2_Head_52ARKit'
-            ) {
+                object.visible =
+                  true;
 
-              object.visible =
-                true;
+                forceCleanMaterial(
+                  object,
+                  faceMaterial
+                );
 
-              forceCleanMaterial(
-                object,
-                faceMaterial
-              );
+                return;
 
-              return;
+              }
 
-            }
 
+              if (
+                name === 'SK_FemBase2_TShirt'
+              ) {
 
-            /* ---------------------------------------------
-               SHIRT
-            --------------------------------------------- */
+                object.visible =
+                  true;
 
-            if (
-              name === 'SK_FemBase2_TShirt'
-            ) {
+                forceCleanMaterial(
+                  object,
+                  shirtMaterial
+                );
 
-              object.visible =
-                true;
+                return;
 
-              forceCleanMaterial(
-                object,
-                shirtMaterial
-              );
+              }
 
-              return;
 
-            }
+              if (
+                name === 'SK_FemBase2_Leggings'
+              ) {
 
+                object.visible =
+                  true;
 
-            /* ---------------------------------------------
-               LEGGINGS
-            --------------------------------------------- */
+                forceCleanMaterial(
+                  object,
+                  leggingsMaterial
+                );
 
-            if (
-              name === 'SK_FemBase2_Leggings'
-            ) {
+                return;
 
-              object.visible =
-                true;
+              }
 
-              forceCleanMaterial(
-                object,
-                leggingsMaterial
-              );
 
-              return;
+              if (
+                name === 'SK_FemBase2_Hair'
+              ) {
 
-            }
+                object.visible =
+                  true;
 
+                forceCleanMaterial(
+                  object,
+                  hairMaterial
+                );
 
-            /* ---------------------------------------------
-               HAIR
-            --------------------------------------------- */
+                return;
 
-            if (
-              name === 'SK_FemBase2_Hair'
-            ) {
+              }
 
-              object.visible =
-                true;
 
-              forceCleanMaterial(
-                object,
-                hairMaterial
-              );
+              if (
+                name === 'SK_FemBase2_EyeL' ||
+                name === 'SK_FemBase2_EyeR' ||
+                name === 'SK_FemBase2_EyeShell'
+              ) {
 
-              return;
+                object.visible =
+                  true;
 
-            }
+                forceCleanMaterial(
+                  object,
+                  eyeMaterial
+                );
 
+                return;
 
-            /* ---------------------------------------------
-               EYES
-            --------------------------------------------- */
+              }
 
-            if (
-              name === 'SK_FemBase2_EyeL' ||
-              name === 'SK_FemBase2_EyeR' ||
-              name === 'SK_FemBase2_EyeShell'
-            ) {
 
-              object.visible =
-                true;
+              if (
+                name === 'SK_FemBase2_Lashes' ||
+                name === 'SK_FemBase2_EyeEdge'
+              ) {
 
-              forceCleanMaterial(
-                object,
-                eyeMaterial
-              );
+                object.visible =
+                  true;
 
-              return;
+                forceCleanMaterial(
+                  object,
+                  darkDetailMaterial
+                );
 
-            }
+                return;
 
+              }
 
-            /* ---------------------------------------------
-               EYE DETAILS
-            --------------------------------------------- */
 
-            if (
-              name === 'SK_FemBase2_Lashes' ||
-              name === 'SK_FemBase2_EyeEdge'
-            ) {
+              if (
+                name === 'SK_FemBase2_Teeth'
+              ) {
 
-              object.visible =
-                true;
+                object.visible =
+                  true;
 
-              forceCleanMaterial(
-                object,
-                darkDetailMaterial
-              );
+                forceCleanMaterial(
+                  object,
+                  teethMaterial
+                );
 
-              return;
+                return;
+
+              }
+
+
+              if (
+                name === 'SK_FemBase2_Nails'
+              ) {
+
+                object.visible =
+                  true;
+
+                forceCleanMaterial(
+                  object,
+                  goldMaterial
+                );
+
+                return;
+
+              }
 
             }
 
 
-            /* ---------------------------------------------
-               TEETH
-            --------------------------------------------- */
-
             if (
-              name === 'SK_FemBase2_Teeth'
+              object.isBone
             ) {
 
-              object.visible =
-                true;
-
-              forceCleanMaterial(
-                object,
-                teethMaterial
-              );
-
-              return;
-
-            }
+              const lower =
+                object.name.toLowerCase();
 
 
-            /* ---------------------------------------------
-               NAILS
-            --------------------------------------------- */
+              if (
+                lower.includes('head')
+              ) {
 
-            if (
-              name === 'SK_FemBase2_Nails'
-            ) {
+                headBone =
+                  object;
 
-              object.visible =
-                true;
+              }
 
-              forceCleanMaterial(
-                object,
-                goldMaterial
-              );
 
-              return;
+              if (
+                lower.includes('neck_01')
+              ) {
+
+                neck01 =
+                  object;
+
+              }
+
+
+              if (
+                lower.includes('neck_02')
+              ) {
+
+                neck02 =
+                  object;
+
+              }
 
             }
 
@@ -784,7 +808,9 @@
 
         const box =
           new THREE.Box3()
-            .setFromObject(model);
+            .setFromObject(
+              model
+            );
 
         const size =
           box.getSize(
@@ -802,6 +828,10 @@
           -center.y,
           -center.z
         );
+
+
+        originalModelY =
+          model.position.y;
 
 
         /* =================================================
@@ -870,10 +900,6 @@
       },
 
 
-      /* ===================================================
-         PROGRESS
-      =================================================== */
-
       function (xhr) {
 
         if (
@@ -898,10 +924,6 @@
       },
 
 
-      /* ===================================================
-         ERROR
-      =================================================== */
-
       function (error) {
 
         console.error(
@@ -920,14 +942,85 @@
 
 
     /* =====================================================
-       RENDER LOOP
+       SUBTLE IDLE MOTION
     ===================================================== */
+
+    const clock =
+      new THREE.Clock();
+
 
     function animate() {
 
       requestAnimationFrame(
         animate
       );
+
+
+      const t =
+        clock.getElapsedTime();
+
+
+      if (
+        model
+      ) {
+
+        /*
+          Very small vertical breathing drift.
+        */
+
+        model.position.y =
+          originalModelY +
+          Math.sin(t * 1.15) * 0.003;
+
+
+        /*
+          Small body sway.
+        */
+
+        model.rotation.z =
+          Math.sin(t * 0.45) * 0.0025;
+
+      }
+
+
+      /*
+        Tiny head / neck movement.
+
+        This is intentionally subtle.
+        Mouse tracking comes later.
+      */
+
+      if (
+        headBone
+      ) {
+
+        headBone.rotation.y =
+          Math.sin(t * 0.33) * 0.018;
+
+        headBone.rotation.x =
+          Math.sin(t * 0.27) * 0.008;
+
+      }
+
+
+      if (
+        neck02
+      ) {
+
+        neck02.rotation.y =
+          Math.sin(t * 0.30) * 0.007;
+
+      }
+
+
+      if (
+        neck01
+      ) {
+
+        neck01.rotation.z =
+          Math.sin(t * 0.25) * 0.003;
+
+      }
 
 
       renderer.render(
