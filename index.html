@@ -49,8 +49,8 @@
       background:
         radial-gradient(
           ellipse at center,
-          transparent 40%,
-          rgba(0, 0, 0, 0.55) 100%
+          transparent 42%,
+          rgba(0, 0, 0, 0.58) 100%
         );
     }
 
@@ -152,6 +152,7 @@
         alpha: true
       });
 
+
     renderer.setPixelRatio(
       Math.min(
         window.devicePixelRatio || 1,
@@ -159,24 +160,30 @@
       )
     );
 
+
     renderer.setSize(
       window.innerWidth,
       window.innerHeight
     );
 
+
     renderer.outputColorSpace =
       THREE.SRGBColorSpace;
+
 
     renderer.toneMapping =
       THREE.ACESFilmicToneMapping;
 
+
     renderer.toneMappingExposure =
-      1.15;
+      1.1;
+
 
     renderer.setClearColor(
       0x000000,
       0
     );
+
 
     stage.appendChild(
       renderer.domElement
@@ -191,7 +198,7 @@
       new THREE.HemisphereLight(
         0xdff9ff,
         0x050608,
-        1.45
+        1.25
       );
 
     scene.add(
@@ -202,7 +209,7 @@
     const faceLight =
       new THREE.DirectionalLight(
         0xffffff,
-        3.3
+        3.0
       );
 
     faceLight.position.set(
@@ -219,7 +226,7 @@
     const cyanRim =
       new THREE.DirectionalLight(
         0x39ddff,
-        4.2
+        4.0
       );
 
     cyanRim.position.set(
@@ -236,7 +243,7 @@
     const goldRim =
       new THREE.DirectionalLight(
         0xd9a441,
-        3
+        2.6
       );
 
     goldRim.position.set(
@@ -253,7 +260,7 @@
     const lowerFill =
       new THREE.PointLight(
         0x1eaac7,
-        14,
+        10,
         8
       );
 
@@ -269,85 +276,137 @@
 
 
     /* =====================================================
-       MATERIALS
+       PRIME MATERIALS
     ===================================================== */
 
-    const syntheticSkin =
+    const bodyMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0x8b969d
-          ),
-
-        metalness:
-          0.42,
-
-        roughness:
-          0.34,
-
-        clearcoat:
-          0.4,
-
-        clearcoatRoughness:
-          0.3
-
-      });
-
-
-    const uniformMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(
-            0x0b1116
-          ),
-
-        metalness:
-          0.78,
-
-        roughness:
-          0.24,
-
-        clearcoat:
-          0.5,
-
-        clearcoatRoughness:
-          0.2
-
-      });
-
-
-    const hairMaterial =
-      new THREE.MeshStandardMaterial({
-
-        color:
-          new THREE.Color(
-            0x10161b
+            0xc7d3d8
           ),
 
         metalness:
           0.52,
 
         roughness:
-          0.4
+          0.31,
+
+        clearcoat:
+          0.48,
+
+        clearcoatRoughness:
+          0.22,
+
+        sheen:
+          0.18,
+
+        sheenColor:
+          new THREE.Color(
+            0x72dff5
+          ),
+
+        envMapIntensity:
+          1.0
 
       });
 
 
-    const darkDetailMaterial =
-      new THREE.MeshStandardMaterial({
+    const faceMaterial =
+      new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0x05080b
+            0xd6e1e4
+          ),
+
+        metalness:
+          0.30,
+
+        roughness:
+          0.38,
+
+        clearcoat:
+          0.35,
+
+        clearcoatRoughness:
+          0.28
+
+      });
+
+
+    const shirtMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0x05070a
+          ),
+
+        metalness:
+          0.70,
+
+        roughness:
+          0.25,
+
+        clearcoat:
+          0.58,
+
+        clearcoatRoughness:
+          0.17,
+
+        envMapIntensity:
+          1.2
+
+      });
+
+
+    const leggingsMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0x05070a
+          ),
+
+        metalness:
+          0.67,
+
+        roughness:
+          0.27,
+
+        clearcoat:
+          0.52,
+
+        clearcoatRoughness:
+          0.19,
+
+        envMapIntensity:
+          1.15
+
+      });
+
+
+    const hairMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0x05090d
           ),
 
         metalness:
           0.35,
 
         roughness:
-          0.3
+          0.32,
+
+        clearcoat:
+          0.32,
+
+        clearcoatRoughness:
+          0.28
 
       });
 
@@ -357,45 +416,91 @@
 
         color:
           new THREE.Color(
-            0x8cf4ff
+            0xbffaff
           ),
 
         emissive:
           new THREE.Color(
-            0x20cbe8
+            0x28dfff
           ),
 
         emissiveIntensity:
-          1.3,
+          0.8,
+
+        metalness:
+          0.05,
+
+        roughness:
+          0.15,
+
+        clearcoat:
+          1,
+
+        clearcoatRoughness:
+          0.08
+
+      });
+
+
+    const eyeShellMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0xdffcff
+          ),
+
+        transparent:
+          true,
+
+        opacity:
+          0.38,
+
+        metalness:
+          0,
+
+        roughness:
+          0.08,
+
+        clearcoat:
+          1
+
+      });
+
+
+    const darkDetailMaterial =
+      new THREE.MeshStandardMaterial({
+
+        color:
+          new THREE.Color(
+            0x020304
+          ),
 
         metalness:
           0.15,
 
         roughness:
-          0.18,
-
-        clearcoat:
-          1.0,
-
-        clearcoatRoughness:
-          0.1
+          0.42
 
       });
 
 
     const teethMaterial =
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhysicalMaterial({
 
         color:
           new THREE.Color(
-            0xe6ecec
+            0xf1f4f4
           ),
 
-        roughness:
-          0.35,
-
         metalness:
-          0.0
+          0,
+
+        roughness:
+          0.28,
+
+        clearcoat:
+          0.25
 
       });
 
@@ -405,14 +510,14 @@
 
         color:
           new THREE.Color(
-            0xd4a54c
+            0xc99a3d
           ),
 
         metalness:
-          0.9,
+          0.78,
 
         roughness:
-          0.2,
+          0.25,
 
         clearcoat:
           0.5
@@ -421,7 +526,7 @@
 
 
     /* =====================================================
-       LOADER
+       LOAD CHARACTER
     ===================================================== */
 
     const loader =
@@ -433,10 +538,15 @@
       './PrimeReceptionAI_Test01.glb',
 
 
+      /* ===================================================
+         SUCCESS
+      =================================================== */
+
       function (gltf) {
 
         const model =
           gltf.scene;
+
 
         scene.add(
           model
@@ -444,7 +554,7 @@
 
 
         /* =================================================
-           MESH + MATERIAL INSPECTION
+           EXACT MESH MAPPING
         ================================================= */
 
         model.traverse(
@@ -469,100 +579,12 @@
 
 
             /* ---------------------------------------------
-               MATERIAL DEBUG INFORMATION
+               HIDE UNWANTED MESHES
             --------------------------------------------- */
 
-            console.log(
-              'MATERIAL INFO:',
-              name,
-              Array.isArray(
-                object.material
-              )
-
-                ? object.material.map(
-                    function (material) {
-
-                      return {
-
-                        name:
-                          material
-                            ? material.name
-                            : null,
-
-                        type:
-                          material
-                            ? material.type
-                            : null,
-
-                        map:
-                          material &&
-                          material.map
-                            ? material.map.name
-                            : null,
-
-                        normalMap:
-                          material &&
-                          material.normalMap
-                            ? material.normalMap.name
-                            : null,
-
-                        roughnessMap:
-                          material &&
-                          material.roughnessMap
-                            ? material.roughnessMap.name
-                            : null
-
-                      };
-
-                    }
-                  )
-
-                : {
-
-                    name:
-                      object.material
-                        ? object.material.name
-                        : null,
-
-                    type:
-                      object.material
-                        ? object.material.type
-                        : null,
-
-                    map:
-                      object.material &&
-                      object.material.map
-                        ? object.material.map.name
-                        : null,
-
-                    normalMap:
-                      object.material &&
-                      object.material.normalMap
-                        ? object.material.normalMap.name
-                        : null,
-
-                    roughnessMap:
-                      object.material &&
-                      object.material.roughnessMap
-                        ? object.material.roughnessMap.name
-                        : null
-
-                  }
-
-            );
-
-
-            /* =================================================
-               VISIBILITY
-            ================================================= */
-
             if (
-              name.includes(
-                'Censored_Torso'
-              ) ||
-              name.includes(
-                'UnderWear'
-              )
+              name ===
+              'SK_FemBase2_Censored_Torso'
             ) {
 
               object.visible =
@@ -573,119 +595,236 @@
             }
 
 
-            /* =================================================
-               MATERIAL ASSIGNMENTS
-            ================================================= */
+            if (
+              name ===
+              'SK_FemBase2_UnderWear'
+            ) {
+
+              object.visible =
+                false;
+
+              return;
+
+            }
+
+
+            /* ---------------------------------------------
+               MAIN BODY
+            --------------------------------------------- */
 
             if (
-              name.includes(
-                'Head_52ARKit'
-              )
-            ) {
-
-              object.material =
-                syntheticSkin;
-
-            }
-
-
-            else if (
-              name.includes(
-                'Torso'
-              )
-            ) {
-
-              object.material =
-                syntheticSkin;
-
-            }
-
-
-            else if (
-              name.includes(
-                'TShirt'
-              ) ||
-              name.includes(
-                'Leggings'
-              )
+              name ===
+              'SK_FemBase2_Torso'
             ) {
 
               object.visible =
                 true;
 
               object.material =
-                uniformMaterial;
+                bodyMaterial;
+
+              return;
 
             }
 
 
-            else if (
-              name.includes(
-                'Hair'
-              )
+            /* ---------------------------------------------
+               HEAD / ARKIT FACE
+            --------------------------------------------- */
+
+            if (
+              name ===
+              'SK_FemBase2_Head_52ArKit'
+              ||
+              name ===
+              'SK_FemBase2_Head_52ARKit'
             ) {
+
+              object.visible =
+                true;
+
+              object.material =
+                faceMaterial;
+
+              return;
+
+            }
+
+
+            /* ---------------------------------------------
+               PROFESSIONAL TOP
+            --------------------------------------------- */
+
+            if (
+              name ===
+              'SK_FemBase2_TShirt'
+            ) {
+
+              object.visible =
+                true;
+
+              object.material =
+                shirtMaterial;
+
+              return;
+
+            }
+
+
+            /* ---------------------------------------------
+               LEGGINGS
+            --------------------------------------------- */
+
+            if (
+              name ===
+              'SK_FemBase2_Leggings'
+            ) {
+
+              object.visible =
+                true;
+
+              object.material =
+                leggingsMaterial;
+
+              return;
+
+            }
+
+
+            /* ---------------------------------------------
+               HAIR
+            --------------------------------------------- */
+
+            if (
+              name ===
+              'SK_FemBase2_Hair'
+            ) {
+
+              object.visible =
+                true;
 
               object.material =
                 hairMaterial;
 
+              return;
+
             }
 
 
-            else if (
-              name.includes(
-                'EyeL'
-              ) ||
-              name.includes(
-                'EyeR'
-              ) ||
-              name.includes(
-                'EyeShell'
-              )
+            /* ---------------------------------------------
+               EYES
+            --------------------------------------------- */
+
+            if (
+              name ===
+              'SK_FemBase2_EyeL'
+              ||
+              name ===
+              'SK_FemBase2_EyeR'
             ) {
+
+              object.visible =
+                true;
 
               object.material =
                 eyeMaterial;
 
+              return;
+
             }
 
 
-            else if (
-              name.includes(
-                'Lashes'
-              ) ||
-              name.includes(
-                'EyeEdge'
-              )
+            /* ---------------------------------------------
+               EYE SHELL
+            --------------------------------------------- */
+
+            if (
+              name ===
+              'SK_FemBase2_EyeShell'
             ) {
+
+              object.visible =
+                true;
+
+              object.material =
+                eyeShellMaterial;
+
+              return;
+
+            }
+
+
+            /* ---------------------------------------------
+               LASHES + EYE EDGE
+            --------------------------------------------- */
+
+            if (
+              name ===
+              'SK_FemBase2_Lashes'
+              ||
+              name ===
+              'SK_FemBase2_EyeEdge'
+            ) {
+
+              object.visible =
+                true;
 
               object.material =
                 darkDetailMaterial;
 
+              return;
+
             }
 
 
-            else if (
-              name.includes(
-                'Teeth'
-              )
+            /* ---------------------------------------------
+               TEETH
+            --------------------------------------------- */
+
+            if (
+              name ===
+              'SK_FemBase2_Teeth'
             ) {
+
+              object.visible =
+                true;
 
               object.material =
                 teethMaterial;
 
+              return;
+
             }
 
 
-            else if (
-              name.includes(
-                'Nails'
-              )
+            /* ---------------------------------------------
+               NAILS
+            --------------------------------------------- */
+
+            if (
+              name ===
+              'SK_FemBase2_Nails'
             ) {
+
+              object.visible =
+                true;
 
               object.material =
                 goldMaterial;
 
+              return;
+
             }
+
+
+            /* ---------------------------------------------
+               UNKNOWN / EXTRA GEOMETRY
+            --------------------------------------------- */
+
+            console.log(
+              'UNMAPPED PRIME MESH:',
+              name
+            );
 
           }
 
@@ -693,7 +832,7 @@
 
 
         /* =================================================
-           DIMENSIONS
+           CHARACTER DIMENSIONS
         ================================================= */
 
         const box =
@@ -783,20 +922,28 @@
 
 
         /* =================================================
-           FUTURE INTERACTION REFERENCES
+           FIND INTERACTION OBJECTS
         ================================================= */
 
         const importantObjects = {
 
-          head: null,
+          head:
+            null,
 
-          eyeL: null,
+          eyeL:
+            null,
 
-          eyeR: null,
+          eyeR:
+            null,
 
-          neck01: null,
+          neck01:
+            null,
 
-          neck02: null
+          neck02:
+            null,
+
+          faceMesh:
+            null
 
         };
 
@@ -810,10 +957,10 @@
 
 
             if (
+              object.isBone &&
               lowerName.includes(
                 'head'
-              ) &&
-              object.isBone
+              )
             ) {
 
               importantObjects.head =
@@ -867,6 +1014,20 @@
 
             }
 
+
+            if (
+              object.name ===
+              'SK_FemBase2_Head_52ArKit'
+              ||
+              object.name ===
+              'SK_FemBase2_Head_52ARKit'
+            ) {
+
+              importantObjects.faceMesh =
+                object;
+
+            }
+
           }
 
         );
@@ -876,6 +1037,22 @@
           'PRIME AI REFERENCES:',
           importantObjects
         );
+
+
+        if (
+          importantObjects.faceMesh &&
+          importantObjects.faceMesh
+            .morphTargetDictionary
+        ) {
+
+          console.log(
+            'ARKIT MORPHS:',
+            importantObjects
+              .faceMesh
+              .morphTargetDictionary
+          );
+
+        }
 
 
         window.PrimeAI = {
