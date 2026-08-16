@@ -29,12 +29,13 @@
       inset: 0;
       width: 100%;
       height: 100%;
+
       background:
         radial-gradient(
           circle at center,
           #071722 0%,
           #02070c 55%,
-          #000 100%
+          #000000 100%
         );
     }
 
@@ -47,9 +48,12 @@
     #status {
       position: absolute;
       z-index: 10;
+
       left: 50%;
       top: 50%;
-      transform: translate(-50%, -50%);
+
+      transform:
+        translate(-50%, -50%);
 
       color: #6eeaff;
 
@@ -58,9 +62,11 @@
         sans-serif;
 
       font-size: 15px;
+
       letter-spacing: 0.08em;
 
       text-align: center;
+
       pointer-events: none;
     }
   </style>
@@ -69,11 +75,15 @@
 <body>
 
   <div id="stage">
+
     <div id="status">
       Loading Prime Reception AI…
     </div>
+
   </div>
 
+
+  <!-- THREE.JS IMPORT MAP -->
 
   <script type="importmap">
   {
@@ -95,6 +105,12 @@
     'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
 
 
+    /* ==========================================
+       PRIME RECEPTION AI
+       THREE.JS CHARACTER VIEWER
+    ========================================== */
+
+
     const stage =
       document.getElementById('stage');
 
@@ -102,17 +118,17 @@
       document.getElementById('status');
 
 
-    /* =========================
+    /* ==========================================
        SCENE
-    ========================= */
+    ========================================== */
 
     const scene =
       new THREE.Scene();
 
 
-    /* =========================
+    /* ==========================================
        CAMERA
-    ========================= */
+    ========================================== */
 
     const camera =
       new THREE.PerspectiveCamera(
@@ -124,9 +140,9 @@
       );
 
 
-    /* =========================
+    /* ==========================================
        RENDERER
-    ========================= */
+    ========================================== */
 
     const renderer =
       new THREE.WebGLRenderer({
@@ -134,34 +150,44 @@
         alpha: true
       });
 
+
     renderer.setPixelRatio(
       Math.min(
-        window.devicePixelRatio,
+        window.devicePixelRatio || 1,
         2
       )
     );
+
 
     renderer.setSize(
       window.innerWidth,
       window.innerHeight
     );
 
+
     renderer.outputColorSpace =
       THREE.SRGBColorSpace;
+
 
     renderer.setClearColor(
       0x000000,
       0
     );
 
+
     stage.appendChild(
       renderer.domElement
     );
 
 
-    /* =========================
-       LIGHTS
-    ========================= */
+    /* ==========================================
+       LIGHTING
+    ========================================== */
+
+
+    /*
+      Soft general illumination
+    */
 
     const hemisphere =
       new THREE.HemisphereLight(
@@ -170,8 +196,14 @@
         2.5
       );
 
-    scene.add(hemisphere);
+    scene.add(
+      hemisphere
+    );
 
+
+    /*
+      Main front light
+    */
 
     const key =
       new THREE.DirectionalLight(
@@ -185,8 +217,14 @@
       5
     );
 
-    scene.add(key);
+    scene.add(
+      key
+    );
 
+
+    /*
+      Cyan fill light
+    */
 
     const fill =
       new THREE.DirectionalLight(
@@ -200,8 +238,14 @@
       3
     );
 
-    scene.add(fill);
+    scene.add(
+      fill
+    );
 
+
+    /*
+      Strong holographic rim
+    */
 
     const rim =
       new THREE.DirectionalLight(
@@ -215,12 +259,14 @@
       -4
     );
 
-    scene.add(rim);
+    scene.add(
+      rim
+    );
 
 
-    /* =========================
-       GLB
-    ========================= */
+    /* ==========================================
+       GLB LOADER
+    ========================================== */
 
     const loader =
       new GLTFLoader();
@@ -231,26 +277,37 @@
       './PrimeReceptionAI_Test01.glb',
 
 
-      /* SUCCESS */
+      /* ========================================
+         MODEL LOADED
+      ======================================== */
 
       function (gltf) {
 
         const model =
           gltf.scene;
 
-        scene.add(model);
+
+        scene.add(
+          model
+        );
 
 
-        /* Find model dimensions */
+        /* --------------------------------------
+           CALCULATE CHARACTER DIMENSIONS
+        -------------------------------------- */
 
         const box =
           new THREE.Box3()
-            .setFromObject(model);
+            .setFromObject(
+              model
+            );
+
 
         const size =
           box.getSize(
             new THREE.Vector3()
           );
+
 
         const center =
           box.getCenter(
@@ -258,7 +315,21 @@
           );
 
 
-        /* Center model */
+        console.log(
+          'MODEL SIZE:',
+          size
+        );
+
+
+        console.log(
+          'MODEL CENTER:',
+          center
+        );
+
+
+        /* --------------------------------------
+           CENTER CHARACTER
+        -------------------------------------- */
 
         model.position.set(
           -center.x,
@@ -267,47 +338,74 @@
         );
 
 
-/* Upper-body homepage framing */
-
-const verticalFOV =
-  THREE.MathUtils.degToRad(
-    camera.fov
-  );
-
-/* Use only part of the full body height
-   so the model appears much closer */
-const upperBodyHeight =
-  size.y * 0.52;
-
-let distance =
-  upperBodyHeight /
-  (
-    2 *
-    Math.tan(
-      verticalFOV / 2
-    )
-  );
-
-distance *= 1.05;
+        /* ======================================
+           HOMEPAGE UPPER-BODY FRAMING
+        ====================================== */
 
 
-/* Move camera upward toward chest/head */
-
-camera.position.set(
-  0,
-  size.y * 0.17,
-  distance
-);
+        const verticalFOV =
+          THREE.MathUtils.degToRad(
+            camera.fov
+          );
 
 
-/* Look slightly above the model center */
+        /*
+          We intentionally frame approximately
+          the upper 62% of the character instead
+          of fitting the entire body.
+        */
 
-camera.lookAt(
-  0,
-  size.y * 0.17,
-  0
-);
+        const upperBodyHeight =
+          size.y * 0.62;
 
+
+        let distance =
+          upperBodyHeight /
+          (
+            2 *
+            Math.tan(
+              verticalFOV / 2
+            )
+          );
+
+
+        /*
+          Small amount of breathing room
+          around the character.
+        */
+
+        distance *= 1.05;
+
+
+        /*
+          Raise the camera slightly above
+          the character's geometric center.
+
+          This moves our composition toward
+          the upper torso and face.
+        */
+
+        const cameraTargetHeight =
+          size.y * 0.11;
+
+
+        camera.position.set(
+          0,
+          cameraTargetHeight,
+          distance
+        );
+
+
+        camera.lookAt(
+          0,
+          cameraTargetHeight,
+          0
+        );
+
+
+        /* --------------------------------------
+           CAMERA CLIPPING PLANES
+        -------------------------------------- */
 
         camera.near =
           Math.max(
@@ -315,42 +413,17 @@ camera.lookAt(
             0.01
           );
 
+
         camera.far =
           distance * 100;
+
 
         camera.updateProjectionMatrix();
 
 
-        /* Inspect character */
-
-        model.traverse(
-          function (object) {
-
-            if (!object.isMesh) {
-              return;
-            }
-
-            console.log(
-              'MESH:',
-              object.name
-            );
-
-
-            if (
-              object.morphTargetDictionary
-            ) {
-
-              console.log(
-                'MORPH TARGETS:',
-                object.name,
-                object.morphTargetDictionary
-              );
-
-            }
-
-          }
-        );
-
+        /* ======================================
+           INSPECT CHARACTER STRUCTURE
+        ====================================== */
 
         console.log(
           'GLB SUCCESSFULLY LOADED:',
@@ -358,17 +431,103 @@ camera.lookAt(
         );
 
 
+        model.traverse(
+
+          function (object) {
+
+
+            /*
+              Log every object.
+
+              This will help us identify:
+
+              Head
+              Neck
+              EyeL
+              EyeR
+              Armature
+              Face meshes
+            */
+
+            console.log(
+              'OBJECT:',
+              object.name,
+              object.type
+            );
+
+
+            /*
+              Mesh inspection
+            */
+
+            if (
+              object.isMesh
+            ) {
+
+              console.log(
+                'MESH:',
+                object.name
+              );
+
+
+              /*
+                ARKit / facial morph targets
+              */
+
+              if (
+                object.morphTargetDictionary
+              ) {
+
+                console.log(
+                  'MORPH TARGETS:',
+                  object.name,
+                  object.morphTargetDictionary
+                );
+
+              }
+
+            }
+
+
+            /*
+              Bone inspection
+            */
+
+            if (
+              object.isBone
+            ) {
+
+              console.log(
+                'BONE:',
+                object.name
+              );
+
+            }
+
+          }
+
+        );
+
+
+        /* --------------------------------------
+           REMOVE LOADING MESSAGE
+        -------------------------------------- */
+
         status.style.display =
           'none';
 
       },
 
 
-      /* PROGRESS */
+      /* ========================================
+         DOWNLOAD PROGRESS
+      ======================================== */
 
       function (xhr) {
 
-        if (xhr.total) {
+        if (
+          xhr.total
+        ) {
 
           const percent =
             Math.round(
@@ -377,12 +536,15 @@ camera.lookAt(
               100
             );
 
+
           status.textContent =
             'Loading Prime Reception AI… ' +
             percent +
             '%';
 
-        } else {
+        }
+
+        else {
 
           const mb =
             (
@@ -390,6 +552,7 @@ camera.lookAt(
               1024 /
               1024
             ).toFixed(1);
+
 
           status.textContent =
             'Loading Prime Reception AI… ' +
@@ -401,7 +564,9 @@ camera.lookAt(
       },
 
 
-      /* ERROR */
+      /* ========================================
+         LOAD ERROR
+      ======================================== */
 
       function (error) {
 
@@ -409,6 +574,7 @@ camera.lookAt(
           'GLB ERROR:',
           error
         );
+
 
         status.innerHTML =
           'MODEL FAILED TO LOAD<br>' +
@@ -419,15 +585,16 @@ camera.lookAt(
     );
 
 
-    /* =========================
+    /* ==========================================
        RENDER LOOP
-    ========================= */
+    ========================================== */
 
     function animate() {
 
       requestAnimationFrame(
         animate
       );
+
 
       renderer.render(
         scene,
@@ -436,22 +603,27 @@ camera.lookAt(
 
     }
 
+
     animate();
 
 
-    /* =========================
-       RESIZE
-    ========================= */
+    /* ==========================================
+       RESPONSIVE RESIZE
+    ========================================== */
 
     window.addEventListener(
+
       'resize',
+
       function () {
 
         camera.aspect =
           window.innerWidth /
           window.innerHeight;
 
+
         camera.updateProjectionMatrix();
+
 
         renderer.setSize(
           window.innerWidth,
@@ -459,6 +631,7 @@ camera.lookAt(
         );
 
       }
+
     );
 
   </script>
