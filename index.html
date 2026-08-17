@@ -758,16 +758,16 @@
 
         color:
           new THREE.Color(
-            0xc8f5ff
+            0x4aa9d8
           ),
 
         emissive:
           new THREE.Color(
-            0x00bfff
+            0x006fae
           ),
 
         emissiveIntensity:
-          1.05,
+          0.42,
 
         metalness:
           0,
@@ -789,22 +789,22 @@
 
         color:
           new THREE.Color(
-            0xd8faff
+            0xe8fbff
           ),
 
         emissive:
           new THREE.Color(
-            0x006d91
+            0x004d70
           ),
 
         emissiveIntensity:
-          0.22,
+          0.10,
 
         transparent:
           true,
 
         opacity:
-          0.25,
+          0.16,
 
         roughness:
           0.07,
@@ -941,6 +941,10 @@
 
 
     let shirtMesh =
+      null;
+
+
+    let faceMorphMesh =
       null;
 
 
@@ -1352,14 +1356,117 @@
     */
 
     const RESTING_SMILE =
-      0.52;
+      0.68;
 
 
     const RESTING_CHEEK =
-      0.11;
+      0.08;
+
+
+    const RESTING_DIMPLE =
+      0.10;
+
+
+    function setMorphByName(
+      mesh,
+      name,
+      value
+    ) {
+
+      if (
+        !mesh ||
+        !mesh.morphTargetDictionary ||
+        !mesh.morphTargetInfluences
+      ) {
+
+        return false;
+
+      }
+
+
+      const index =
+        mesh.morphTargetDictionary[name];
+
+
+      if (
+        index ===
+        undefined
+      ) {
+
+        return false;
+
+      }
+
+
+      mesh.morphTargetInfluences[index] =
+        value;
+
+
+      return true;
+
+    }
 
 
     function applyRestingSmile() {
+
+      /*
+        Drive the actual visible ARKit head directly.
+        This avoids accidentally applying the smile only
+        to a duplicate/unified head mesh.
+      */
+
+      if (
+        faceMorphMesh
+      ) {
+
+        setMorphByName(
+          faceMorphMesh,
+          'mouthSmileLeft',
+          RESTING_SMILE
+        );
+
+
+        setMorphByName(
+          faceMorphMesh,
+          'mouthSmileRight',
+          RESTING_SMILE
+        );
+
+
+        setMorphByName(
+          faceMorphMesh,
+          'cheekSquintLeft',
+          RESTING_CHEEK
+        );
+
+
+        setMorphByName(
+          faceMorphMesh,
+          'cheekSquintRight',
+          RESTING_CHEEK
+        );
+
+
+        setMorphByName(
+          faceMorphMesh,
+          'mouthDimpleLeft',
+          RESTING_DIMPLE
+        );
+
+
+        setMorphByName(
+          faceMorphMesh,
+          'mouthDimpleRight',
+          RESTING_DIMPLE
+        );
+
+
+        return;
+
+      }
+
+
+      /* fallback */
 
       for (
         const entry
@@ -1367,9 +1474,7 @@
       ) {
 
         const influences =
-          entry
-            .mesh
-            .morphTargetInfluences;
+          entry.mesh.morphTargetInfluences;
 
 
         if (
@@ -1377,9 +1482,7 @@
           null
         ) {
 
-          influences[
-            entry.left
-          ] =
+          influences[entry.left] =
             RESTING_SMILE;
 
         }
@@ -1390,36 +1493,8 @@
           null
         ) {
 
-          influences[
-            entry.right
-          ] =
+          influences[entry.right] =
             RESTING_SMILE;
-
-        }
-
-
-        if (
-          entry.cheekLeft !==
-          null
-        ) {
-
-          influences[
-            entry.cheekLeft
-          ] =
-            RESTING_CHEEK;
-
-        }
-
-
-        if (
-          entry.cheekRight !==
-          null
-        ) {
-
-          influences[
-            entry.cheekRight
-          ] =
-            RESTING_CHEEK;
 
         }
 
@@ -1603,6 +1678,27 @@
                 object.name;
 
 
+              /*
+                The GLB contains exported unified duplicate meshes
+                in addition to the proper torso/head meshes.
+                Rendering both causes skin geometry to poke through
+                the T-shirt (the two skin-coloured circles seen on the chest).
+              */
+
+              if (
+                name === 'Mesh010' ||
+                name === 'Mesh010_1' ||
+                name.startsWith('SK_FemBase2_Unified_mesh')
+              ) {
+
+                object.visible =
+                  false;
+
+                return;
+
+              }
+
+
               registerFacialMorphs(
                 object
               );
@@ -1635,9 +1731,6 @@
 
               if (
                 name ===
-                  'Mesh010'
-                ||
-                name ===
                   'SK_FemBase2_Torso'
               ) {
 
@@ -1665,14 +1758,15 @@
 
               if (
                 name ===
-                  'Mesh010_1'
-                ||
-                name ===
                   'SK_FemBase2_Head_52ArKit'
                 ||
                 name ===
                   'SK_FemBase2_Head_52ARKit'
               ) {
+
+                faceMorphMesh =
+                  object;
+
 
                 object.visible =
                   true;
@@ -2314,6 +2408,17 @@
         );
 
 
+        console.log(
+          'VISIBLE SMILE HEAD:',
+          faceMorphMesh ? faceMorphMesh.name : 'NOT FOUND',
+          faceMorphMesh && faceMorphMesh.morphTargetDictionary
+            ? Object.keys(faceMorphMesh.morphTargetDictionary).filter(
+                name => name.toLowerCase().includes('smile') || name.toLowerCase().includes('dimple')
+              )
+            : []
+        );
+
+
         status.style.display =
           'none';
 
@@ -2467,7 +2572,7 @@
       const targetY =
         headWorld.y +
         modelSize.y *
-        0.018;
+        0.036;
 
 
       const targetX =
@@ -2487,8 +2592,7 @@
           modelSize.y *
           0.20
 
-        ) *
-        1.012;
+        );
 
 
       const verticalFOV =
@@ -2506,7 +2610,7 @@
 
 
       distance *=
-        1.012;
+        1.000;
 
 
       camera.position.set(
@@ -2957,13 +3061,13 @@
 
     const ARM_DROP =
       THREE.MathUtils.degToRad(
-        22
+        30
       );
 
 
     const ELBOW_RELAX =
       THREE.MathUtils.degToRad(
-        6
+        10
       );
 
 
@@ -3622,9 +3726,9 @@
 
 
       eyeMaterial.emissiveIntensity =
-        0.98 +
+        0.34 +
         eyePulse *
-        0.18;
+        0.14;
 
 
       lowerGlow.intensity =
