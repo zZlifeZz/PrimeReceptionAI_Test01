@@ -1772,6 +1772,113 @@
                   'SK_FemBase2_Torso'
               ) {
 
+                /*
+                  REAL CHEST INTERSECTION FIX
+
+                  The visible skin circles are not a lighting artifact. The
+                  torso surface physically intersects the tight shirt. Because
+                  this is a skinned mesh, simply scaling or polygon-offsetting
+                  the shirt does not reliably solve it.
+
+                  We therefore recess only the front torso vertices that are
+                  underneath the shirt. Arms, hands, neck and visible skin are
+                  left untouched.
+                */
+
+                if (
+                  name === 'SK_FemBase2_Torso' &&
+                  object.geometry &&
+                  object.geometry.attributes &&
+                  object.geometry.attributes.position &&
+                  !object.geometry.userData.primeTorsoChestRecessApplied
+                ) {
+
+                  const position =
+                    object.geometry.attributes.position;
+
+                  for (
+                    let i = 0;
+                    i < position.count;
+                    i++
+                  ) {
+
+                    const x = position.getX(i);
+                    const y = position.getY(i);
+                    const z = position.getZ(i);
+
+                    /*
+                      Model-space shirt coverage zone.
+                      Positive Z is the front of the torso in this GLB.
+                    */
+                    if (
+                      y > 1.145 &&
+                      y < 1.365 &&
+                      Math.abs(x) < 0.205 &&
+                      z > 0.015
+                    ) {
+
+                      /*
+                        Smoothly recess the chest under the garment.
+                        Strongest around the forward-most breast surface,
+                        tapering toward the shirt boundaries.
+                      */
+                      const sideMask =
+                        THREE.MathUtils.smoothstep(
+                          0.205 - Math.abs(x),
+                          0.0,
+                          0.075
+                        );
+
+                      const lowerMask =
+                        THREE.MathUtils.smoothstep(
+                          y,
+                          1.145,
+                          1.205
+                        );
+
+                      const upperMask =
+                        1.0 - THREE.MathUtils.smoothstep(
+                          y,
+                          1.315,
+                          1.365
+                        );
+
+                      const frontMask =
+                        THREE.MathUtils.clamp(
+                          (z - 0.015) / 0.17,
+                          0,
+                          1
+                        );
+
+                      const mask =
+                        Math.max(0.35, sideMask) *
+                        lowerMask *
+                        upperMask *
+                        frontMask;
+
+                      const recess =
+                        0.040 * mask;
+
+                      position.setZ(
+                        i,
+                        z - recess
+                      );
+
+                    }
+
+                  }
+
+                  position.needsUpdate =
+                    true;
+
+                  object.geometry.computeBoundingBox();
+                  object.geometry.computeBoundingSphere();
+                  object.geometry.userData.primeTorsoChestRecessApplied =
+                    true;
+
+                }
+
+
                 object.visible =
                   true;
 
@@ -1883,7 +1990,7 @@
                       const ny = normal.getY(i);
                       const nz = normal.getZ(i);
 
-                      const clearance = 0.010;
+                      const clearance = 0.018;
 
                       position.setXYZ(
                         i,
