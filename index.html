@@ -9,7 +9,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Prime Reception AI — Digital Receptionist</title>
+  <title>Prime Reception AI — Character Clean V7</title>
 
   <style>
     * {
@@ -374,6 +374,19 @@
       #holoSweep {
         width: 70vw;
       }
+    }
+
+
+
+    /* V7: all decorative VFX disabled while character geometry is corrected */
+    #projectionFx {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    #stage::before {
+      display: none !important;
     }
 
   </style>
@@ -1206,6 +1219,14 @@
       null;
 
 
+    let torsoMesh =
+      null;
+
+
+    let faceMorphMesh =
+      null;
+
+
     let headBone =
       null;
 
@@ -1315,6 +1336,14 @@
 
 
     let baseHandRRotation =
+      null;
+
+
+    let relaxedUpperArmLQuaternion =
+      null;
+
+
+    let relaxedUpperArmRQuaternion =
       null;
 
 
@@ -1626,86 +1655,102 @@
     */
 
     const RESTING_SMILE =
-      0.82;
+      1.25;
 
 
-    const RESTING_CHEEK =
-      0.20;
+    /*
+      V7 FACE EXPRESSION
+
+      We drive the confirmed visible ARKit head mesh directly.
+      Negative frown is intentional: it reinforces the upward
+      corner movement without opening the mouth into a grin.
+    */
+    function setFaceMorph(
+      name,
+      value
+    ) {
+
+      if (
+        !faceMorphMesh ||
+        !faceMorphMesh.morphTargetDictionary ||
+        !faceMorphMesh.morphTargetInfluences
+      ) {
+
+        return;
+
+      }
+
+
+      const index =
+        faceMorphMesh
+          .morphTargetDictionary[name];
+
+
+      if (
+        index !==
+        undefined
+      ) {
+
+        faceMorphMesh
+          .morphTargetInfluences[index] =
+            value;
+
+      }
+
+    }
 
 
     function applyRestingSmile() {
 
-      for (
-        const entry
-        of smileMeshes
-      ) {
+      setFaceMorph(
+        'mouthSmileLeft',
+        RESTING_SMILE
+      );
 
-        const influences =
-          entry
-            .mesh
-            .morphTargetInfluences;
+      setFaceMorph(
+        'mouthSmileRight',
+        RESTING_SMILE
+      );
 
+      setFaceMorph(
+        'mouthFrownLeft',
+        -0.16
+      );
 
-        if (
-          entry.left !==
-          null
-        ) {
+      setFaceMorph(
+        'mouthFrownRight',
+        -0.16
+      );
 
-          influences[
-            entry.left
-          ] =
-            RESTING_SMILE;
+      setFaceMorph(
+        'mouthDimpleLeft',
+        0.20
+      );
 
-        }
+      setFaceMorph(
+        'mouthDimpleRight',
+        0.20
+      );
 
+      setFaceMorph(
+        'cheekSquintLeft',
+        0.09
+      );
 
-        if (
-          entry.right !==
-          null
-        ) {
+      setFaceMorph(
+        'cheekSquintRight',
+        0.09
+      );
 
-          influences[
-            entry.right
-          ] =
-            RESTING_SMILE;
+      setFaceMorph(
+        'mouthUpperUpLeft',
+        0.05
+      );
 
-        }
-
-
-        if (
-          entry.cheekLeft !==
-          null
-        ) {
-
-          influences[
-            entry.cheekLeft
-          ] =
-            RESTING_CHEEK;
-
-        }
-
-
-        if (
-          entry.cheekRight !==
-          null
-        ) {
-
-          influences[
-            entry.cheekRight
-          ] =
-            RESTING_CHEEK;
-
-        }
-
-        if (entry.dimpleLeft !== null) {
-          influences[entry.dimpleLeft] = 0.18;
-        }
-
-        if (entry.dimpleRight !== null) {
-          influences[entry.dimpleRight] = 0.18;
-        }
-
-      }
+      setFaceMorph(
+        'mouthUpperUpRight',
+        0.05
+      );
 
     }
 
@@ -1942,6 +1987,398 @@
     }
 
     /* =====================================================
+       V7 CHEST MASK
+
+       The purchased torso and shirt occupy almost the same
+       surface around the chest. The skin-colored circles are
+       the torso physically intersecting the shirt.
+
+       We DO NOT inflate the shirt. Instead, we remove only the
+       front torso triangles that sit underneath the shirt.
+       Arms, hands, neck and the rest of the body stay intact.
+    ===================================================== */
+
+    function maskTorsoBehindShirt(
+      torso,
+      shirt
+    ) {
+
+      if (
+        !torso ||
+        !shirt ||
+        !torso.geometry ||
+        !shirt.geometry ||
+        !torso.geometry.index
+      ) {
+
+        return;
+
+      }
+
+
+      const geometry =
+        torso.geometry.clone();
+
+
+      const position =
+        geometry.attributes.position;
+
+
+      const sourceIndex =
+        geometry.index.array;
+
+
+      shirt.geometry.computeBoundingBox();
+
+
+      const shirtBox =
+        shirt.geometry.boundingBox;
+
+
+      /*
+        The chest mask deliberately stops below the neck.
+        It covers the front torso hidden by the shirt, including
+        the exact nipple region around y ~= 1.23 in this GLB.
+      */
+      const minX =
+        Math.max(
+          shirtBox.min.x + 0.010,
+          -0.205
+        );
+
+
+      const maxX =
+        Math.min(
+          shirtBox.max.x - 0.010,
+          0.205
+        );
+
+
+      const minY =
+        shirtBox.min.y +
+        0.012;
+
+
+      const maxY =
+        Math.min(
+          shirtBox.max.y - 0.065,
+          1.342
+        );
+
+
+      /*
+        Only the forward-facing half of the torso is removed.
+        This avoids unnecessary changes to the back/body volume.
+      */
+      const minZ =
+        0.015;
+
+
+      const kept =
+        [];
+
+
+      function insideMask(
+        vertexIndex
+      ) {
+
+        const x =
+          position.getX(
+            vertexIndex
+          );
+
+        const y =
+          position.getY(
+            vertexIndex
+          );
+
+        const z =
+          position.getZ(
+            vertexIndex
+          );
+
+
+        return (
+          x > minX &&
+          x < maxX &&
+          y > minY &&
+          y < maxY &&
+          z > minZ
+        );
+
+      }
+
+
+      for (
+        let i = 0;
+        i < sourceIndex.length;
+        i += 3
+      ) {
+
+        const a =
+          sourceIndex[i];
+
+        const b =
+          sourceIndex[i + 1];
+
+        const c =
+          sourceIndex[i + 2];
+
+
+        const ax = position.getX(a);
+        const ay = position.getY(a);
+        const az = position.getZ(a);
+
+        const bx = position.getX(b);
+        const by = position.getY(b);
+        const bz = position.getZ(b);
+
+        const cx = position.getX(c);
+        const cy = position.getY(c);
+        const cz = position.getZ(c);
+
+
+        const centerX =
+          (ax + bx + cx) / 3;
+
+        const centerY =
+          (ay + by + cy) / 3;
+
+        const centerZ =
+          (az + bz + cz) / 3;
+
+
+        const centerCovered = (
+          centerX > minX &&
+          centerX < maxX &&
+          centerY > minY &&
+          centerY < maxY &&
+          centerZ > minZ
+        );
+
+
+        const vertexHits =
+          Number(
+            insideMask(a)
+          ) +
+          Number(
+            insideMask(b)
+          ) +
+          Number(
+            insideMask(c)
+          );
+
+
+        /*
+          Dense topology means removing a triangle when its
+          center OR at least two vertices are covered gives a
+          clean hidden surface without affecting the arms.
+        */
+        if (
+          centerCovered ||
+          vertexHits >= 2
+        ) {
+
+          continue;
+
+        }
+
+
+        kept.push(
+          a,
+          b,
+          c
+        );
+
+      }
+
+
+      const IndexArray =
+        sourceIndex.constructor;
+
+
+      geometry.setIndex(
+        new THREE.BufferAttribute(
+          new IndexArray(kept),
+          1
+        )
+      );
+
+
+      geometry.computeBoundingSphere();
+
+
+      torso.geometry =
+        geometry;
+
+
+      torso.renderOrder =
+        0;
+
+
+      shirt.renderOrder =
+        1;
+
+
+      torso.material.depthWrite =
+        true;
+
+
+      shirt.material.depthWrite =
+        true;
+
+
+      console.log(
+        'V7 CHEST MASK:',
+        sourceIndex.length / 3,
+        'triangles ->',
+        kept.length / 3
+      );
+
+    }
+
+
+    /* =====================================================
+       V7 RELAXED ARM TARGETS
+
+       Old versions rotated Euler Z, but this skeleton's local
+       arm axes do not correspond to screen/world Z. Therefore
+       those rotations barely changed the pose.
+
+       V7 computes an actual WORLD-SPACE arm direction and
+       converts it back to the bone's local quaternion.
+    ===================================================== */
+
+    function makeBoneDirectionTarget(
+      bone,
+      child,
+      targetDirection
+    ) {
+
+      if (
+        !bone ||
+        !child ||
+        !bone.parent
+      ) {
+
+        return null;
+
+      }
+
+
+      model.updateMatrixWorld(
+        true
+      );
+
+
+      const bonePosition =
+        new THREE.Vector3();
+
+
+      const childPosition =
+        new THREE.Vector3();
+
+
+      bone.getWorldPosition(
+        bonePosition
+      );
+
+
+      child.getWorldPosition(
+        childPosition
+      );
+
+
+      const currentDirection =
+        childPosition
+          .sub(
+            bonePosition
+          )
+          .normalize();
+
+
+      const desiredDirection =
+        targetDirection
+          .clone()
+          .normalize();
+
+
+      const directionDelta =
+        new THREE.Quaternion()
+          .setFromUnitVectors(
+            currentDirection,
+            desiredDirection
+          );
+
+
+      const currentWorldQuaternion =
+        new THREE.Quaternion();
+
+
+      bone.getWorldQuaternion(
+        currentWorldQuaternion
+      );
+
+
+      const desiredWorldQuaternion =
+        directionDelta
+          .clone()
+          .multiply(
+            currentWorldQuaternion
+          );
+
+
+      const parentWorldQuaternion =
+        new THREE.Quaternion();
+
+
+      bone.parent.getWorldQuaternion(
+        parentWorldQuaternion
+      );
+
+
+      return parentWorldQuaternion
+        .invert()
+        .multiply(
+          desiredWorldQuaternion
+        );
+
+    }
+
+
+    function configureRelaxedArms() {
+
+      /*
+        Close to vertical, but not glued to the body.
+        Positive Z gives a slight natural forward hang.
+      */
+      relaxedUpperArmLQuaternion =
+        makeBoneDirectionTarget(
+          upperArmL,
+          lowerArmL,
+          new THREE.Vector3(
+            0.17,
+            -0.98,
+            0.08
+          )
+        );
+
+
+      relaxedUpperArmRQuaternion =
+        makeBoneDirectionTarget(
+          upperArmR,
+          lowerArmR,
+          new THREE.Vector3(
+            -0.17,
+            -0.98,
+            0.08
+          )
+        );
+
+    }
+
+
+    /* =====================================================
        LOAD MODEL
     ===================================================== */
 
@@ -2026,6 +2463,17 @@
                   'SK_FemBase2_Torso'
               ) {
 
+                if (
+                  name ===
+                  'SK_FemBase2_Torso'
+                ) {
+
+                  torsoMesh =
+                    object;
+
+                }
+
+
                 object.visible =
                   true;
 
@@ -2058,6 +2506,20 @@
                 name ===
                   'SK_FemBase2_Head_52ARKit'
               ) {
+
+                if (
+                  name ===
+                    'SK_FemBase2_Head_52ArKit'
+                  ||
+                  name ===
+                    'SK_FemBase2_Head_52ARKit'
+                ) {
+
+                  faceMorphMesh =
+                    object;
+
+                }
+
 
                 object.visible =
                   true;
@@ -2102,22 +2564,6 @@
 
                 );
 
-
-                /*
-                  V6 SHIRT FIX
-
-                  Do NOT push every shirt vertex along its normal. That was the
-                  source of the rigid / bulletproof-vest silhouette in V5.
-
-                  Keep the purchased garment geometry intact and add only a
-                  tiny local X/Z clearance. Y is unchanged, so the collar,
-                  sleeves and shirt length keep their authored proportions.
-                */
-                if (!object.userData.primeShirtV6Applied) {
-                  object.scale.x *= 1.012;
-                  object.scale.z *= 1.018;
-                  object.userData.primeShirtV6Applied = true;
-                }
 
                 shirtMaterial.side = THREE.DoubleSide;
                 shirtMaterial.depthWrite = true;
@@ -2691,6 +3137,19 @@
         );
 
 
+        /*
+          Fix the shirt/body intersection without deforming
+          the purchased shirt mesh.
+        */
+        maskTorsoBehindShirt(
+          torsoMesh,
+          shirtMesh
+        );
+
+
+        configureRelaxedArms();
+
+
         /* =================================================
            CAMERA
         ================================================= */
@@ -2700,31 +3159,13 @@
 
         /* =================================================
            EFFECTS
+
+           Disabled in V7. Character only.
         ================================================= */
 
-        createBackgroundParticles(
-          modelSize
-        );
-
-
-        createProjectionParticles();
-
-
-        if (
-          projectionFx
-        ) {
-
-          requestAnimationFrame(
-            function () {
-
-              projectionFx.classList.add(
-                'ready'
-              );
-
-            }
-          );
-
-        }
+        waterLightA.visible = false;
+        waterLightB.visible = false;
+        waterLightC.visible = false;
 
 
         /*
@@ -3384,146 +3825,45 @@
       These rotations are intentionally modest.
     */
 
-    const ARM_DROP =
-      THREE.MathUtils.degToRad(
-        30
-      );
-
-
-    const ELBOW_RELAX =
-      THREE.MathUtils.degToRad(
-        14
-      );
-
-
-    const SHOULDER_DROP =
-      THREE.MathUtils.degToRad(
-        4.0
-      );
-
-
     function applyRelaxedPose(
       now
     ) {
 
       /*
-        Extremely subtle natural idle motion.
-        The torso itself stays fixed.
+        The main relaxation is quaternion-based and therefore
+        follows the real bone orientation instead of assuming
+        a local Euler axis.
       */
-
-      const idle =
-        Math.sin(
-          now *
-          0.72
-        ) *
-        THREE.MathUtils.degToRad(
-          0.55
-        );
-
-
-      const idle2 =
-        Math.sin(
-          now *
-          0.49 +
-          1.3
-        ) *
-        THREE.MathUtils.degToRad(
-          0.35
-        );
-
-
-      if (
-        clavicleL &&
-        baseClavicleLRotation
-      ) {
-
-        clavicleL.rotation.copy(
-          baseClavicleLRotation
-        );
-
-
-        clavicleL.rotation.z -=
-          SHOULDER_DROP;
-
-
-        clavicleL.rotation.x +=
-          idle2;
-
-      }
-
-
-      if (
-        clavicleR &&
-        baseClavicleRRotation
-      ) {
-
-        clavicleR.rotation.copy(
-          baseClavicleRRotation
-        );
-
-
-        clavicleR.rotation.z +=
-          SHOULDER_DROP;
-
-
-        clavicleR.rotation.x -=
-          idle2;
-
-      }
-
-
-      /*
-        LEFT ARM DOWN
-      */
-
       if (
         upperArmL &&
-        baseUpperArmLRotation
+        relaxedUpperArmLQuaternion
       ) {
 
-        upperArmL.rotation.copy(
-          baseUpperArmLRotation
+        upperArmL.quaternion.copy(
+          relaxedUpperArmLQuaternion
         );
-
-
-        upperArmL.rotation.z -=
-          ARM_DROP;
-
-
-        upperArmL.rotation.x +=
-          idle;
 
       }
 
-
-      /*
-        RIGHT ARM DOWN
-      */
 
       if (
         upperArmR &&
-        baseUpperArmRRotation
+        relaxedUpperArmRQuaternion
       ) {
 
-        upperArmR.rotation.copy(
-          baseUpperArmRRotation
+        upperArmR.quaternion.copy(
+          relaxedUpperArmRQuaternion
         );
-
-
-        upperArmR.rotation.z +=
-          ARM_DROP;
-
-
-        upperArmR.rotation.x -=
-          idle;
 
       }
 
 
       /*
-        Gentle elbow bend.
+        Forearms and wrists retain the purchased rig's authored
+        local bend. Because they inherit the new upper-arm
+        direction, the hands naturally hang much closer to the
+        sides instead of remaining in the statue/A-pose.
       */
-
       if (
         lowerArmL &&
         baseLowerArmLRotation
@@ -3532,10 +3872,6 @@
         lowerArmL.rotation.copy(
           baseLowerArmLRotation
         );
-
-
-        lowerArmL.rotation.z -=
-          ELBOW_RELAX;
 
       }
 
@@ -3549,16 +3885,8 @@
           baseLowerArmRRotation
         );
 
-
-        lowerArmR.rotation.z +=
-          ELBOW_RELAX;
-
       }
 
-
-      /*
-        Keep wrists near their original orientation.
-      */
 
       if (
         handL &&
@@ -3921,119 +4249,11 @@
 
 
       /* =========================================
-         MOVING CYAN REFLECTION
+         DECORATIVE VFX
+
+         Disabled in V7 while the character itself is being
+         finalized.
       ========================================= */
-
-      const waterTime =
-        now *
-        0.72;
-
-
-      waterLightA.position.set(
-
-        Math.sin(
-          waterTime
-        ) *
-        1.3,
-
-        0.35 +
-        Math.sin(
-          waterTime *
-          1.8
-        ) *
-        0.42,
-
-        1.45 +
-        Math.cos(
-          waterTime
-        ) *
-        0.50
-
-      );
-
-
-      waterLightB.position.set(
-
-        Math.cos(
-          waterTime *
-          1.13
-        ) *
-        1.20,
-
-        1.05 +
-        Math.sin(
-          waterTime *
-          1.44 +
-          1.7
-        ) *
-        0.44,
-
-        1.15
-
-      );
-
-
-      waterLightC.position.set(
-
-        Math.sin(
-          waterTime *
-          0.72 +
-          2.2
-        ) *
-        1.5,
-
-        -0.05 +
-        Math.cos(
-          waterTime *
-          1.3
-        ) *
-        0.38,
-
-        0.75
-
-      );
-
-
-      waterLightA.intensity =
-        0.95 +
-        (
-          Math.sin(
-            now *
-            2.1
-          ) *
-          0.5 +
-          0.5
-        ) *
-        0.52;
-
-
-      waterLightB.intensity =
-        0.65 +
-        (
-          Math.sin(
-            now *
-            2.65 +
-            1.4
-          ) *
-          0.5 +
-          0.5
-        ) *
-        0.42;
-
-
-      waterLightC.intensity =
-        0.38 +
-        (
-          Math.sin(
-            now *
-            1.9 +
-            2.8
-          ) *
-          0.5 +
-          0.5
-        ) *
-        0.34;
-
 
       /* =========================================
          EYE PULSE
@@ -4065,15 +4285,6 @@
       /* =========================================
          PARTICLES
       ========================================= */
-
-      if (
-        backgroundParticles
-      ) {
-
-        backgroundParticles.rotation.y +=
-          0.00009;
-
-      }
 
 
       /* =========================================
