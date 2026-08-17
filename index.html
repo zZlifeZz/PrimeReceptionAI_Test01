@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
 
@@ -27,40 +28,49 @@
     #stage {
       position: fixed;
       inset: 0;
+
       width: 100%;
       height: 100%;
+
       overflow: hidden;
 
       background:
         radial-gradient(
-          ellipse at 50% 38%,
-          #0a1b26 0%,
-          #05131b 27%,
-          #02080d 54%,
+          ellipse at 50% 45%,
+          #09202c 0%,
+          #04131b 27%,
+          #02080d 55%,
           #000000 100%
         );
     }
 
-    /* very subtle scan texture */
+    /* -----------------------------------------
+       Very subtle digital scan atmosphere
+    ----------------------------------------- */
+
     #stage::before {
       content: "";
+
       position: absolute;
       inset: 0;
+
       z-index: 4;
+
       pointer-events: none;
 
-      opacity: 0.03;
+      opacity: 0.028;
 
       background:
         repeating-linear-gradient(
           to bottom,
           transparent 0px,
           transparent 5px,
-          rgba(71, 229, 255, 0.14) 6px,
+          rgba(69, 227, 255, 0.14) 6px,
           transparent 7px
         );
 
-      animation: scanMove 12s linear infinite;
+      animation:
+        scanMove 13s linear infinite;
     }
 
     @keyframes scanMove {
@@ -69,58 +79,89 @@
       }
 
       to {
-        background-position-y: 220px;
+        background-position-y: 240px;
       }
     }
 
-    /* cinematic vignette */
+
+    /* -----------------------------------------
+       Cinematic vignette
+    ----------------------------------------- */
+
     #stage::after {
       content: "";
+
       position: absolute;
       inset: 0;
+
       z-index: 5;
+
       pointer-events: none;
 
       background:
         radial-gradient(
           ellipse at center,
-          transparent 36%,
-          rgba(0, 0, 0, 0.10) 58%,
+          transparent 37%,
+          rgba(0, 0, 0, 0.08) 59%,
           rgba(0, 0, 0, 0.78) 100%
         );
     }
 
+
     #stage canvas {
       position: relative;
+
       z-index: 1;
+
       display: block;
+
       width: 100%;
       height: 100%;
     }
 
+
     #status {
       position: absolute;
+
       z-index: 20;
+
       left: 50%;
       top: 50%;
-      transform: translate(-50%, -50%);
 
-      font-family: Arial, sans-serif;
-      color: #67e9ff;
-      font-size: 14px;
-      letter-spacing: 0.11em;
+      transform:
+        translate(-50%, -50%);
 
-      pointer-events: none;
+      color:
+        #62e7ff;
+
+      font-family:
+        Arial,
+        sans-serif;
+
+      font-size:
+        14px;
+
+      letter-spacing:
+        0.11em;
+
+      white-space:
+        nowrap;
+
+      pointer-events:
+        none;
     }
   </style>
 </head>
 
+
 <body>
 
   <div id="stage">
+
     <div id="status">
       INITIALIZING PRIME RECEPTION AI…
     </div>
+
   </div>
 
 
@@ -149,10 +190,15 @@
     ===================================================== */
 
     const stage =
-      document.getElementById('stage');
+      document.getElementById(
+        'stage'
+      );
+
 
     const status =
-      document.getElementById('status');
+      document.getElementById(
+        'status'
+      );
 
 
     /* =====================================================
@@ -165,31 +211,52 @@
 
     const camera =
       new THREE.PerspectiveCamera(
-        31,
-        window.innerWidth / window.innerHeight,
+
+        30,
+
+        window.innerWidth /
+        window.innerHeight,
+
         0.01,
+
         1000
+
       );
 
 
+    /* =====================================================
+       RENDERER
+    ===================================================== */
+
     const renderer =
       new THREE.WebGLRenderer({
+
         antialias: true,
+
         alpha: true
+
       });
 
 
     renderer.setPixelRatio(
+
       Math.min(
+
         window.devicePixelRatio || 1,
+
         2
+
       )
+
     );
 
 
     renderer.setSize(
+
       window.innerWidth,
+
       window.innerHeight
+
     );
 
 
@@ -202,12 +269,15 @@
 
 
     renderer.toneMappingExposure =
-      1.02;
+      1.05;
 
 
     renderer.setClearColor(
+
       0x000000,
+
       0
+
     );
 
 
@@ -220,46 +290,115 @@
        LIGHTING
     ===================================================== */
 
+
+    /*
+      General environment illumination.
+    */
+
     const ambient =
       new THREE.HemisphereLight(
-        0xe9f9ff,
-        0x020405,
-        0.88
+
+        0xfff4ec,
+
+        0x020607,
+
+        0.92
+
       );
+
 
     scene.add(
       ambient
     );
 
 
+    /*
+      Main human-face key light.
+      Slight warmth helps the skin.
+    */
+
     const keyLight =
       new THREE.DirectionalLight(
-        0xfffaf2,
-        2.75
+
+        0xffe8d9,
+
+        2.6
+
       );
 
+
     keyLight.position.set(
+
       1.5,
-      4,
+
+      4.3,
+
       5.8
+
     );
+
 
     scene.add(
       keyLight
     );
 
 
-    const cyanLeft =
-      new THREE.DirectionalLight(
-        0x22ddff,
-        4.7
+    /*
+      Soft frontal fill.
+    */
+
+    const frontFill =
+      new THREE.PointLight(
+
+        0xffe9dd,
+
+        1.0,
+
+        6
+
       );
 
-    cyanLeft.position.set(
-      -4.3,
-      3.6,
-      -3.5
+
+    frontFill.position.set(
+
+      -0.4,
+
+      1.7,
+
+      3.2
+
     );
+
+
+    scene.add(
+      frontFill
+    );
+
+
+    /*
+      Strong cyan holographic silhouette.
+    */
+
+    const cyanLeft =
+      new THREE.DirectionalLight(
+
+        0x19ddff,
+
+        4.8
+
+      );
+
+
+    cyanLeft.position.set(
+
+      -4.5,
+
+      3.7,
+
+      -3.8
+
+    );
+
 
     scene.add(
       cyanLeft
@@ -268,71 +407,148 @@
 
     const cyanRight =
       new THREE.DirectionalLight(
-        0x69efff,
-        2.6
+
+        0x63e9ff,
+
+        2.7
+
       );
 
+
     cyanRight.position.set(
-      4,
-      3,
+
+      4.5,
+
+      3.2,
+
       -3.2
+
     );
+
 
     scene.add(
       cyanRight
     );
 
 
-    const goldLight =
+    /*
+      Gold illumination reinforces clothing.
+    */
+
+    const goldKey =
       new THREE.DirectionalLight(
-        0xd7aa50,
-        1.1
+
+        0xffc35a,
+
+        1.45
+
       );
 
-    goldLight.position.set(
-      3.5,
-      2.6,
-      -1.8
+
+    goldKey.position.set(
+
+      3.2,
+
+      2.8,
+
+      3.5
+
     );
+
 
     scene.add(
-      goldLight
+      goldKey
     );
 
+
+    /*
+      Lower cyan projection.
+    */
 
     const lowerGlow =
       new THREE.PointLight(
-        0x24ddff,
-        9.5,
-        8
+
+        0x16dfff,
+
+        6.5,
+
+        6
+
       );
 
+
     lowerGlow.position.set(
+
       0,
-      -1.5,
-      1.5
+
+      -1.0,
+
+      1.4
+
     );
+
 
     scene.add(
       lowerGlow
     );
 
 
-    const faceFill =
+    /* =====================================================
+       MOVING "WATER / HOLOGRAM REFLECTION" LIGHTS
+
+       These produce animated cyan reflections across the
+       character instead of making her skin look wet.
+    ===================================================== */
+
+
+    const waterLightA =
       new THREE.PointLight(
-        0x74ebff,
-        0.8,
-        4.5
+
+        0x11e5ff,
+
+        1.7,
+
+        4
+
       );
 
-    faceFill.position.set(
-      0,
-      1.6,
-      2.3
-    );
 
     scene.add(
-      faceFill
+      waterLightA
+    );
+
+
+    const waterLightB =
+      new THREE.PointLight(
+
+        0x55edff,
+
+        1.15,
+
+        4
+
+      );
+
+
+    scene.add(
+      waterLightB
+    );
+
+
+    const waterLightC =
+      new THREE.PointLight(
+
+        0x008fb3,
+
+        0.9,
+
+        3.5
+
+      );
+
+
+    scene.add(
+      waterLightC
     );
 
 
@@ -340,188 +556,244 @@
        MATERIALS
     ===================================================== */
 
+
+    /*
+      HUMAN-LOOKING EXPOSED SKIN
+
+      This material is used for torso/arms/hands.
+      We deliberately keep metalness almost zero.
+    */
+
     const bodyMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
-          new THREE.Color(0xb8c7cb),
+          new THREE.Color(
+            0xc9aba0
+          ),
 
         emissive:
-          new THREE.Color(0x03242b),
+          new THREE.Color(
+            0x080d0e
+          ),
 
         emissiveIntensity:
-          0.075,
-
-        metalness:
-          0.18,
-
-        roughness:
-          0.39,
-
-        clearcoat:
-          0.30,
-
-        clearcoatRoughness:
-          0.28,
-
-        sheen:
-          0.14,
-
-        sheenColor:
-          new THREE.Color(0x5bdcec)
-
-      });
-
-
-    const faceMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(0xd8dfe0),
-
-        emissive:
-          new THREE.Color(0x021418),
-
-        emissiveIntensity:
-          0.035,
-
-        metalness:
-          0.035,
-
-        roughness:
-          0.46,
-
-        clearcoat:
-          0.17,
-
-        clearcoatRoughness:
-          0.34,
-
-        sheen:
-          0.07,
-
-        sheenColor:
-          new THREE.Color(0x78d9e6)
-
-      });
-
-
-    const shirtMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(0xd9e3e5),
-
-        emissive:
-          new THREE.Color(0x042d35),
-
-        emissiveIntensity:
-          0.085,
-
-        metalness:
-          0.24,
-
-        roughness:
-          0.31,
-
-        clearcoat:
-          0.41,
-
-        clearcoatRoughness:
-          0.22,
-
-        sheen:
-          0.21,
-
-        sheenColor:
-          new THREE.Color(0x55e5f5)
-
-      });
-
-
-    const leggingsMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(0xc5d1d5),
-
-        emissive:
-          new THREE.Color(0x032830),
-
-        emissiveIntensity:
-          0.07,
-
-        metalness:
-          0.27,
-
-        roughness:
-          0.32,
-
-        clearcoat:
-          0.38,
-
-        clearcoatRoughness:
-          0.25,
-
-        sheen:
-          0.17,
-
-        sheenColor:
-          new THREE.Color(0x45d9eb)
-
-      });
-
-
-    const hairMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(0x030609),
-
-        emissive:
-          new THREE.Color(0x00141b),
-
-        emissiveIntensity:
-          0.11,
-
-        metalness:
-          0.16,
-
-        roughness:
-          0.39,
-
-        clearcoat:
-          0.25,
-
-        clearcoatRoughness:
-          0.28
-
-      });
-
-
-    const eyeMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(0xe8fcff),
-
-        emissive:
-          new THREE.Color(0x25d9f5),
-
-        emissiveIntensity:
-          0.82,
+          0.018,
 
         metalness:
           0.01,
 
         roughness:
-          0.15,
+          0.49,
+
+        clearcoat:
+          0.10,
+
+        clearcoatRoughness:
+          0.46,
+
+        sheen:
+          0.08,
+
+        sheenColor:
+          new THREE.Color(
+            0xffcabe
+          )
+
+      });
+
+
+    /*
+      FACE
+
+      Slightly brighter than the body.
+    */
+
+    const faceMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0xd3b4a9
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x06090a
+          ),
+
+        emissiveIntensity:
+          0.012,
+
+        metalness:
+          0,
+
+        roughness:
+          0.50,
+
+        clearcoat:
+          0.085,
+
+        clearcoatRoughness:
+          0.48,
+
+        sheen:
+          0.075,
+
+        sheenColor:
+          new THREE.Color(
+            0xffd2c5
+          )
+
+      });
+
+
+    /*
+      PREMIUM GOLD SHIRT
+    */
+
+    const shirtMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0xc4942e
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x251503
+          ),
+
+        emissiveIntensity:
+          0.055,
+
+        metalness:
+          0.73,
+
+        roughness:
+          0.25,
+
+        clearcoat:
+          0.48,
+
+        clearcoatRoughness:
+          0.19,
+
+        sheen:
+          0.24,
+
+        sheenColor:
+          new THREE.Color(
+            0xffd46b
+          )
+
+      });
+
+
+    /*
+      Matching gold lower uniform.
+      Most of this will be outside our new camera crop.
+    */
+
+    const leggingsMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0x9e711b
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x1c1001
+          ),
+
+        emissiveIntensity:
+          0.040,
+
+        metalness:
+          0.69,
+
+        roughness:
+          0.29,
+
+        clearcoat:
+          0.40,
+
+        clearcoatRoughness:
+          0.23
+
+      });
+
+
+    /*
+      Dark hair.
+    */
+
+    const hairMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0x030405
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x00141a
+          ),
+
+        emissiveIntensity:
+          0.10,
+
+        metalness:
+          0.12,
+
+        roughness:
+          0.38,
+
+        clearcoat:
+          0.28,
+
+        clearcoatRoughness:
+          0.27
+
+      });
+
+
+    /*
+      Eyes remain futuristic,
+      but not overwhelmingly bright.
+    */
+
+    const eyeMaterial =
+      new THREE.MeshPhysicalMaterial({
+
+        color:
+          new THREE.Color(
+            0xd9f9ff
+          ),
+
+        emissive:
+          new THREE.Color(
+            0x1cd9f5
+          ),
+
+        emissiveIntensity:
+          0.72,
+
+        metalness:
+          0,
+
+        roughness:
+          0.14,
 
         clearcoat:
           1,
 
         clearcoatRoughness:
-          0.05
+          0.04
 
       });
 
@@ -530,22 +802,19 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          0xd4faff,
+          0xe3fbff,
 
         emissive:
-          0x064b57,
+          0x054a54,
 
         emissiveIntensity:
-          0.20,
+          0.15,
 
         transparent:
           true,
 
         opacity:
-          0.31,
-
-        metalness:
-          0,
+          0.26,
 
         roughness:
           0.08,
@@ -560,7 +829,7 @@
       new THREE.MeshStandardMaterial({
 
         color:
-          0x010203,
+          0x010101,
 
         roughness:
           0.46
@@ -572,37 +841,40 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          0xf5f6f4,
+          0xf4eee9,
 
         roughness:
-          0.33,
+          0.34,
 
         clearcoat:
-          0.12
+          0.10
 
       });
 
 
-    const goldMaterial =
+    const nailMaterial =
       new THREE.MeshPhysicalMaterial({
 
         color:
-          0xd2a449,
-
-        emissive:
-          0x281900,
-
-        emissiveIntensity:
-          0.10,
+          new THREE.Color(
+            0xd1a259
+          ),
 
         metalness:
-          0.72,
+          0.18,
 
         roughness:
-          0.27
+          0.36,
+
+        clearcoat:
+          0.35
 
       });
 
+
+    /* =====================================================
+       CLEAN MATERIAL HELPER
+    ===================================================== */
 
     function forceCleanMaterial(
       object,
@@ -612,35 +884,46 @@
       object.material =
         material;
 
+
       material.map =
         null;
+
 
       material.normalMap =
         null;
 
+
       material.roughnessMap =
         null;
+
 
       material.metalnessMap =
         null;
 
+
       material.aoMap =
         null;
+
 
       material.emissiveMap =
         null;
 
+
       material.alphaMap =
         null;
+
 
       material.lightMap =
         null;
 
+
       material.displacementMap =
         null;
 
+
       material.vertexColors =
         false;
+
 
       material.needsUpdate =
         true;
@@ -649,41 +932,61 @@
 
 
     /* =====================================================
-       MODEL VARIABLES — DECLARED ONCE ONLY
+       MODEL REFERENCES
+       DECLARED ONCE.
     ===================================================== */
 
     let model =
       null;
 
+
     let modelSize =
       null;
+
+
+    let modelBox =
+      null;
+
+
+    let shirtMesh =
+      null;
+
 
     let headBone =
       null;
 
+
     let neck01 =
       null;
+
 
     let neck02 =
       null;
 
+
     let eyeLObject =
       null;
+
 
     let eyeRObject =
       null;
 
+
     let baseHeadRotation =
       null;
+
 
     let baseNeck01Rotation =
       null;
 
+
     let baseNeck02Rotation =
       null;
 
+
     let baseEyeLRotation =
       null;
+
 
     let baseEyeRRotation =
       null;
@@ -719,13 +1022,17 @@
 
       'pointermove',
 
-      function (event) {
+      function (
+        event
+      ) {
 
         let x =
           (
             event.clientX /
             window.innerWidth
-          ) * 2 - 1;
+          ) *
+          2 -
+          1;
 
 
         let y =
@@ -733,16 +1040,24 @@
             (
               event.clientY /
               window.innerHeight
-            ) * 2 - 1
+            ) *
+            2 -
+            1
           );
 
 
+        /*
+          Small dead zone near screen center.
+        */
+
         const deadZone =
-          0.055;
+          0.045;
 
 
         if (
-          Math.abs(x) <
+          Math.abs(
+            x
+          ) <
           deadZone
         ) {
 
@@ -753,7 +1068,9 @@
 
 
         if (
-          Math.abs(y) <
+          Math.abs(
+            y
+          ) <
           deadZone
         ) {
 
@@ -763,19 +1080,32 @@
         }
 
 
+        /*
+          Slight curve makes center movements gentle
+          while still allowing strong movement at edges.
+        */
+
         x =
-          Math.sign(x) *
+          Math.sign(
+            x
+          ) *
           Math.pow(
-            Math.abs(x),
-            1.15
+            Math.abs(
+              x
+            ),
+            1.10
           );
 
 
         y =
-          Math.sign(y) *
+          Math.sign(
+            y
+          ) *
           Math.pow(
-            Math.abs(y),
-            1.15
+            Math.abs(
+              y
+            ),
+            1.06
           );
 
 
@@ -817,668 +1147,98 @@
 
 
     /* =====================================================
-       BACKGROUND PARTICLES
+       MORPH UTILITIES
     ===================================================== */
 
-    let backgroundParticles =
-      null;
-
-
-    function createBackgroundParticles(
-      size
+    function normalizeMorphName(
+      name
     ) {
 
-      const count =
-        270;
-
-
-      const positions =
-        new Float32Array(
-          count * 3
+      return name
+        .toLowerCase()
+        .replace(
+          /[^a-z0-9]/g,
+          ''
         );
-
-
-      for (
-        let i = 0;
-        i < count;
-        i++
-      ) {
-
-        const i3 =
-          i * 3;
-
-
-        positions[i3] =
-          (
-            Math.random() -
-            0.5
-          ) *
-          size.x *
-          3.1;
-
-
-        positions[i3 + 1] =
-          (
-            Math.random() -
-            0.44
-          ) *
-          size.y *
-          1.35;
-
-
-        positions[i3 + 2] =
-          (
-            Math.random() -
-            0.5
-          ) *
-          Math.max(
-            size.x * 3,
-            size.z * 5
-          );
-
-      }
-
-
-      const geometry =
-        new THREE.BufferGeometry();
-
-
-      geometry.setAttribute(
-
-        'position',
-
-        new THREE.BufferAttribute(
-          positions,
-          3
-        )
-
-      );
-
-
-      const material =
-        new THREE.PointsMaterial({
-
-          color:
-            0x36ddff,
-
-          size:
-            Math.max(
-              size.y *
-              0.0022,
-              0.002
-            ),
-
-          transparent:
-            true,
-
-          opacity:
-            0.19,
-
-          depthWrite:
-            false,
-
-          blending:
-            THREE.AdditiveBlending
-
-        });
-
-
-      backgroundParticles =
-        new THREE.Points(
-          geometry,
-          material
-        );
-
-
-      scene.add(
-        backgroundParticles
-      );
 
     }
 
 
-    /* =====================================================
-       PROJECTOR / WATER EFFECT
-    ===================================================== */
-
-    const projectorGroup =
-      new THREE.Group();
-
-
-    scene.add(
-      projectorGroup
-    );
-
-
-    let waterMaterial =
-      null;
-
-
-    let projectorY =
-      0;
-
-
-    function createProjector(
-      size
+    function findMorphIndex(
+      dictionary,
+      possibilities
     ) {
 
-      projectorY =
-        -size.y *
-        0.39;
-
-
-      const radius =
-        size.x *
-        0.70;
-
-
-      const waterGeometry =
-        new THREE.CircleGeometry(
-          radius,
-          128
-        );
-
-
-      waterMaterial =
-        new THREE.ShaderMaterial({
-
-          transparent:
-            true,
-
-          depthWrite:
-            false,
-
-          side:
-            THREE.DoubleSide,
-
-          blending:
-            THREE.AdditiveBlending,
-
-          uniforms: {
-
-            uTime: {
-              value: 0
-            }
-
-          },
-
-          vertexShader: `
-
-            varying vec2 vUv;
-
-            void main() {
-
-              vUv =
-                uv;
-
-              gl_Position =
-                projectionMatrix *
-                modelViewMatrix *
-                vec4(
-                  position,
-                  1.0
-                );
-
-            }
-
-          `,
-
-          fragmentShader: `
-
-            uniform float uTime;
-
-            varying vec2 vUv;
-
-            void main() {
-
-              vec2 p =
-                vUv -
-                vec2(0.5);
-
-
-              float d =
-                length(p) *
-                2.0;
-
-
-              float mask =
-                1.0 -
-                smoothstep(
-                  0.70,
-                  1.0,
-                  d
-                );
-
-
-              float waveA =
-                sin(
-                  d *
-                  74.0 -
-                  uTime *
-                  4.0
-                );
-
-
-              float waveB =
-                sin(
-                  d *
-                  115.0 -
-                  uTime *
-                  6.1
-                );
-
-
-              waveA =
-                smoothstep(
-                  0.67,
-                  1.0,
-                  waveA
-                );
-
-
-              waveB =
-                smoothstep(
-                  0.72,
-                  1.0,
-                  waveB
-                );
-
-
-              float center =
-                1.0 -
-                smoothstep(
-                  0.0,
-                  0.62,
-                  d
-                );
-
-
-              float alpha =
-                (
-                  waveA *
-                  0.35 +
-                  waveB *
-                  0.22 +
-                  center *
-                  0.14
-                ) *
-                mask;
-
-
-              gl_FragColor =
-                vec4(
-                  0.05,
-                  0.80,
-                  1.0,
-                  alpha
-                );
-
-            }
-
-          `
-
-        });
-
-
-      const water =
-        new THREE.Mesh(
-          waterGeometry,
-          waterMaterial
-        );
-
-
-      water.rotation.x =
-        -Math.PI / 2;
-
-
-      water.position.y =
-        projectorY;
-
-
-      projectorGroup.add(
-        water
-      );
-
-
-      const ringData = [
-
-        [0.72, 0.009, 0.68],
-
-        [0.88, 0.005, 0.42],
-
-        [1.03, 0.0036, 0.27],
-
-        [1.21, 0.0025, 0.14]
-
-      ];
-
+      /*
+        First try exact names.
+      */
 
       for (
-        const values
-        of ringData
+        const possibility
+        of possibilities
       ) {
-
-        const material =
-          new THREE.MeshBasicMaterial({
-
-            color:
-              0x41e8ff,
-
-            transparent:
-              true,
-
-            opacity:
-              values[2],
-
-            depthWrite:
-              false,
-
-            blending:
-              THREE.AdditiveBlending
-
-          });
-
-
-        const ring =
-          new THREE.Mesh(
-
-            new THREE.TorusGeometry(
-
-              radius *
-              values[0],
-
-              radius *
-              values[1],
-
-              10,
-
-              128
-
-            ),
-
-            material
-
-          );
-
-
-        ring.rotation.x =
-          Math.PI / 2;
-
-
-        ring.position.y =
-          projectorY +
-          0.001;
-
-
-        ring.userData.phase =
-          Math.random() *
-          Math.PI *
-          2;
-
-
-        projectorGroup.add(
-          ring
-        );
-
-      }
-
-    }
-
-
-    /* =====================================================
-       LOWER DIGITAL PARTICLES
-    ===================================================== */
-
-    let lowerParticles =
-      null;
-
-
-    let lowerPositions =
-      null;
-
-
-    const lowerSpeeds =
-      [];
-
-
-    function createLowerParticles(
-      size
-    ) {
-
-      const count =
-        340;
-
-
-      lowerPositions =
-        new Float32Array(
-          count * 3
-        );
-
-
-      for (
-        let i = 0;
-        i < count;
-        i++
-      ) {
-
-        const i3 =
-          i * 3;
-
-
-        const angle =
-          Math.random() *
-          Math.PI *
-          2;
-
-
-        const radius =
-          Math.sqrt(
-            Math.random()
-          ) *
-          size.x *
-          0.42;
-
-
-        lowerPositions[i3] =
-          Math.cos(angle) *
-          radius;
-
-
-        lowerPositions[i3 + 1] =
-          projectorY +
-          Math.random() *
-          size.y *
-          0.17;
-
-
-        lowerPositions[i3 + 2] =
-          Math.sin(angle) *
-          radius *
-          0.38;
-
-
-        lowerSpeeds.push(
-
-          0.0012 +
-          Math.random() *
-          0.0045
-
-        );
-
-      }
-
-
-      const geometry =
-        new THREE.BufferGeometry();
-
-
-      geometry.setAttribute(
-
-        'position',
-
-        new THREE.BufferAttribute(
-          lowerPositions,
-          3
-        )
-
-      );
-
-
-      const material =
-        new THREE.PointsMaterial({
-
-          color:
-            0x43e6ff,
-
-          size:
-            Math.max(
-              size.y *
-              0.0028,
-              0.0025
-            ),
-
-          transparent:
-            true,
-
-          opacity:
-            0.42,
-
-          depthWrite:
-            false,
-
-          blending:
-            THREE.AdditiveBlending
-
-        });
-
-
-      lowerParticles =
-        new THREE.Points(
-          geometry,
-          material
-        );
-
-
-      scene.add(
-        lowerParticles
-      );
-
-    }
-
-
-    function updateLowerParticles(
-      size,
-      now
-    ) {
-
-      if (
-        !lowerParticles ||
-        !lowerPositions
-      ) {
-
-        return;
-
-      }
-
-
-      const upperLimit =
-        projectorY +
-        size.y *
-        0.17;
-
-
-      for (
-        let i = 0;
-        i < lowerSpeeds.length;
-        i++
-      ) {
-
-        const i3 =
-          i * 3;
-
-
-        lowerPositions[i3 + 1] +=
-          lowerSpeeds[i];
-
-
-        lowerPositions[i3] +=
-          Math.sin(
-            now *
-            2 +
-            i
-          ) *
-          0.000018;
-
 
         if (
-          lowerPositions[i3 + 1] >
-          upperLimit
+          dictionary[possibility] !==
+          undefined
         ) {
 
-          lowerPositions[i3 + 1] =
-            projectorY;
+          return dictionary[
+            possibility
+          ];
 
         }
 
       }
 
 
-      lowerParticles
-        .geometry
-        .attributes
-        .position
-        .needsUpdate =
-          true;
+      /*
+        Then try normalized fuzzy matching.
+      */
 
-    }
+      const entries =
+        Object.entries(
+          dictionary
+        );
 
-
-    /* =====================================================
-       FACIAL MORPHS / SMILE
-    ===================================================== */
-
-    const smileLeftNames = [
-
-      'mouthSmileLeft',
-
-      'MouthSmileLeft',
-
-      'mouth_smile_left',
-
-      'SmileLeft'
-
-    ];
-
-
-    const smileRightNames = [
-
-      'mouthSmileRight',
-
-      'MouthSmileRight',
-
-      'mouth_smile_right',
-
-      'SmileRight'
-
-    ];
-
-
-    function findMorphIndex(
-      dictionary,
-      names
-    ) {
 
       for (
-        const name
-        of names
+        const [
+          morphName,
+          index
+        ]
+        of entries
       ) {
 
-        if (
-          dictionary[name] !==
-          undefined
+        const normalizedMorph =
+          normalizeMorphName(
+            morphName
+          );
+
+
+        for (
+          const possibility
+          of possibilities
         ) {
 
-          return dictionary[name];
+          const normalizedPossibility =
+            normalizeMorphName(
+              possibility
+            );
+
+
+          if (
+            normalizedMorph ===
+            normalizedPossibility
+            ||
+            normalizedMorph.includes(
+              normalizedPossibility
+            )
+          ) {
+
+            return index;
+
+          }
 
         }
 
@@ -1508,38 +1268,140 @@
         object.morphTargetDictionary;
 
 
+      /* =========================================
+         BLINK
+      ========================================= */
+
+      const blinkLeft =
+        findMorphIndex(
+
+          dictionary,
+
+          [
+            'eyeBlinkLeft',
+            'EyeBlinkLeft',
+            'blinkLeft',
+            'eyeBlink_L',
+            'eyeBlinkL'
+          ]
+
+        );
+
+
+      const blinkRight =
+        findMorphIndex(
+
+          dictionary,
+
+          [
+            'eyeBlinkRight',
+            'EyeBlinkRight',
+            'blinkRight',
+            'eyeBlink_R',
+            'eyeBlinkR'
+          ]
+
+        );
+
+
       if (
-        dictionary.eyeBlinkLeft !==
-          undefined
+        blinkLeft !==
+          null
         ||
-        dictionary.eyeBlinkRight !==
-          undefined
+        blinkRight !==
+          null
       ) {
 
-        blinkMeshes.push(
-          object
-        );
+        blinkMeshes.push({
+
+          mesh:
+            object,
+
+          left:
+            blinkLeft,
+
+          right:
+            blinkRight
+
+        });
 
       }
 
 
+      /* =========================================
+         SMILE
+      ========================================= */
+
       const smileLeft =
         findMorphIndex(
+
           dictionary,
-          smileLeftNames
+
+          [
+            'mouthSmileLeft',
+            'MouthSmileLeft',
+            'smileLeft',
+            'SmileLeft',
+            'mouthSmile_L',
+            'mouthSmileL',
+            'smile_L'
+          ]
+
         );
 
 
       const smileRight =
         findMorphIndex(
+
           dictionary,
-          smileRightNames
+
+          [
+            'mouthSmileRight',
+            'MouthSmileRight',
+            'smileRight',
+            'SmileRight',
+            'mouthSmile_R',
+            'mouthSmileR',
+            'smile_R'
+          ]
+
+        );
+
+
+      const cheekLeft =
+        findMorphIndex(
+
+          dictionary,
+
+          [
+            'cheekSquintLeft',
+            'CheekSquintLeft',
+            'cheekSquint_L'
+          ]
+
+        );
+
+
+      const cheekRight =
+        findMorphIndex(
+
+          dictionary,
+
+          [
+            'cheekSquintRight',
+            'CheekSquintRight',
+            'cheekSquint_R'
+          ]
+
         );
 
 
       if (
-        smileLeft !== null ||
-        smileRight !== null
+        smileLeft !==
+          null
+        ||
+        smileRight !==
+          null
       ) {
 
         smileMeshes.push({
@@ -1551,20 +1413,49 @@
             smileLeft,
 
           right:
-            smileRight
+            smileRight,
+
+          cheekLeft:
+            cheekLeft,
+
+          cheekRight:
+            cheekRight
 
         });
 
       }
 
+
+      /*
+        Debugging information.
+
+        If smile is still unavailable,
+        this gives us the model's exact morph names.
+      */
+
+      console.log(
+
+        'FACIAL MORPHS:',
+        object.name,
+        Object.keys(
+          dictionary
+        )
+
+      );
+
     }
 
 
-    /*
-      Small professional smile.
-    */
+    /* =====================================================
+       PROFESSIONAL RESTING SMILE
+    ===================================================== */
+
     const RESTING_SMILE =
-      0.18;
+      0.28;
+
+
+    const CHEEK_SMILE =
+      0.075;
 
 
     function applyRestingSmile() {
@@ -1605,13 +1496,170 @@
 
         }
 
+
+        if (
+          entry.cheekLeft !==
+          null
+        ) {
+
+          influences[
+            entry.cheekLeft
+          ] =
+            CHEEK_SMILE;
+
+        }
+
+
+        if (
+          entry.cheekRight !==
+          null
+        ) {
+
+          influences[
+            entry.cheekRight
+          ] =
+            CHEEK_SMILE;
+
+        }
+
       }
 
     }
 
 
     /* =====================================================
-       LOAD MODEL
+       BACKGROUND PARTICLES
+    ===================================================== */
+
+    let backgroundParticles =
+      null;
+
+
+    function createBackgroundParticles(
+      size
+    ) {
+
+      const count =
+        250;
+
+
+      const positions =
+        new Float32Array(
+          count *
+          3
+        );
+
+
+      for (
+        let i = 0;
+        i < count;
+        i++
+      ) {
+
+        const i3 =
+          i *
+          3;
+
+
+        positions[
+          i3
+        ] =
+          (
+            Math.random() -
+            0.5
+          ) *
+          size.x *
+          4;
+
+
+        positions[
+          i3 + 1
+        ] =
+          (
+            Math.random() -
+            0.42
+          ) *
+          size.y *
+          1.8;
+
+
+        positions[
+          i3 + 2
+        ] =
+          (
+            Math.random() -
+            0.5
+          ) *
+          Math.max(
+            size.x *
+            4,
+            size.z *
+            7
+          );
+
+      }
+
+
+      const geometry =
+        new THREE.BufferGeometry();
+
+
+      geometry.setAttribute(
+
+        'position',
+
+        new THREE.BufferAttribute(
+          positions,
+          3
+        )
+
+      );
+
+
+      const material =
+        new THREE.PointsMaterial({
+
+          color:
+            0x24dfff,
+
+          size:
+            Math.max(
+              size.y *
+              0.0017,
+              0.0017
+            ),
+
+          transparent:
+            true,
+
+          opacity:
+            0.18,
+
+          depthWrite:
+            false,
+
+          blending:
+            THREE.AdditiveBlending
+
+        });
+
+
+      backgroundParticles =
+        new THREE.Points(
+          geometry,
+          material
+        );
+
+
+      scene.add(
+        backgroundParticles
+      );
+
+    }
+
+
+    /* =====================================================
+       MODEL LOADING
     ===================================================== */
 
     const loader =
@@ -1623,7 +1671,9 @@
       './PrimeReceptionAI_Test01.glb',
 
 
-      function (gltf) {
+      function (
+        gltf
+      ) {
 
         model =
           gltf.scene;
@@ -1636,8 +1686,14 @@
 
         model.traverse(
 
-          function (object) {
+          function (
+            object
+          ) {
 
+
+            /* =============================================
+               MESHES
+            ============================================= */
 
             if (
               object.isMesh
@@ -1653,8 +1709,9 @@
 
 
               /*
-                Hide unwanted auxiliary layers.
+                Hide known unwanted auxiliary layers.
               */
+
               if (
                 name ===
                   'SK_FemBase2_Censored_Torso'
@@ -1673,8 +1730,9 @@
 
 
               /*
-                Body.
+                Body / arms / hands / torso.
               */
+
               if (
                 name ===
                   'Mesh010'
@@ -1688,8 +1746,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
+
                   bodyMaterial
+
                 );
 
 
@@ -1701,6 +1762,7 @@
               /*
                 Face.
               */
+
               if (
                 name ===
                   'Mesh010_1'
@@ -1717,8 +1779,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
+
                   faceMaterial
+
                 );
 
 
@@ -1728,20 +1793,28 @@
 
 
               /*
-                Shirt.
+                GOLD SHIRT.
               */
+
               if (
                 name ===
                   'SK_FemBase2_TShirt'
               ) {
+
+                shirtMesh =
+                  object;
+
 
                 object.visible =
                   true;
 
 
                 forceCleanMaterial(
+
                   object,
+
                   shirtMaterial
+
                 );
 
 
@@ -1751,8 +1824,9 @@
 
 
               /*
-                Leggings.
+                GOLD LEGGINGS.
               */
+
               if (
                 name ===
                   'SK_FemBase2_Leggings'
@@ -1763,8 +1837,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
+
                   leggingsMaterial
+
                 );
 
 
@@ -1774,8 +1851,9 @@
 
 
               /*
-                Hair.
+                HAIR.
               */
+
               if (
                 name ===
                   'SK_FemBase2_Hair'
@@ -1786,8 +1864,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
+
                   hairMaterial
+
                 );
 
 
@@ -1797,8 +1878,9 @@
 
 
               /*
-                Left eye.
+                LEFT EYE.
               */
+
               if (
                 name ===
                   'SK_FemBase2_EyeL'
@@ -1813,8 +1895,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
+
                   eyeMaterial
+
                 );
 
 
@@ -1824,8 +1909,9 @@
 
 
               /*
-                Right eye.
+                RIGHT EYE.
               */
+
               if (
                 name ===
                   'SK_FemBase2_EyeR'
@@ -1840,8 +1926,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
+
                   eyeMaterial
+
                 );
 
 
@@ -1849,6 +1938,10 @@
 
               }
 
+
+              /*
+                EYE SHELL.
+              */
 
               if (
                 name ===
@@ -1860,8 +1953,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
+
                   eyeShellMaterial
+
                 );
 
 
@@ -1869,6 +1965,10 @@
 
               }
 
+
+              /*
+                LASHES.
+              */
 
               if (
                 name ===
@@ -1883,8 +1983,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
+
                   darkDetailMaterial
+
                 );
 
 
@@ -1892,6 +1995,10 @@
 
               }
 
+
+              /*
+                TEETH.
+              */
 
               if (
                 name ===
@@ -1903,8 +2010,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
+
                   teethMaterial
+
                 );
 
 
@@ -1912,6 +2022,10 @@
 
               }
 
+
+              /*
+                NAILS.
+              */
 
               if (
                 name ===
@@ -1923,8 +2037,11 @@
 
 
                 forceCleanMaterial(
+
                   object,
-                  goldMaterial
+
+                  nailMaterial
+
                 );
 
 
@@ -1935,15 +2052,18 @@
             }
 
 
-            /*
-              Bones.
-            */
+            /* =============================================
+               BONES
+            ============================================= */
+
             if (
               object.isBone
             ) {
 
               const lowerName =
-                object.name.toLowerCase();
+                object
+                  .name
+                  .toLowerCase();
 
 
               if (
@@ -1991,14 +2111,8 @@
         );
 
 
-        console.log(
-          'SMILE MORPH MESHES:',
-          smileMeshes.length
-        );
-
-
         /* =================================================
-           SAVE ORIGINAL ROTATIONS
+           STORE ORIGINAL BONE ROTATIONS
         ================================================= */
 
         if (
@@ -2006,7 +2120,9 @@
         ) {
 
           baseHeadRotation =
-            headBone.rotation.clone();
+            headBone
+              .rotation
+              .clone();
 
         }
 
@@ -2016,7 +2132,9 @@
         ) {
 
           baseNeck01Rotation =
-            neck01.rotation.clone();
+            neck01
+              .rotation
+              .clone();
 
         }
 
@@ -2026,7 +2144,9 @@
         ) {
 
           baseNeck02Rotation =
-            neck02.rotation.clone();
+            neck02
+              .rotation
+              .clone();
 
         }
 
@@ -2036,7 +2156,9 @@
         ) {
 
           baseEyeLRotation =
-            eyeLObject.rotation.clone();
+            eyeLObject
+              .rotation
+              .clone();
 
         }
 
@@ -2046,16 +2168,18 @@
         ) {
 
           baseEyeRRotation =
-            eyeRObject.rotation.clone();
+            eyeRObject
+              .rotation
+              .clone();
 
         }
 
 
         /* =================================================
-           CENTER MODEL
+           CENTER ENTIRE MODEL
         ================================================= */
 
-        const box =
+        modelBox =
           new THREE.Box3()
             .setFromObject(
               model
@@ -2063,99 +2187,45 @@
 
 
         modelSize =
-          box.getSize(
+          modelBox.getSize(
             new THREE.Vector3()
           );
 
 
-        const center =
-          box.getCenter(
+        const modelCenter =
+          modelBox.getCenter(
             new THREE.Vector3()
           );
 
 
         model.position.set(
 
-          -center.x,
+          -modelCenter.x,
 
-          -center.y,
+          -modelCenter.y,
 
-          -center.z
+          -modelCenter.z
 
+        );
+
+
+        model.updateMatrixWorld(
+          true
         );
 
 
         /* =================================================
            CAMERA
+
+           PRIMARY GOALS:
+
+           1. Head centered.
+           2. Tight corporate portrait.
+           3. Bottom of frame around shirt hem.
+           4. Belly/lower body no longer emphasized.
         ================================================= */
 
-        const verticalFOV =
-          THREE.MathUtils.degToRad(
-            camera.fov
-          );
-
-
-        const visibleHeight =
-          modelSize.y *
-          0.73;
-
-
-        let distance =
-          visibleHeight /
-          (
-            2 *
-            Math.tan(
-              verticalFOV /
-              2
-            )
-          );
-
-
-        distance *=
-          1.04;
-
-
-        const targetHeight =
-          modelSize.y *
-          0.15;
-
-
-        camera.position.set(
-
-          0,
-
-          targetHeight,
-
-          distance
-
-        );
-
-
-        camera.lookAt(
-
-          0,
-
-          targetHeight,
-
-          0
-
-        );
-
-
-        camera.near =
-          Math.max(
-            distance /
-            100,
-            0.01
-          );
-
-
-        camera.far =
-          distance *
-          100;
-
-
-        camera.updateProjectionMatrix();
+        setupPortraitCamera();
 
 
         /* =================================================
@@ -2167,17 +2237,20 @@
         );
 
 
-        createProjector(
-          modelSize
-        );
-
-
-        createLowerParticles(
-          modelSize
-        );
-
+        /* =================================================
+           FACE
+        ================================================= */
 
         applyRestingSmile();
+
+
+        console.log(
+
+          'SMILE MORPH MESHES:',
+
+          smileMeshes.length
+
+        );
 
 
         status.style.display =
@@ -2189,17 +2262,25 @@
       },
 
 
-      function (xhr) {
+      /* ===================================================
+         PROGRESS
+      =================================================== */
+
+      function (
+        xhr
+      ) {
 
         if (
           xhr.total
         ) {
 
-          const percentage =
+          const percent =
             Math.round(
 
-              xhr.loaded /
-              xhr.total *
+              (
+                xhr.loaded /
+                xhr.total
+              ) *
               100
 
             );
@@ -2207,7 +2288,7 @@
 
           status.textContent =
             'INITIALIZING PRIME RECEPTION AI… ' +
-            percentage +
+            percent +
             '%';
 
         }
@@ -2215,11 +2296,20 @@
       },
 
 
-      function (error) {
+      /* ===================================================
+         ERROR
+      =================================================== */
+
+      function (
+        error
+      ) {
 
         console.error(
+
           'GLB ERROR:',
+
           error
+
         );
 
 
@@ -2232,7 +2322,203 @@
 
 
     /* =====================================================
-       BLINK
+       CAMERA SETUP
+    ===================================================== */
+
+    const headWorldPosition =
+      new THREE.Vector3();
+
+
+    function setupPortraitCamera() {
+
+      if (
+        !model ||
+        !modelSize
+      ) {
+
+        return;
+
+      }
+
+
+      model.updateMatrixWorld(
+        true
+      );
+
+
+      /*
+        Find actual head location.
+      */
+
+      if (
+        headBone
+      ) {
+
+        headBone.getWorldPosition(
+          headWorldPosition
+        );
+
+      }
+
+      else {
+
+        headWorldPosition.set(
+
+          0,
+
+          modelSize.y *
+          0.29,
+
+          0
+
+        );
+
+      }
+
+
+      /*
+        Find the actual lower edge of the shirt.
+      */
+
+      let shirtBottomY;
+
+
+      if (
+        shirtMesh
+      ) {
+
+        const shirtBox =
+          new THREE.Box3()
+            .setFromObject(
+              shirtMesh
+            );
+
+
+        shirtBottomY =
+          shirtBox.min.y;
+
+      }
+
+      else {
+
+        shirtBottomY =
+          headWorldPosition.y -
+          modelSize.y *
+          0.31;
+
+      }
+
+
+      /*
+        HEAD IS THE CAMERA TARGET.
+
+        Therefore the head sits at the center
+        of the viewport vertically and horizontally.
+      */
+
+      const targetY =
+        headWorldPosition.y;
+
+
+      const targetX =
+        headWorldPosition.x;
+
+
+      /*
+        We need enough room from head-center down
+        to the shirt hem.
+
+        Small margin prevents accidental clipping.
+      */
+
+      const distanceHeadToShirt =
+        Math.max(
+
+          targetY -
+          shirtBottomY,
+
+          modelSize.y *
+          0.20
+
+        );
+
+
+      /*
+        Frame reaches just slightly below shirt.
+      */
+
+      const requiredHalfHeight =
+        distanceHeadToShirt *
+        1.075;
+
+
+      const verticalFOV =
+        THREE.MathUtils.degToRad(
+          camera.fov
+        );
+
+
+      let cameraDistance =
+        requiredHalfHeight /
+        Math.tan(
+          verticalFOV /
+          2
+        );
+
+
+      /*
+        Small safety margin.
+      */
+
+      cameraDistance *=
+        1.025;
+
+
+      camera.position.set(
+
+        targetX,
+
+        targetY,
+
+        cameraDistance
+
+      );
+
+
+      camera.lookAt(
+
+        targetX,
+
+        targetY,
+
+        0
+
+      );
+
+
+      camera.near =
+        Math.max(
+
+          cameraDistance /
+          120,
+
+          0.01
+
+        );
+
+
+      camera.far =
+        cameraDistance *
+        100;
+
+
+      camera.updateProjectionMatrix();
+
+    }
+
+
+    /* =====================================================
+       BLINKING
     ===================================================== */
 
     function setBlinkAmount(
@@ -2241,32 +2527,34 @@
 
       const value =
         THREE.MathUtils.clamp(
+
           amount,
+
           0,
+
           1
+
         );
 
 
       for (
-        const mesh
+        const entry
         of blinkMeshes
       ) {
 
-        const dictionary =
-          mesh.morphTargetDictionary;
-
-
         const influences =
-          mesh.morphTargetInfluences;
+          entry
+            .mesh
+            .morphTargetInfluences;
 
 
         if (
-          dictionary.eyeBlinkLeft !==
-          undefined
+          entry.left !==
+          null
         ) {
 
           influences[
-            dictionary.eyeBlinkLeft
+            entry.left
           ] =
             value;
 
@@ -2274,12 +2562,12 @@
 
 
         if (
-          dictionary.eyeBlinkRight !==
-          undefined
+          entry.right !==
+          null
         ) {
 
           influences[
-            dictionary.eyeBlinkRight
+            entry.right
           ] =
             value;
 
@@ -2319,7 +2607,7 @@
       nextBlink =
         performance.now() /
         1000 +
-        2.4 +
+        2.3 +
         Math.random() *
         3.8;
 
@@ -2340,7 +2628,7 @@
       blinkDuration =
         0.12 +
         Math.random() *
-        0.05;
+        0.055;
 
 
       doubleBlink =
@@ -2356,7 +2644,8 @@
 
       if (
         !blinkActive &&
-        now >= nextBlink
+        now >=
+        nextBlink
       ) {
 
         beginBlink();
@@ -2367,7 +2656,8 @@
       if (
         !blinkActive &&
         doubleBlink &&
-        now >= secondBlinkAt
+        now >=
+        secondBlinkAt
       ) {
 
         doubleBlink =
@@ -2405,14 +2695,17 @@
 
 
       if (
-        progress <= 1
+        progress <=
+        1
       ) {
 
         setBlinkAmount(
 
           Math.sin(
+
             progress *
             Math.PI
+
           )
 
         );
@@ -2436,9 +2729,9 @@
 
           secondBlinkAt =
             now +
-            0.15 +
+            0.14 +
             Math.random() *
-            0.07;
+            0.08;
 
         }
 
@@ -2454,42 +2747,75 @@
 
 
     /* =====================================================
-       TRACKING
+       TRACKING SETTINGS
     ===================================================== */
+
+
+    /*
+      Eyes react considerably more than before.
+    */
 
     const eyeHorizontalMax =
       THREE.MathUtils.degToRad(
-        10
+        12
       );
 
 
-    const eyeVerticalMax =
+    const eyeVerticalUpMax =
       THREE.MathUtils.degToRad(
-        6
+        7
       );
 
+
+    const eyeVerticalDownMax =
+      THREE.MathUtils.degToRad(
+        11
+      );
+
+
+    /*
+      Horizontal head movement remains restrained.
+    */
 
     const headHorizontalMax =
       THREE.MathUtils.degToRad(
-        4.2
+        5
       );
 
 
-    const headVerticalMax =
+    /*
+      UP and DOWN intentionally use different limits.
+
+      Looking down needs to be unmistakable.
+    */
+
+    const headUpMax =
       THREE.MathUtils.degToRad(
-        2.2
+        5
+      );
+
+
+    const headDownMax =
+      THREE.MathUtils.degToRad(
+        12
       );
 
 
     const neckHorizontalMax =
       THREE.MathUtils.degToRad(
-        1.25
+        1.7
       );
 
 
-    const neckVerticalMax =
+    const neckUpMax =
       THREE.MathUtils.degToRad(
-        0.7
+        1.8
+      );
+
+
+    const neckDownMax =
+      THREE.MathUtils.degToRad(
+        4.2
       );
 
 
@@ -2542,7 +2868,81 @@
 
 
     /* =====================================================
-       ANIMATION
+       TRACKING TARGET CALCULATION
+    ===================================================== */
+
+    function calculateVerticalTargets() {
+
+      /*
+        pointer.y:
+
+        +1 = cursor at TOP
+        -1 = cursor at BOTTOM
+      */
+
+
+      if (
+        pointer.y >=
+        0
+      ) {
+
+        /*
+          LOOKING UP
+        */
+
+        return {
+
+          eye:
+            pointer.y *
+            eyeVerticalUpMax,
+
+          head:
+            pointer.y *
+            headUpMax,
+
+          neck:
+            pointer.y *
+            neckUpMax
+
+        };
+
+      }
+
+
+      /*
+        LOOKING DOWN
+
+        Negative values use substantially greater
+        rotation than upward gaze.
+      */
+
+      const downAmount =
+        Math.abs(
+          pointer.y
+        );
+
+
+      return {
+
+        eye:
+          -downAmount *
+          eyeVerticalDownMax,
+
+        head:
+          -downAmount *
+          headDownMax,
+
+        neck:
+          -downAmount *
+          neckDownMax
+
+      };
+
+    }
+
+
+    /* =====================================================
+       ANIMATION LOOP
     ===================================================== */
 
     const clock =
@@ -2558,8 +2958,11 @@
 
       const delta =
         Math.min(
+
           clock.getDelta(),
+
           0.05
+
         );
 
 
@@ -2568,93 +2971,158 @@
         1000;
 
 
-      /* pointer smoothing */
+      /* =========================================
+         POINTER SMOOTHING
+      ========================================= */
 
       pointer.x =
         damp(
+
           pointer.x,
+
           targetPointer.x,
-          7,
+
+          7.5,
+
           delta
+
         );
 
 
       pointer.y =
         damp(
+
           pointer.y,
+
           targetPointer.y,
-          7,
+
+          7.5,
+
           delta
+
         );
 
 
-      /* eyes */
+      const verticalTargets =
+        calculateVerticalTargets();
+
+
+      /* =========================================
+         EYES
+
+         Eyes react fastest.
+      ========================================= */
 
       eyeHorizontal =
         damp(
+
           eyeHorizontal,
+
           pointer.x *
           eyeHorizontalMax,
-          14,
+
+          16,
+
           delta
+
         );
 
 
       eyeVertical =
         damp(
+
           eyeVertical,
-          pointer.y *
-          eyeVerticalMax,
-          14,
+
+          verticalTargets.eye,
+
+          16,
+
           delta
+
         );
 
 
-      /* head */
+      /* =========================================
+         HEAD
+
+         Faster and more obvious than old version.
+      ========================================= */
 
       headHorizontal =
         damp(
+
           headHorizontal,
+
           pointer.x *
           headHorizontalMax,
-          2.7,
+
+          3.7,
+
           delta
+
         );
 
 
       headVertical =
         damp(
+
           headVertical,
-          pointer.y *
-          headVerticalMax,
-          2.5,
+
+          verticalTargets.head,
+
+          pointer.y <
+            0
+            ?
+            4.4
+            :
+            3.2,
+
           delta
+
         );
 
 
-      /* neck */
+      /* =========================================
+         NECK
+      ========================================= */
 
       neckHorizontal =
         damp(
+
           neckHorizontal,
+
           pointer.x *
           neckHorizontalMax,
-          1.65,
+
+          2.2,
+
           delta
+
         );
 
 
       neckVertical =
         damp(
+
           neckVertical,
-          pointer.y *
-          neckVerticalMax,
-          1.5,
+
+          verticalTargets.neck,
+
+          pointer.y <
+            0
+            ?
+            3.2
+            :
+            2.0,
+
           delta
+
         );
 
 
-      /* apply eye rotations */
+      /* =========================================
+         APPLY EYES
+      ========================================= */
 
       if (
         eyeLObject &&
@@ -2696,11 +3164,15 @@
       }
 
 
-      /*
-        Confirmed rig mapping:
-        X = left/right
-        Z = up/down
-      */
+      /* =========================================
+         APPLY HEAD
+
+         Confirmed rig mapping from our testing:
+
+         X = LEFT / RIGHT
+         Z = UP / DOWN
+         Y must remain untouched.
+      ========================================= */
 
       if (
         headBone &&
@@ -2726,6 +3198,10 @@
       }
 
 
+      /* =========================================
+         NECK 02
+      ========================================= */
+
       if (
         neck02 &&
         baseNeck02Rotation
@@ -2750,6 +3226,13 @@
       }
 
 
+      /* =========================================
+         NECK 01
+
+         Reduced contribution so most of the
+         downward expression comes from upper neck/head.
+      ========================================= */
+
       if (
         neck01 &&
         baseNeck01Rotation
@@ -2767,7 +3250,7 @@
 
         neck01.rotation.z +=
           neckVertical *
-          0.22;
+          0.28;
 
 
         neck01.rotation.y =
@@ -2776,7 +3259,9 @@
       }
 
 
-      /* face */
+      /* =========================================
+         FACIAL EXPRESSION
+      ========================================= */
 
       applyRestingSmile();
 
@@ -2786,130 +3271,179 @@
       );
 
 
-      /* subtle electronic pulse */
+      /* =========================================
+         WATER-LIKE CYAN LIGHT REFLECTIONS
 
-      const pulse =
-        0.5 +
+         No actual body movement.
+         Only light moves.
+      ========================================= */
+
+      const waterTime =
+        now *
+        0.75;
+
+
+      waterLightA.position.set(
+
         Math.sin(
-          now *
+          waterTime
+        ) *
+        1.4,
+
+        0.45 +
+        Math.sin(
+          waterTime *
+          1.8
+        ) *
+        0.45,
+
+        1.45 +
+        Math.cos(
+          waterTime
+        ) *
+        0.55
+
+      );
+
+
+      waterLightB.position.set(
+
+        Math.cos(
+          waterTime *
           1.15
         ) *
-        0.5;
+        1.25,
+
+        1.15 +
+        Math.sin(
+          waterTime *
+          1.45 +
+          1.7
+        ) *
+        0.48,
+
+        1.2
+
+      );
+
+
+      waterLightC.position.set(
+
+        Math.sin(
+          waterTime *
+          0.72 +
+          2.2
+        ) *
+        1.6,
+
+        -0.05 +
+        Math.cos(
+          waterTime *
+          1.3
+        ) *
+        0.40,
+
+        0.75
+
+      );
+
+
+      /*
+        Light intensity also moves slightly,
+        resembling reflected water caustics.
+      */
+
+      waterLightA.intensity =
+        1.30 +
+        (
+          Math.sin(
+            now *
+            2.1
+          ) *
+          0.5 +
+          0.5
+        ) *
+        0.65;
+
+
+      waterLightB.intensity =
+        0.85 +
+        (
+          Math.sin(
+            now *
+            2.7 +
+            1.4
+          ) *
+          0.5 +
+          0.5
+        ) *
+        0.55;
+
+
+      waterLightC.intensity =
+        0.55 +
+        (
+          Math.sin(
+            now *
+            1.9 +
+            2.8
+          ) *
+          0.5 +
+          0.5
+        ) *
+        0.45;
+
+
+      /* =========================================
+         SUBTLE AI ENERGY PULSE
+      ========================================= */
+
+      const pulse =
+        (
+          Math.sin(
+            now *
+            1.1
+          ) *
+          0.5 +
+          0.5
+        );
 
 
       lowerGlow.intensity =
-        8 +
+        5.8 +
         pulse *
-        1.6;
-
-
-      faceFill.intensity =
-        0.70 +
-        pulse *
-        0.16;
-
-
-      bodyMaterial.emissiveIntensity =
-        0.060 +
-        pulse *
-        0.028;
-
-
-      shirtMaterial.emissiveIntensity =
-        0.070 +
-        pulse *
-        0.035;
-
-
-      leggingsMaterial.emissiveIntensity =
-        0.055 +
-        pulse *
-        0.026;
+        1.4;
 
 
       eyeMaterial.emissiveIntensity =
-        0.75 +
+        0.64 +
         pulse *
-        0.16;
+        0.14;
 
 
-      /* water */
-
-      if (
-        waterMaterial
-      ) {
-
-        waterMaterial
-          .uniforms
-          .uTime
-          .value =
-            now;
-
-      }
+      shirtMaterial.emissiveIntensity =
+        0.045 +
+        pulse *
+        0.018;
 
 
-      /* ring breathing */
-
-      for (
-        let i = 1;
-        i < projectorGroup.children.length;
-        i++
-      ) {
-
-        const ring =
-          projectorGroup.children[i];
-
-
-        if (
-          ring.userData.phase ===
-          undefined
-        ) {
-
-          continue;
-
-        }
-
-
-        const scale =
-          1 +
-          Math.sin(
-            now *
-            1.1 +
-            ring.userData.phase
-          ) *
-          0.014;
-
-
-        ring.scale.set(
-          scale,
-          scale,
-          scale
-        );
-
-      }
-
-
-      if (
-        modelSize
-      ) {
-
-        updateLowerParticles(
-          modelSize,
-          now
-        );
-
-      }
-
+      /* =========================================
+         BACKGROUND PARTICLES
+      ========================================= */
 
       if (
         backgroundParticles
       ) {
 
         backgroundParticles.rotation.y +=
-          0.00012;
+          0.00010;
 
       }
 
+
+      /* =========================================
+         RENDER
+      ========================================= */
 
       renderer.render(
         scene,
@@ -2941,9 +3475,26 @@
 
 
         renderer.setSize(
+
           window.innerWidth,
+
           window.innerHeight
+
         );
+
+
+        /*
+          Recalculate camera framing,
+          keeping her head centered.
+        */
+
+        if (
+          model
+        ) {
+
+          setupPortraitCamera();
+
+        }
 
       }
 
@@ -2952,4 +3503,5 @@
   </script>
 
 </body>
+
 </html>
