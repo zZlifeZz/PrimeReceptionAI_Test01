@@ -1669,7 +1669,7 @@
     */
 
     const RESTING_SMILE =
-      0.90;
+      0.96;
 
 
     /*
@@ -1742,32 +1742,32 @@
 
       setFaceMorph(
         'mouthDimpleLeft',
-        0.14
+        0.17
       );
 
       setFaceMorph(
         'mouthDimpleRight',
-        0.14
+        0.17
       );
 
       setFaceMorph(
         'cheekSquintLeft',
-        0.075
+        0.09
       );
 
       setFaceMorph(
         'cheekSquintRight',
-        0.075
+        0.09
       );
 
       setFaceMorph(
         'mouthUpperUpLeft',
-        0.065
+        0.075
       );
 
       setFaceMorph(
         'mouthUpperUpRight',
-        0.065
+        0.075
       );
 
     }
@@ -3159,16 +3159,23 @@
           We use the asset's purpose-built censored torso instead.
         */
         console.log(
-          'V9 BODY MESH:',
+          'V10 BODY MESH:',
           torsoMesh ? torsoMesh.name : 'NOT FOUND'
         );
 
         console.log(
-          'V9 FACE MESH:',
+          'V10 FACE MESH:',
           faceMorphMesh ? faceMorphMesh.name : 'NOT FOUND'
         );
 
         configureRelaxedArms();
+
+
+        /*
+          V10: cache the actual hand/finger skeleton and derive a palm
+          orientation basis from the purchased rig.
+        */
+        cacheFingerRig();
 
 
         /* =================================================
@@ -3213,7 +3220,7 @@
           const d = faceMorphMesh.morphTargetDictionary;
 
           console.log(
-            'V9 SMILE VALUES:',
+            'V10 SMILE VALUES:',
             {
               left: d.mouthSmileLeft !== undefined
                 ? faceMorphMesh.morphTargetInfluences[d.mouthSmileLeft]
@@ -3963,99 +3970,426 @@
 
       }
 
+
+      /*
+        Always restore every finger to the purchased rig's base pose
+        before an optional gesture is layered on top.
+      */
+      resetFingerPose();
+
     }
 
 
     /* =====================================================
-       PROCEDURAL HAND GESTURES — V9
+       PROCEDURAL NECK-RELIEF GESTURE — V10
 
-       The GLB contains no authored animation clips, so these gestures
-       are generated at runtime using a small CCD inverse-kinematics
-       solver. The important part is that we solve against the real
-       skeleton instead of assuming Euler axes.
+       V9 moved the arm successfully, but the wrist and fingers were
+       not posed as part of the contact. V10 changes the strategy:
 
-       Gestures are intentionally occasional:
-       - ~72%: light hair/temple adjustment
-       - ~28%: brief outer-eye / temple touch
+       - only a calm neck-relief / self-massage gesture is used
+       - the arm IK targets the WRIST, not a fingertip
+       - the palm is explicitly oriented toward the side of the neck
+       - all finger joints receive a soft authored curl pose
+       - the fingers make tiny squeeze/release changes while holding
+       - the gesture blends in and out slowly
+       - normal relaxed-arm pose is restored every frame first
 
-       We never rub directly across the eye surface. That keeps the
-       receptionist looking composed rather than tired or irritated.
+       No hair touching and no eye rubbing in this version.
     ===================================================== */
 
     const gestureState = {
 
       active: false,
 
-      type: 'hair',
-
       side: 'L',
 
       start: 0,
 
-      approach: 1.15,
+      approach: 1.45,
 
-      hold: 0.85,
+      hold: 2.35,
 
-      release: 1.25,
+      release: 1.55,
 
-      duration: 3.25,
+      duration: 5.35,
 
       nextAt: Infinity
 
     };
 
 
-    const gestureTarget =
+    /* -----------------------------------------------------
+       Finger rig cache
+    ----------------------------------------------------- */
+
+    const fingerRig = {
+
+      L: null,
+
+      R: null
+
+    };
+
+
+    const fingerBaseQuaternions =
+      new Map();
+
+
+    const handLocalBasisQuaternion = {
+
+      L: null,
+
+      R: null
+
+    };
+
+
+    const tempFingerWorldA =
       new THREE.Vector3();
 
 
-    const gestureRestEffector =
+    const tempFingerWorldB =
       new THREE.Vector3();
 
 
-    const gestureBlendedTarget =
+    const tempFingerWorldC =
       new THREE.Vector3();
 
 
-    const gestureBonePosition =
+    const tempFingerLocalA =
       new THREE.Vector3();
 
 
-    const gestureEffectorPosition =
+    const tempFingerLocalB =
       new THREE.Vector3();
 
 
-    const gestureToEffector =
+    const tempFingerLocalC =
       new THREE.Vector3();
 
 
-    const gestureToTarget =
+    const tempBasisX =
       new THREE.Vector3();
 
 
-    const gestureCurrentWorldQuaternion =
-      new THREE.Quaternion();
+    const tempBasisY =
+      new THREE.Vector3();
 
 
-    const gestureParentWorldQuaternion =
-      new THREE.Quaternion();
+    const tempBasisZ =
+      new THREE.Vector3();
 
 
-    const gestureDeltaWorldQuaternion =
-      new THREE.Quaternion();
+    const tempBasisMatrix =
+      new THREE.Matrix4();
 
 
-    const gestureStepQuaternion =
-      new THREE.Quaternion();
+    function getBoneByName(
+      name
+    ) {
+
+      if (
+        !model
+      ) {
+
+        return null;
+
+      }
 
 
-    const gestureDesiredWorldQuaternion =
-      new THREE.Quaternion();
+      return model.getObjectByName(
+        name
+      ) || null;
+
+    }
 
 
-    const gestureDesiredLocalQuaternion =
-      new THREE.Quaternion();
+    function buildFingerSide(
+      suffix
+    ) {
 
+      const side = {
+
+        index: [
+          getBoneByName(`index_01_${suffix}`),
+          getBoneByName(`index_02_${suffix}`),
+          getBoneByName(`index_03_${suffix}`)
+        ],
+
+        middle: [
+          getBoneByName(`middle_01_${suffix}`),
+          getBoneByName(`middle_02_${suffix}`),
+          getBoneByName(`middle_03_${suffix}`)
+        ],
+
+        ring: [
+          getBoneByName(`ring_01_${suffix}`),
+          getBoneByName(`ring_02_${suffix}`),
+          getBoneByName(`ring_03_${suffix}`)
+        ],
+
+        pinky: [
+          getBoneByName(`pinky_01_${suffix}`),
+          getBoneByName(`pinky_02_${suffix}`),
+          getBoneByName(`pinky_03_${suffix}`)
+        ],
+
+        thumb: [
+          getBoneByName(`thumb_01_${suffix}`),
+          getBoneByName(`thumb_02_${suffix}`),
+          getBoneByName(`thumb_03_${suffix}`)
+        ]
+
+      };
+
+
+      for (
+        const chain
+        of Object.values(side)
+      ) {
+
+        for (
+          const bone
+          of chain
+        ) {
+
+          if (
+            bone &&
+            !fingerBaseQuaternions.has(bone)
+          ) {
+
+            fingerBaseQuaternions.set(
+              bone,
+              bone.quaternion.clone()
+            );
+
+          }
+
+        }
+
+      }
+
+
+      return side;
+
+    }
+
+
+    function cacheHandLocalBasis(
+      sideName
+    ) {
+
+      const isLeft =
+        sideName === 'L';
+
+
+      const hand =
+        isLeft
+          ? handL
+          : handR;
+
+
+      const rig =
+        fingerRig[sideName];
+
+
+      if (
+        !hand ||
+        !rig ||
+        !rig.index[0] ||
+        !rig.middle[0] ||
+        !rig.pinky[0]
+      ) {
+
+        return;
+
+      }
+
+
+      model.updateMatrixWorld(
+        true
+      );
+
+
+      rig.index[0].getWorldPosition(
+        tempFingerWorldA
+      );
+
+
+      rig.middle[0].getWorldPosition(
+        tempFingerWorldB
+      );
+
+
+      rig.pinky[0].getWorldPosition(
+        tempFingerWorldC
+      );
+
+
+      tempFingerLocalA
+        .copy(tempFingerWorldA);
+
+
+      tempFingerLocalB
+        .copy(tempFingerWorldB);
+
+
+      tempFingerLocalC
+        .copy(tempFingerWorldC);
+
+
+      hand.worldToLocal(
+        tempFingerLocalA
+      );
+
+
+      hand.worldToLocal(
+        tempFingerLocalB
+      );
+
+
+      hand.worldToLocal(
+        tempFingerLocalC
+      );
+
+
+      /*
+        Y basis = direction from wrist into the fingers.
+      */
+      tempBasisY
+        .copy(tempFingerLocalB)
+        .normalize();
+
+
+      /*
+        X basis = across the palm from pinky toward index.
+      */
+      tempBasisX
+        .subVectors(
+          tempFingerLocalA,
+          tempFingerLocalC
+        )
+        .normalize();
+
+
+      /*
+        Orthogonal palm normal.
+      */
+      tempBasisZ
+        .crossVectors(
+          tempBasisX,
+          tempBasisY
+        )
+        .normalize();
+
+
+      /*
+        The mesh is mirrored across sides. Flip the left-hand normal
+        so +Z of our derived basis always represents the palm side.
+      */
+      if (
+        isLeft
+      ) {
+
+        tempBasisZ.multiplyScalar(
+          -1
+        );
+
+      }
+
+
+      /* Rebuild X so the three axes remain orthogonal. */
+      tempBasisX
+        .crossVectors(
+          tempBasisY,
+          tempBasisZ
+        )
+        .normalize();
+
+
+      tempBasisMatrix.makeBasis(
+        tempBasisX,
+        tempBasisY,
+        tempBasisZ
+      );
+
+
+      handLocalBasisQuaternion[sideName] =
+        new THREE.Quaternion()
+          .setFromRotationMatrix(
+            tempBasisMatrix
+          );
+
+    }
+
+
+    function cacheFingerRig() {
+
+      /*
+        Put the skeleton in the same relaxed arm pose that is used
+        during runtime before measuring the palm basis.
+      */
+      applyRelaxedPose(
+        0
+      );
+
+
+      model.updateMatrixWorld(
+        true
+      );
+
+
+      fingerRig.L =
+        buildFingerSide('l');
+
+
+      fingerRig.R =
+        buildFingerSide('r');
+
+
+      cacheHandLocalBasis(
+        'L'
+      );
+
+
+      cacheHandLocalBasis(
+        'R'
+      );
+
+
+      console.log(
+        'V10 FINGER RIG READY:',
+        {
+          left: !!fingerRig.L,
+          right: !!fingerRig.R
+        }
+      );
+
+    }
+
+
+    function resetFingerPose() {
+
+      for (
+        const [
+          bone,
+          baseQuaternion
+        ]
+        of fingerBaseQuaternions
+      ) {
+
+        bone.quaternion.copy(
+          baseQuaternion
+        );
+
+      }
+
+    }
+
+
+    /* -----------------------------------------------------
+       Gesture scheduling
+    ----------------------------------------------------- */
 
     function smoothGestureStep(
       value
@@ -4083,10 +4417,8 @@
         now +
         (
           initial
-            ?
-            6 + Math.random() * 5
-            :
-            18 + Math.random() * 22
+            ? 8 + Math.random() * 6
+            : 24 + Math.random() * 26
         );
 
     }
@@ -4104,12 +4436,6 @@
         now;
 
 
-      gestureState.type =
-        Math.random() < 0.72
-          ? 'hair'
-          : 'temple';
-
-
       gestureState.side =
         Math.random() < 0.5
           ? 'L'
@@ -4117,27 +4443,31 @@
 
 
       /*
-        Give each gesture slightly different timing so it does not
-        look like the same canned animation repeating forever.
+        A neck-relief gesture should be unhurried. The hold is long
+        enough for two or three tiny massage compressions.
       */
       gestureState.approach =
-        1.00 + Math.random() * 0.30;
+        1.35 + Math.random() * 0.28;
 
 
       gestureState.hold =
-        gestureState.type === 'hair'
-          ? 0.70 + Math.random() * 0.55
-          : 0.45 + Math.random() * 0.40;
+        2.15 + Math.random() * 0.65;
 
 
       gestureState.release =
-        1.10 + Math.random() * 0.35;
+        1.45 + Math.random() * 0.30;
 
 
       gestureState.duration =
         gestureState.approach +
         gestureState.hold +
         gestureState.release;
+
+
+      console.log(
+        'V10 NECK RELIEF:',
+        gestureState.side
+      );
 
     }
 
@@ -4185,49 +4515,136 @@
       }
 
 
-      const releaseProgress =
+      return 1 - smoothGestureStep(
         (
           elapsed -
           holdEnd
         ) /
-        gestureState.release;
-
-
-      return 1 - smoothGestureStep(
-        releaseProgress
+        gestureState.release
       );
 
     }
 
 
-    function getGestureTarget(
+    function getGestureHoldWeight(
       now
     ) {
 
       if (
-        !headBone ||
-        !modelSize
+        !gestureState.active
       ) {
 
-        return gestureTarget.set(
-          0,
-          0,
-          0
-        );
+        return 0;
 
       }
 
 
-      headBone.getWorldPosition(
-        gestureTarget
+      const elapsed =
+        now - gestureState.start;
+
+
+      if (
+        elapsed <= gestureState.approach
+      ) {
+
+        return 0;
+
+      }
+
+
+      const holdProgress =
+        (
+          elapsed -
+          gestureState.approach
+        ) /
+        gestureState.hold;
+
+
+      if (
+        holdProgress < 0 ||
+        holdProgress > 1
+      ) {
+
+        return 0;
+
+      }
+
+
+      return Math.sin(
+        holdProgress *
+        Math.PI
       );
 
+    }
 
-      /*
-        Anatomical left appears on the viewer's right.
-      */
+
+    /* -----------------------------------------------------
+       Neck and wrist targets
+    ----------------------------------------------------- */
+
+    const gestureNeckContact =
+      new THREE.Vector3();
+
+
+    const gestureWristTarget =
+      new THREE.Vector3();
+
+
+    const gestureRestWrist =
+      new THREE.Vector3();
+
+
+    const gestureBlendedWristTarget =
+      new THREE.Vector3();
+
+
+    const gestureBonePosition =
+      new THREE.Vector3();
+
+
+    const gestureEffectorPosition =
+      new THREE.Vector3();
+
+
+    const gestureToEffector =
+      new THREE.Vector3();
+
+
+    const gestureToTarget =
+      new THREE.Vector3();
+
+
+    const gestureCurrentWorldQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureParentWorldQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureDeltaWorldQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureStepQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureDesiredWorldQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureDesiredLocalQuaternion =
+      new THREE.Quaternion();
+
+
+    function getNeckGestureTargets(
+      now,
+      sideName
+    ) {
+
       const sideSign =
-        gestureState.side === 'L'
+        sideName === 'L'
           ? 1
           : -1;
 
@@ -4236,81 +4653,128 @@
         modelSize.y;
 
 
+      /*
+        neck_02 is a much better anatomical anchor than the head for
+        this gesture. Contact sits on the side/back of the neck.
+      */
       if (
-        gestureState.type === 'hair'
+        neck02
       ) {
 
-        /*
-          Side of hair, just above the temple. The tiny movement during
-          the hold reads like an adjustment/tuck rather than a frozen pose.
-        */
-        gestureTarget.x +=
-          sideSign *
-          scale *
-          0.056;
-
-
-        gestureTarget.y +=
-          scale *
-          0.030;
-
-
-        gestureTarget.z +=
-          scale *
-          0.018;
-
-
-        gestureTarget.y +=
-          Math.sin(
-            now * 4.2
-          ) *
-          scale *
-          0.0017;
+        neck02.getWorldPosition(
+          gestureNeckContact
+        );
 
       }
 
-      else {
+      else if (
+        headBone
+      ) {
 
-        /*
-          Outer-eye / temple contact. This is deliberately offset from
-          the eyeball itself so it stays professional and natural.
-        */
-        gestureTarget.x +=
-          sideSign *
-          scale *
-          0.043;
+        headBone.getWorldPosition(
+          gestureNeckContact
+        );
 
 
-        gestureTarget.y +=
-          scale *
-          0.002;
-
-
-        gestureTarget.z +=
-          scale *
-          0.024;
-
-
-        gestureTarget.y +=
-          Math.sin(
-            now * 5.0
-          ) *
-          scale *
-          0.0011;
+        gestureNeckContact.y -=
+          scale * 0.060;
 
       }
 
 
-      return gestureTarget;
+      gestureNeckContact.x +=
+        sideSign *
+        scale *
+        0.032;
+
+
+      gestureNeckContact.y -=
+        scale *
+        0.022;
+
+
+      gestureNeckContact.z +=
+        scale *
+        0.010;
+
+
+      /*
+        The WRIST must stay outside/below the neck. The hand and
+        fingers then make the actual contact after palm orientation.
+      */
+      gestureWristTarget
+        .copy(
+          gestureNeckContact
+        );
+
+
+      gestureWristTarget.x +=
+        sideSign *
+        scale *
+        0.052;
+
+
+      gestureWristTarget.y -=
+        scale *
+        0.040;
+
+
+      gestureWristTarget.z +=
+        scale *
+        0.017;
+
+
+      /*
+        Tiny vertical movement during the hold gives a gentle massage
+        instead of a hand frozen against the neck.
+      */
+      const holdWeight =
+        getGestureHoldWeight(
+          now
+        );
+
+
+      gestureNeckContact.y +=
+        Math.sin(
+          now * 3.1
+        ) *
+        scale *
+        0.0017 *
+        holdWeight;
+
+
+      gestureWristTarget.y +=
+        Math.sin(
+          now * 3.1
+        ) *
+        scale *
+        0.0013 *
+        holdWeight;
+
+
+      return {
+        contact: gestureNeckContact,
+        wrist: gestureWristTarget
+      };
 
     }
 
+
+    /* -----------------------------------------------------
+       Arm IK — shoulder/elbow only
+
+       The wrist is intentionally excluded from the position solver.
+       V9 let the CCD solver rotate the wrist simply to chase a target,
+       which is the main reason the hand looked disconnected from the
+       contact. V10 positions the arm first, then orients the palm in a
+       separate controlled step.
+    ----------------------------------------------------- */
 
     function solveGestureCCD(
       chain,
       effector,
       targetWorld,
-      iterations = 5
+      iterations = 7
     ) {
 
       if (
@@ -4332,11 +4796,6 @@
         iteration++
       ) {
 
-        /*
-          Solve wrist -> elbow -> shoulder. Starting near the hand keeps
-          the motion compact and prevents the shoulder from doing all of
-          the work.
-        */
         for (
           let i = chain.length - 1;
           i >= 0;
@@ -4398,14 +4857,38 @@
 
 
           /*
-            Never apply the full correction in one step. Several small
-            corrections look smoother and greatly reduce joint flipping.
+            Lower arm does most of the final placement. Upper arm
+            contributes strongly. Clavicle moves only slightly.
           */
+          let correctionStrength =
+            0.56;
+
+
+          if (
+            i === 1
+          ) {
+
+            correctionStrength =
+              0.44;
+
+          }
+
+
+          if (
+            i === 0
+          ) {
+
+            correctionStrength =
+              0.20;
+
+          }
+
+
           gestureStepQuaternion
             .identity()
             .slerp(
               gestureDeltaWorldQuaternion,
-              i === 0 ? 0.42 : 0.58
+              correctionStrength
             );
 
 
@@ -4440,7 +4923,7 @@
 
           bone.quaternion.slerp(
             gestureDesiredLocalQuaternion,
-            0.72
+            0.68
           );
 
 
@@ -4451,6 +4934,389 @@
         }
 
       }
+
+    }
+
+
+    /* -----------------------------------------------------
+       Palm orientation
+    ----------------------------------------------------- */
+
+    const orientHandPosition =
+      new THREE.Vector3();
+
+
+    const desiredPalmNormal =
+      new THREE.Vector3();
+
+
+    const desiredFingerDirection =
+      new THREE.Vector3();
+
+
+    const desiredAcrossPalm =
+      new THREE.Vector3();
+
+
+    const desiredHandBasisMatrix =
+      new THREE.Matrix4();
+
+
+    const desiredHandBasisQuaternion =
+      new THREE.Quaternion();
+
+
+    const desiredHandWorldQuaternion =
+      new THREE.Quaternion();
+
+
+    const currentHandLocalQuaternion =
+      new THREE.Quaternion();
+
+
+    function orientHandToNeck(
+      hand,
+      sideName,
+      contactWorld,
+      weight
+    ) {
+
+      const localBasis =
+        handLocalBasisQuaternion[sideName];
+
+
+      if (
+        !hand ||
+        !localBasis ||
+        weight <= 0
+      ) {
+
+        return;
+
+      }
+
+
+      model.updateMatrixWorld(
+        true
+      );
+
+
+      hand.getWorldPosition(
+        orientHandPosition
+      );
+
+
+      /* Palm faces the neck. */
+      desiredPalmNormal
+        .subVectors(
+          contactWorld,
+          orientHandPosition
+        )
+        .normalize();
+
+
+      /*
+        Fingers point mostly upward along the neck. Project world-up
+        onto the plane of the palm so the wrist never twists randomly.
+      */
+      desiredFingerDirection.set(
+        0,
+        1,
+        0
+      );
+
+
+      desiredFingerDirection
+        .addScaledVector(
+          desiredPalmNormal,
+          -desiredFingerDirection.dot(
+            desiredPalmNormal
+          )
+        );
+
+
+      if (
+        desiredFingerDirection.lengthSq() < 0.00001
+      ) {
+
+        desiredFingerDirection.set(
+          0,
+          0,
+          1
+        );
+
+      }
+
+
+      desiredFingerDirection.normalize();
+
+
+      /*
+        X x Y = Z. Therefore X = Y x Z.
+      */
+      desiredAcrossPalm
+        .crossVectors(
+          desiredFingerDirection,
+          desiredPalmNormal
+        )
+        .normalize();
+
+
+      desiredHandBasisMatrix.makeBasis(
+        desiredAcrossPalm,
+        desiredFingerDirection,
+        desiredPalmNormal
+      );
+
+
+      desiredHandBasisQuaternion
+        .setFromRotationMatrix(
+          desiredHandBasisMatrix
+        );
+
+
+      /*
+        handWorld * localPalmBasis = desiredWorldPalmBasis
+      */
+      desiredHandWorldQuaternion
+        .copy(
+          desiredHandBasisQuaternion
+        )
+        .multiply(
+          localBasis
+            .clone()
+            .invert()
+        );
+
+
+      hand.parent.getWorldQuaternion(
+        gestureParentWorldQuaternion
+      );
+
+
+      gestureDesiredLocalQuaternion
+        .copy(
+          gestureParentWorldQuaternion
+        )
+        .invert()
+        .multiply(
+          desiredHandWorldQuaternion
+        );
+
+
+      currentHandLocalQuaternion
+        .copy(
+          hand.quaternion
+        );
+
+
+      hand.quaternion
+        .copy(
+          currentHandLocalQuaternion
+        )
+        .slerp(
+          gestureDesiredLocalQuaternion,
+          THREE.MathUtils.clamp(
+            weight * 0.92,
+            0,
+            0.92
+          )
+        );
+
+    }
+
+
+    /* -----------------------------------------------------
+       Finger contact pose
+    ----------------------------------------------------- */
+
+    const localCurlAxis =
+      new THREE.Vector3(
+        0,
+        0,
+        1
+      );
+
+
+    const localThumbAxis =
+      new THREE.Vector3(
+        0,
+        1,
+        0
+      );
+
+
+    const fingerDeltaQuaternion =
+      new THREE.Quaternion();
+
+
+    function rotateFingerLocal(
+      bone,
+      radians,
+      axis = localCurlAxis
+    ) {
+
+      if (
+        !bone
+      ) {
+
+        return;
+
+      }
+
+
+      fingerDeltaQuaternion
+        .setFromAxisAngle(
+          axis,
+          radians
+        );
+
+
+      bone.quaternion.multiply(
+        fingerDeltaQuaternion
+      );
+
+    }
+
+
+    function applyNeckFingerPose(
+      sideName,
+      gestureWeight,
+      now
+    ) {
+
+      const rig =
+        fingerRig[sideName];
+
+
+      if (
+        !rig ||
+        gestureWeight <= 0
+      ) {
+
+        return;
+
+      }
+
+
+      const elapsed =
+        now - gestureState.start;
+
+
+      const holding =
+        elapsed > gestureState.approach &&
+        elapsed < gestureState.approach + gestureState.hold;
+
+
+      /*
+        A tiny 2.4 Hz squeeze while the palm rests on the neck.
+        The fingers never make a fist; they simply conform to the neck.
+      */
+      const massagePulse =
+        holding
+          ? 0.5 + 0.5 * Math.sin(
+              now * 2.4 * Math.PI
+            )
+          : 0;
+
+
+      const curl =
+        gestureWeight *
+        (
+          1 +
+          massagePulse * 0.09
+        );
+
+
+      const deg =
+        THREE.MathUtils.degToRad;
+
+
+      const applyChain = (
+        chain,
+        a,
+        b,
+        c
+      ) => {
+
+        rotateFingerLocal(
+          chain[0],
+          deg(a) * curl
+        );
+
+
+        rotateFingerLocal(
+          chain[1],
+          deg(b) * curl
+        );
+
+
+        rotateFingerLocal(
+          chain[2],
+          deg(c) * curl
+        );
+
+      };
+
+
+      /*
+        Middle/ring fingers hug the neck most. Index stays slightly
+        straighter and pinky slightly softer. This reads much more like
+        an open hand than a generic fist curl.
+      */
+      applyChain(
+        rig.index,
+        12,
+        20,
+        13
+      );
+
+
+      applyChain(
+        rig.middle,
+        18,
+        29,
+        19
+      );
+
+
+      applyChain(
+        rig.ring,
+        21,
+        32,
+        21
+      );
+
+
+      applyChain(
+        rig.pinky,
+        18,
+        28,
+        19
+      );
+
+
+      /*
+        Thumb rests inward toward the side of the neck rather than
+        sticking straight away from the palm.
+      */
+      rotateFingerLocal(
+        rig.thumb[0],
+        deg(12) * curl,
+        localThumbAxis
+      );
+
+
+      rotateFingerLocal(
+        rig.thumb[1],
+        deg(15) * curl
+      );
+
+
+      rotateFingerLocal(
+        rig.thumb[2],
+        deg(8) * curl
+      );
 
     }
 
@@ -4518,8 +5384,18 @@
       }
 
 
+      const sideName =
+        gestureState.side;
+
+
       const isLeft =
-        gestureState.side === 'L';
+        sideName === 'L';
+
+
+      const clavicle =
+        isLeft
+          ? clavicleL
+          : clavicleR;
 
 
       const upperArm =
@@ -4540,17 +5416,11 @@
           : handR;
 
 
-      const effector =
-        isLeft
-          ? (indexTipL || handL)
-          : (indexTipR || handR);
-
-
       if (
+        !clavicle ||
         !upperArm ||
         !lowerArm ||
-        !hand ||
-        !effector
+        !hand
       ) {
 
         return;
@@ -4558,46 +5428,74 @@
       }
 
 
-      /*
-        After applyRelaxedPose(), capture the fingertip's natural resting
-        location. Then blend the target itself rather than snapping the arm
-        between two finished poses.
-      */
       model.updateMatrixWorld(
         true
       );
 
 
-      effector.getWorldPosition(
-        gestureRestEffector
+      /*
+        Rest wrist comes from the already-correct V8/V9 relaxed pose.
+      */
+      hand.getWorldPosition(
+        gestureRestWrist
       );
 
 
-      const target =
-        getGestureTarget(
-          now
+      const targets =
+        getNeckGestureTargets(
+          now,
+          sideName
         );
 
 
-      gestureBlendedTarget
+      gestureBlendedWristTarget
         .copy(
-          gestureRestEffector
+          gestureRestWrist
         )
         .lerp(
-          target,
+          targets.wrist,
           weight
         );
 
 
       solveGestureCCD(
         [
+          clavicle,
           upperArm,
-          lowerArm,
-          hand
+          lowerArm
         ],
-        effector,
-        gestureBlendedTarget,
-        6
+        hand,
+        gestureBlendedWristTarget,
+        7
+      );
+
+
+      model.updateMatrixWorld(
+        true
+      );
+
+
+      orientHandToNeck(
+        hand,
+        sideName,
+        targets.contact,
+        weight
+      );
+
+
+      /*
+        Finger pose is applied AFTER wrist orientation so the contact
+        curl is never overwritten by IK.
+      */
+      applyNeckFingerPose(
+        sideName,
+        weight,
+        now
+      );
+
+
+      model.updateMatrixWorld(
+        true
       );
 
     }
