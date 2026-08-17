@@ -138,6 +138,243 @@
       pointer-events:
         none;
     }
+
+
+    /* =====================================================
+       PRIME PROJECTION EFFECTS
+    ===================================================== */
+
+    #projectionFx {
+      position: absolute;
+      left: 50%;
+      bottom: -42px;
+      width: min(720px, 78vw);
+      height: 185px;
+      transform: translateX(-50%);
+      z-index: 3;
+      pointer-events: none;
+      overflow: visible;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      filter: saturate(1.08);
+    }
+
+    #projectionFx.ready {
+      opacity: 1;
+    }
+
+    #projectionFx .projection-glow {
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      width: 72%;
+      height: 98px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background:
+        radial-gradient(
+          ellipse at center,
+          rgba(64, 226, 255, 0.28) 0%,
+          rgba(15, 180, 224, 0.14) 30%,
+          rgba(0, 108, 145, 0.05) 52%,
+          transparent 72%
+        );
+      filter: blur(12px);
+      animation: projectionGlowPulse 4.6s ease-in-out infinite;
+    }
+
+    #projectionFx .projection-core {
+      position: absolute;
+      left: 50%;
+      bottom: 38px;
+      width: 54%;
+      height: 10px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: rgba(75, 232, 255, 0.56);
+      box-shadow:
+        0 0 12px rgba(63, 224, 255, 0.60),
+        0 0 34px rgba(19, 177, 221, 0.38),
+        0 0 70px rgba(10, 118, 155, 0.20);
+      filter: blur(1.5px);
+      opacity: 0.72;
+    }
+
+    #projectionFx .ring {
+      position: absolute;
+      left: 50%;
+      bottom: 31px;
+      width: 48%;
+      height: 52px;
+      transform: translateX(-50%) scale(0.65);
+      border: 1px solid rgba(74, 229, 255, 0.66);
+      border-radius: 50%;
+      opacity: 0;
+      box-shadow:
+        0 0 8px rgba(54, 219, 255, 0.25),
+        inset 0 0 8px rgba(54, 219, 255, 0.12);
+      animation: projectionRing 5.8s ease-out infinite;
+    }
+
+    #projectionFx .ring.r2 {
+      animation-delay: 1.9s;
+    }
+
+    #projectionFx .ring.r3 {
+      animation-delay: 3.8s;
+    }
+
+    #projectionParticles {
+      position: absolute;
+      inset: 0;
+      overflow: visible;
+    }
+
+    #projectionParticles i {
+      position: absolute;
+      left: var(--x);
+      bottom: 42px;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: rgba(92, 235, 255, 0.90);
+      box-shadow: 0 0 7px rgba(49, 222, 255, 0.58);
+      opacity: 0;
+      animation: particleRise var(--duration) linear var(--delay) infinite;
+    }
+
+    #characterAura {
+      position: absolute;
+      z-index: 0;
+      left: 50%;
+      top: 46%;
+      width: min(620px, 62vw);
+      height: min(760px, 80vh);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      pointer-events: none;
+      background:
+        radial-gradient(
+          ellipse at center,
+          rgba(8, 109, 139, 0.10) 0%,
+          rgba(5, 69, 92, 0.055) 42%,
+          transparent 70%
+        );
+      filter: blur(20px);
+      animation: auraPulse 6.5s ease-in-out infinite;
+    }
+
+    #holoSweep {
+      position: absolute;
+      z-index: 2;
+      left: 50%;
+      top: 8%;
+      width: min(520px, 48vw);
+      height: 110px;
+      transform: translateX(-50%);
+      pointer-events: none;
+      opacity: 0;
+      background:
+        linear-gradient(
+          to bottom,
+          transparent 0%,
+          rgba(91, 228, 255, 0.015) 32%,
+          rgba(91, 228, 255, 0.085) 50%,
+          rgba(91, 228, 255, 0.015) 68%,
+          transparent 100%
+        );
+      filter: blur(5px);
+      animation: holoSweepMove 11s ease-in-out infinite;
+    }
+
+    @keyframes projectionGlowPulse {
+      0%, 100% {
+        opacity: 0.64;
+        transform: translateX(-50%) scaleX(0.96) scaleY(0.94);
+      }
+      50% {
+        opacity: 0.92;
+        transform: translateX(-50%) scaleX(1.05) scaleY(1.02);
+      }
+    }
+
+    @keyframes projectionRing {
+      0% {
+        transform: translateX(-50%) scale(0.60);
+        opacity: 0;
+      }
+      13% {
+        opacity: 0.68;
+      }
+      72% {
+        opacity: 0.16;
+      }
+      100% {
+        transform: translateX(-50%) scale(1.55);
+        opacity: 0;
+      }
+    }
+
+    @keyframes particleRise {
+      0% {
+        transform: translate3d(0, 0, 0) scale(0.65);
+        opacity: 0;
+      }
+      14% {
+        opacity: 0.70;
+      }
+      72% {
+        opacity: 0.30;
+      }
+      100% {
+        transform: translate3d(var(--drift), -128px, 0) scale(0.15);
+        opacity: 0;
+      }
+    }
+
+    @keyframes auraPulse {
+      0%, 100% {
+        opacity: 0.52;
+        transform: translate(-50%, -50%) scale(0.98);
+      }
+      50% {
+        opacity: 0.82;
+        transform: translate(-50%, -50%) scale(1.03);
+      }
+    }
+
+    @keyframes holoSweepMove {
+      0%, 68% {
+        top: 8%;
+        opacity: 0;
+      }
+      72% {
+        opacity: 0.22;
+      }
+      82% {
+        opacity: 0.36;
+      }
+      93% {
+        top: 80%;
+        opacity: 0.08;
+      }
+      100% {
+        top: 80%;
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 800px) {
+      #projectionFx {
+        width: 92vw;
+        bottom: -48px;
+      }
+
+      #holoSweep {
+        width: 70vw;
+      }
+    }
+
   </style>
 </head>
 
@@ -145,6 +382,18 @@
 <body>
 
   <div id="stage">
+
+    <div id="characterAura"></div>
+    <div id="holoSweep"></div>
+
+    <div id="projectionFx">
+      <div class="projection-glow"></div>
+      <div class="projection-core"></div>
+      <div class="ring r1"></div>
+      <div class="ring r2"></div>
+      <div class="ring r3"></div>
+      <div id="projectionParticles"></div>
+    </div>
 
     <div id="status">
       INITIALIZING PRIME RECEPTION AI…
@@ -186,6 +435,18 @@
     const status =
       document.getElementById(
         'status'
+      );
+
+
+    const projectionFx =
+      document.getElementById(
+        'projectionFx'
+      );
+
+
+    const projectionParticles =
+      document.getElementById(
+        'projectionParticles'
       );
 
 
@@ -758,16 +1019,16 @@
 
         color:
           new THREE.Color(
-            0x4aa9d8
+            0x76d7f3
           ),
 
         emissive:
           new THREE.Color(
-            0x006fae
+            0x00bfff
           ),
 
         emissiveIntensity:
-          0.42,
+          0.32,
 
         metalness:
           0,
@@ -789,16 +1050,16 @@
 
         color:
           new THREE.Color(
-            0xe8fbff
+            0xd8faff
           ),
 
         emissive:
           new THREE.Color(
-            0x004d70
+            0x006d91
           ),
 
         emissiveIntensity:
-          0.10,
+          0.08,
 
         transparent:
           true,
@@ -941,10 +1202,6 @@
 
 
     let shirtMesh =
-      null;
-
-
-    let faceMorphMesh =
       null;
 
 
@@ -1356,117 +1613,14 @@
     */
 
     const RESTING_SMILE =
-      0.68;
+      0.62;
 
 
     const RESTING_CHEEK =
-      0.08;
-
-
-    const RESTING_DIMPLE =
-      0.10;
-
-
-    function setMorphByName(
-      mesh,
-      name,
-      value
-    ) {
-
-      if (
-        !mesh ||
-        !mesh.morphTargetDictionary ||
-        !mesh.morphTargetInfluences
-      ) {
-
-        return false;
-
-      }
-
-
-      const index =
-        mesh.morphTargetDictionary[name];
-
-
-      if (
-        index ===
-        undefined
-      ) {
-
-        return false;
-
-      }
-
-
-      mesh.morphTargetInfluences[index] =
-        value;
-
-
-      return true;
-
-    }
+      0.14;
 
 
     function applyRestingSmile() {
-
-      /*
-        Drive the actual visible ARKit head directly.
-        This avoids accidentally applying the smile only
-        to a duplicate/unified head mesh.
-      */
-
-      if (
-        faceMorphMesh
-      ) {
-
-        setMorphByName(
-          faceMorphMesh,
-          'mouthSmileLeft',
-          RESTING_SMILE
-        );
-
-
-        setMorphByName(
-          faceMorphMesh,
-          'mouthSmileRight',
-          RESTING_SMILE
-        );
-
-
-        setMorphByName(
-          faceMorphMesh,
-          'cheekSquintLeft',
-          RESTING_CHEEK
-        );
-
-
-        setMorphByName(
-          faceMorphMesh,
-          'cheekSquintRight',
-          RESTING_CHEEK
-        );
-
-
-        setMorphByName(
-          faceMorphMesh,
-          'mouthDimpleLeft',
-          RESTING_DIMPLE
-        );
-
-
-        setMorphByName(
-          faceMorphMesh,
-          'mouthDimpleRight',
-          RESTING_DIMPLE
-        );
-
-
-        return;
-
-      }
-
-
-      /* fallback */
 
       for (
         const entry
@@ -1474,7 +1628,9 @@
       ) {
 
         const influences =
-          entry.mesh.morphTargetInfluences;
+          entry
+            .mesh
+            .morphTargetInfluences;
 
 
         if (
@@ -1482,7 +1638,9 @@
           null
         ) {
 
-          influences[entry.left] =
+          influences[
+            entry.left
+          ] =
             RESTING_SMILE;
 
         }
@@ -1493,8 +1651,36 @@
           null
         ) {
 
-          influences[entry.right] =
+          influences[
+            entry.right
+          ] =
             RESTING_SMILE;
+
+        }
+
+
+        if (
+          entry.cheekLeft !==
+          null
+        ) {
+
+          influences[
+            entry.cheekLeft
+          ] =
+            RESTING_CHEEK;
+
+        }
+
+
+        if (
+          entry.cheekRight !==
+          null
+        ) {
+
+          influences[
+            entry.cheekRight
+          ] =
+            RESTING_CHEEK;
 
         }
 
@@ -1634,6 +1820,106 @@
     }
 
 
+
+    /* =====================================================
+       SCREEN-SPACE PROJECTION PARTICLES
+    ===================================================== */
+
+    function createProjectionParticles() {
+
+      if (
+        !projectionParticles ||
+        projectionParticles.childElementCount > 0
+      ) {
+        return;
+      }
+
+
+      const count =
+        34;
+
+
+      for (
+        let i = 0;
+        i < count;
+        i++
+      ) {
+
+        const dot =
+          document.createElement(
+            'i'
+          );
+
+
+        const x =
+          26 +
+          Math.random() *
+          48;
+
+
+        const size =
+          1 +
+          Math.random() *
+          2.4;
+
+
+        const duration =
+          3.2 +
+          Math.random() *
+          4.8;
+
+
+        const delay =
+          -Math.random() *
+          duration;
+
+
+        const drift =
+          (
+            Math.random() -
+            0.5
+          ) *
+          56;
+
+
+        dot.style.setProperty(
+          '--x',
+          x + '%'
+        );
+
+
+        dot.style.setProperty(
+          '--size',
+          size + 'px'
+        );
+
+
+        dot.style.setProperty(
+          '--duration',
+          duration + 's'
+        );
+
+
+        dot.style.setProperty(
+          '--delay',
+          delay + 's'
+        );
+
+
+        dot.style.setProperty(
+          '--drift',
+          drift + 'px'
+        );
+
+
+        projectionParticles.appendChild(
+          dot
+        );
+
+      }
+
+    }
+
     /* =====================================================
        LOAD MODEL
     ===================================================== */
@@ -1678,27 +1964,6 @@
                 object.name;
 
 
-              /*
-                The GLB contains exported unified duplicate meshes
-                in addition to the proper torso/head meshes.
-                Rendering both causes skin geometry to poke through
-                the T-shirt (the two skin-coloured circles seen on the chest).
-              */
-
-              if (
-                name === 'Mesh010' ||
-                name === 'Mesh010_1' ||
-                name.startsWith('SK_FemBase2_Unified_mesh')
-              ) {
-
-                object.visible =
-                  false;
-
-                return;
-
-              }
-
-
               registerFacialMorphs(
                 object
               );
@@ -1714,6 +1979,9 @@
                 ||
                 name ===
                   'SK_FemBase2_UnderWear'
+                ||
+                name ===
+                  'SK_FemBase2_Unified_mesh'
               ) {
 
                 object.visible =
@@ -1730,6 +1998,9 @@
               */
 
               if (
+                name ===
+                  'Mesh010'
+                ||
                 name ===
                   'SK_FemBase2_Torso'
               ) {
@@ -1758,15 +2029,14 @@
 
               if (
                 name ===
+                  'Mesh010_1'
+                ||
+                name ===
                   'SK_FemBase2_Head_52ArKit'
                 ||
                 name ===
                   'SK_FemBase2_Head_52ARKit'
               ) {
-
-                faceMorphMesh =
-                  object;
-
 
                 object.visible =
                   true;
@@ -1810,6 +2080,22 @@
                   shirtMaterial
 
                 );
+
+
+                shirtMaterial.polygonOffset =
+                  true;
+
+
+                shirtMaterial.polygonOffsetFactor =
+                  -1.5;
+
+
+                shirtMaterial.polygonOffsetUnits =
+                  -1.5;
+
+
+                shirtMaterial.needsUpdate =
+                  true;
 
 
                 return;
@@ -2392,6 +2678,26 @@
         );
 
 
+        createProjectionParticles();
+
+
+        if (
+          projectionFx
+        ) {
+
+          requestAnimationFrame(
+            function () {
+
+              projectionFx.classList.add(
+                'ready'
+              );
+
+            }
+          );
+
+        }
+
+
         /*
           Apply smile immediately.
         */
@@ -2405,17 +2711,6 @@
 
           smileMeshes.length
 
-        );
-
-
-        console.log(
-          'VISIBLE SMILE HEAD:',
-          faceMorphMesh ? faceMorphMesh.name : 'NOT FOUND',
-          faceMorphMesh && faceMorphMesh.morphTargetDictionary
-            ? Object.keys(faceMorphMesh.morphTargetDictionary).filter(
-                name => name.toLowerCase().includes('smile') || name.toLowerCase().includes('dimple')
-              )
-            : []
         );
 
 
@@ -2572,7 +2867,7 @@
       const targetY =
         headWorld.y +
         modelSize.y *
-        0.036;
+        0.018;
 
 
       const targetX =
@@ -2592,7 +2887,8 @@
           modelSize.y *
           0.20
 
-        );
+        ) *
+        1.012;
 
 
       const verticalFOV =
@@ -2610,7 +2906,7 @@
 
 
       distance *=
-        1.000;
+        1.012;
 
 
       camera.position.set(
@@ -3061,13 +3357,13 @@
 
     const ARM_DROP =
       THREE.MathUtils.degToRad(
-        30
+        22
       );
 
 
     const ELBOW_RELAX =
       THREE.MathUtils.degToRad(
-        10
+        6
       );
 
 
@@ -3726,9 +4022,9 @@
 
 
       eyeMaterial.emissiveIntensity =
-        0.34 +
+        0.26 +
         eyePulse *
-        0.14;
+        0.10;
 
 
       lowerGlow.intensity =
