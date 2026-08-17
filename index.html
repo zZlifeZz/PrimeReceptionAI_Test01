@@ -9,7 +9,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Prime Reception AI — Character Clean V7</title>
+  <title>Prime Reception AI — Character Gestures V9</title>
 
   <style>
     * {
@@ -1284,6 +1284,20 @@
 
 
     /*
+      Fingertip references used by the procedural gesture IK.
+      The index fingertip gives us a natural contact point for
+      hair/temple touches instead of aiming the wrist at the face.
+    */
+
+    let indexTipL =
+      null;
+
+
+    let indexTipR =
+      null;
+
+
+    /*
       Base rotations.
     */
 
@@ -1655,7 +1669,7 @@
     */
 
     const RESTING_SMILE =
-      0.80;
+      0.90;
 
 
     /*
@@ -1728,32 +1742,32 @@
 
       setFaceMorph(
         'mouthDimpleLeft',
-        0.10
+        0.14
       );
 
       setFaceMorph(
         'mouthDimpleRight',
-        0.10
+        0.14
       );
 
       setFaceMorph(
         'cheekSquintLeft',
-        0.055
+        0.075
       );
 
       setFaceMorph(
         'cheekSquintRight',
-        0.055
+        0.075
       );
 
       setFaceMorph(
         'mouthUpperUpLeft',
-        0.05
+        0.065
       );
 
       setFaceMorph(
         'mouthUpperUpRight',
-        0.05
+        0.065
       );
 
     }
@@ -2912,6 +2926,28 @@
 
               }
 
+
+              if (
+                n ===
+                'index_03_l'
+              ) {
+
+                indexTipL =
+                  object;
+
+              }
+
+
+              if (
+                n ===
+                'index_03_r'
+              ) {
+
+                indexTipR =
+                  object;
+
+              }
+
             }
 
           }
@@ -3123,12 +3159,12 @@
           We use the asset's purpose-built censored torso instead.
         */
         console.log(
-          'V8 BODY MESH:',
+          'V9 BODY MESH:',
           torsoMesh ? torsoMesh.name : 'NOT FOUND'
         );
 
         console.log(
-          'V8 FACE MESH:',
+          'V9 FACE MESH:',
           faceMorphMesh ? faceMorphMesh.name : 'NOT FOUND'
         );
 
@@ -3177,7 +3213,7 @@
           const d = faceMorphMesh.morphTargetDictionary;
 
           console.log(
-            'V8 SMILE VALUES:',
+            'V9 SMILE VALUES:',
             {
               left: d.mouthSmileLeft !== undefined
                 ? faceMorphMesh.morphTargetInfluences[d.mouthSmileLeft]
@@ -3196,6 +3232,15 @@
 
 
         scheduleNextBlink();
+
+        /*
+          The first gesture happens fairly soon so it is easy to test.
+          After that, gestures become much more occasional.
+        */
+        scheduleNextGesture(
+          performance.now() / 1000,
+          true
+        );
 
       },
 
@@ -3922,6 +3967,643 @@
 
 
     /* =====================================================
+       PROCEDURAL HAND GESTURES — V9
+
+       The GLB contains no authored animation clips, so these gestures
+       are generated at runtime using a small CCD inverse-kinematics
+       solver. The important part is that we solve against the real
+       skeleton instead of assuming Euler axes.
+
+       Gestures are intentionally occasional:
+       - ~72%: light hair/temple adjustment
+       - ~28%: brief outer-eye / temple touch
+
+       We never rub directly across the eye surface. That keeps the
+       receptionist looking composed rather than tired or irritated.
+    ===================================================== */
+
+    const gestureState = {
+
+      active: false,
+
+      type: 'hair',
+
+      side: 'L',
+
+      start: 0,
+
+      approach: 1.15,
+
+      hold: 0.85,
+
+      release: 1.25,
+
+      duration: 3.25,
+
+      nextAt: Infinity
+
+    };
+
+
+    const gestureTarget =
+      new THREE.Vector3();
+
+
+    const gestureRestEffector =
+      new THREE.Vector3();
+
+
+    const gestureBlendedTarget =
+      new THREE.Vector3();
+
+
+    const gestureBonePosition =
+      new THREE.Vector3();
+
+
+    const gestureEffectorPosition =
+      new THREE.Vector3();
+
+
+    const gestureToEffector =
+      new THREE.Vector3();
+
+
+    const gestureToTarget =
+      new THREE.Vector3();
+
+
+    const gestureCurrentWorldQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureParentWorldQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureDeltaWorldQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureStepQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureDesiredWorldQuaternion =
+      new THREE.Quaternion();
+
+
+    const gestureDesiredLocalQuaternion =
+      new THREE.Quaternion();
+
+
+    function smoothGestureStep(
+      value
+    ) {
+
+      const t =
+        THREE.MathUtils.clamp(
+          value,
+          0,
+          1
+        );
+
+
+      return t * t * (3 - 2 * t);
+
+    }
+
+
+    function scheduleNextGesture(
+      now,
+      initial = false
+    ) {
+
+      gestureState.nextAt =
+        now +
+        (
+          initial
+            ?
+            6 + Math.random() * 5
+            :
+            18 + Math.random() * 22
+        );
+
+    }
+
+
+    function beginRandomGesture(
+      now
+    ) {
+
+      gestureState.active =
+        true;
+
+
+      gestureState.start =
+        now;
+
+
+      gestureState.type =
+        Math.random() < 0.72
+          ? 'hair'
+          : 'temple';
+
+
+      gestureState.side =
+        Math.random() < 0.5
+          ? 'L'
+          : 'R';
+
+
+      /*
+        Give each gesture slightly different timing so it does not
+        look like the same canned animation repeating forever.
+      */
+      gestureState.approach =
+        1.00 + Math.random() * 0.30;
+
+
+      gestureState.hold =
+        gestureState.type === 'hair'
+          ? 0.70 + Math.random() * 0.55
+          : 0.45 + Math.random() * 0.40;
+
+
+      gestureState.release =
+        1.10 + Math.random() * 0.35;
+
+
+      gestureState.duration =
+        gestureState.approach +
+        gestureState.hold +
+        gestureState.release;
+
+    }
+
+
+    function getGestureWeight(
+      now
+    ) {
+
+      if (
+        !gestureState.active
+      ) {
+
+        return 0;
+
+      }
+
+
+      const elapsed =
+        now - gestureState.start;
+
+
+      if (
+        elapsed < gestureState.approach
+      ) {
+
+        return smoothGestureStep(
+          elapsed /
+          gestureState.approach
+        );
+
+      }
+
+
+      const holdEnd =
+        gestureState.approach +
+        gestureState.hold;
+
+
+      if (
+        elapsed < holdEnd
+      ) {
+
+        return 1;
+
+      }
+
+
+      const releaseProgress =
+        (
+          elapsed -
+          holdEnd
+        ) /
+        gestureState.release;
+
+
+      return 1 - smoothGestureStep(
+        releaseProgress
+      );
+
+    }
+
+
+    function getGestureTarget(
+      now
+    ) {
+
+      if (
+        !headBone ||
+        !modelSize
+      ) {
+
+        return gestureTarget.set(
+          0,
+          0,
+          0
+        );
+
+      }
+
+
+      headBone.getWorldPosition(
+        gestureTarget
+      );
+
+
+      /*
+        Anatomical left appears on the viewer's right.
+      */
+      const sideSign =
+        gestureState.side === 'L'
+          ? 1
+          : -1;
+
+
+      const scale =
+        modelSize.y;
+
+
+      if (
+        gestureState.type === 'hair'
+      ) {
+
+        /*
+          Side of hair, just above the temple. The tiny movement during
+          the hold reads like an adjustment/tuck rather than a frozen pose.
+        */
+        gestureTarget.x +=
+          sideSign *
+          scale *
+          0.056;
+
+
+        gestureTarget.y +=
+          scale *
+          0.030;
+
+
+        gestureTarget.z +=
+          scale *
+          0.018;
+
+
+        gestureTarget.y +=
+          Math.sin(
+            now * 4.2
+          ) *
+          scale *
+          0.0017;
+
+      }
+
+      else {
+
+        /*
+          Outer-eye / temple contact. This is deliberately offset from
+          the eyeball itself so it stays professional and natural.
+        */
+        gestureTarget.x +=
+          sideSign *
+          scale *
+          0.043;
+
+
+        gestureTarget.y +=
+          scale *
+          0.002;
+
+
+        gestureTarget.z +=
+          scale *
+          0.024;
+
+
+        gestureTarget.y +=
+          Math.sin(
+            now * 5.0
+          ) *
+          scale *
+          0.0011;
+
+      }
+
+
+      return gestureTarget;
+
+    }
+
+
+    function solveGestureCCD(
+      chain,
+      effector,
+      targetWorld,
+      iterations = 5
+    ) {
+
+      if (
+        !model ||
+        !effector ||
+        chain.some(
+          bone => !bone
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      for (
+        let iteration = 0;
+        iteration < iterations;
+        iteration++
+      ) {
+
+        /*
+          Solve wrist -> elbow -> shoulder. Starting near the hand keeps
+          the motion compact and prevents the shoulder from doing all of
+          the work.
+        */
+        for (
+          let i = chain.length - 1;
+          i >= 0;
+          i--
+        ) {
+
+          const bone =
+            chain[i];
+
+
+          model.updateMatrixWorld(
+            true
+          );
+
+
+          bone.getWorldPosition(
+            gestureBonePosition
+          );
+
+
+          effector.getWorldPosition(
+            gestureEffectorPosition
+          );
+
+
+          gestureToEffector
+            .subVectors(
+              gestureEffectorPosition,
+              gestureBonePosition
+            );
+
+
+          gestureToTarget
+            .subVectors(
+              targetWorld,
+              gestureBonePosition
+            );
+
+
+          if (
+            gestureToEffector.lengthSq() < 0.0000001 ||
+            gestureToTarget.lengthSq() < 0.0000001
+          ) {
+
+            continue;
+
+          }
+
+
+          gestureToEffector.normalize();
+          gestureToTarget.normalize();
+
+
+          gestureDeltaWorldQuaternion
+            .setFromUnitVectors(
+              gestureToEffector,
+              gestureToTarget
+            );
+
+
+          /*
+            Never apply the full correction in one step. Several small
+            corrections look smoother and greatly reduce joint flipping.
+          */
+          gestureStepQuaternion
+            .identity()
+            .slerp(
+              gestureDeltaWorldQuaternion,
+              i === 0 ? 0.42 : 0.58
+            );
+
+
+          bone.getWorldQuaternion(
+            gestureCurrentWorldQuaternion
+          );
+
+
+          gestureDesiredWorldQuaternion
+            .copy(
+              gestureStepQuaternion
+            )
+            .multiply(
+              gestureCurrentWorldQuaternion
+            );
+
+
+          bone.parent.getWorldQuaternion(
+            gestureParentWorldQuaternion
+          );
+
+
+          gestureDesiredLocalQuaternion
+            .copy(
+              gestureParentWorldQuaternion
+            )
+            .invert()
+            .multiply(
+              gestureDesiredWorldQuaternion
+            );
+
+
+          bone.quaternion.slerp(
+            gestureDesiredLocalQuaternion,
+            0.72
+          );
+
+
+          bone.updateMatrixWorld(
+            true
+          );
+
+        }
+
+      }
+
+    }
+
+
+    function updateGesture(
+      now
+    ) {
+
+      if (
+        !gestureState.active &&
+        now >= gestureState.nextAt
+      ) {
+
+        beginRandomGesture(
+          now
+        );
+
+      }
+
+
+      if (
+        !gestureState.active
+      ) {
+
+        return;
+
+      }
+
+
+      const elapsed =
+        now - gestureState.start;
+
+
+      if (
+        elapsed >= gestureState.duration
+      ) {
+
+        gestureState.active =
+          false;
+
+
+        scheduleNextGesture(
+          now,
+          false
+        );
+
+
+        return;
+
+      }
+
+
+      const weight =
+        getGestureWeight(
+          now
+        );
+
+
+      if (
+        weight <= 0.0001
+      ) {
+
+        return;
+
+      }
+
+
+      const isLeft =
+        gestureState.side === 'L';
+
+
+      const upperArm =
+        isLeft
+          ? upperArmL
+          : upperArmR;
+
+
+      const lowerArm =
+        isLeft
+          ? lowerArmL
+          : lowerArmR;
+
+
+      const hand =
+        isLeft
+          ? handL
+          : handR;
+
+
+      const effector =
+        isLeft
+          ? (indexTipL || handL)
+          : (indexTipR || handR);
+
+
+      if (
+        !upperArm ||
+        !lowerArm ||
+        !hand ||
+        !effector
+      ) {
+
+        return;
+
+      }
+
+
+      /*
+        After applyRelaxedPose(), capture the fingertip's natural resting
+        location. Then blend the target itself rather than snapping the arm
+        between two finished poses.
+      */
+      model.updateMatrixWorld(
+        true
+      );
+
+
+      effector.getWorldPosition(
+        gestureRestEffector
+      );
+
+
+      const target =
+        getGestureTarget(
+          now
+        );
+
+
+      gestureBlendedTarget
+        .copy(
+          gestureRestEffector
+        )
+        .lerp(
+          target,
+          weight
+        );
+
+
+      solveGestureCCD(
+        [
+          upperArm,
+          lowerArm,
+          hand
+        ],
+        effector,
+        gestureBlendedTarget,
+        6
+      );
+
+    }
+
+
+    /* =====================================================
        ANIMATION
     ===================================================== */
 
@@ -4235,6 +4917,15 @@
       ========================================= */
 
       applyRelaxedPose(
+        now
+      );
+
+
+      /* =========================================
+         OCCASIONAL HAND GESTURE
+      ========================================= */
+
+      updateGesture(
         now
       );
 
