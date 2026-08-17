@@ -3,29 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prime Reception AI — Realism V15</title>
-
+  <title>Prime Reception AI — Realism V17</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
+    * { box-sizing: border-box; }
+    html, body {
       margin: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
       background: #000;
     }
-
     #stage {
       position: fixed;
       inset: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
-
       background: radial-gradient(
         ellipse at 50% 43%,
         #081c27 0%,
@@ -34,14 +27,12 @@
         #000 100%
       );
     }
-
     #stage::after {
       content: "";
       position: absolute;
       inset: 0;
       z-index: 5;
       pointer-events: none;
-
       background: radial-gradient(
         ellipse at center,
         transparent 37%,
@@ -49,7 +40,6 @@
         rgba(0, 0, 0, 0.80) 100%
       );
     }
-
     #stage canvas {
       position: relative;
       z-index: 1;
@@ -57,3614 +47,869 @@
       width: 100%;
       height: 100%;
     }
-
     #status {
       position: absolute;
       z-index: 20;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-
       color: #55dfff;
-
       font: 14px Arial, sans-serif;
       letter-spacing: 0.11em;
-
       white-space: nowrap;
       pointer-events: none;
     }
   </style>
 </head>
-
 <body>
-
   <div id="stage">
-    <div id="status">
-      INITIALIZING PRIME RECEPTION AI…
-    </div>
+    <div id="status">INITIALIZING PRIME RECEPTION AI…</div>
   </div>
-
   <script type="importmap">
   {
     "imports": {
-      "three":
-      "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
     }
   }
   </script>
-
   <script type="module">
-
-    import * as THREE
-      from 'three';
-
-    import {
-      GLTFLoader
-    }
-    from
-    'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
-
-
-    const stage =
-      document.getElementById(
-        'stage'
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
+    const stage = document.getElementById('stage');
+    const status = document.getElementById('status');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      30,
+      window.innerWidth / window.innerHeight,
+      0.01,
+      1000
+    );
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.04;
+    renderer.setClearColor(0x000000, 0);
+    stage.appendChild(renderer.domElement);
+    const ambient = new THREE.HemisphereLight(0xffeee3, 0x020607, 0.74);
+    scene.add(ambient);
+    const keyLight = new THREE.DirectionalLight(0xffdbc7, 2.10);
+    keyLight.position.set(1.4, 4.0, 5.6);
+    scene.add(keyLight);
+    const frontFill = new THREE.PointLight(0xffe1d2, 0.72, 6);
+    frontFill.position.set(-0.6, 1.6, 3.3);
+    scene.add(frontFill);
+    const cyanLeft = new THREE.DirectionalLight(0x10d8ff, 2.15);
+    cyanLeft.position.set(-4.5, 3.7, -3.8);
+    scene.add(cyanLeft);
+    const cyanRight = new THREE.DirectionalLight(0x51e8ff, 1.25);
+    cyanRight.position.set(4.4, 3.1, -3.1);
+    scene.add(cyanRight);
+    const warmAccent = new THREE.DirectionalLight(0xffb56b, 0.48);
+    warmAccent.position.set(3.2, 2.5, 3.2);
+    scene.add(warmAccent);
+    const lowerGlow = new THREE.PointLight(0x0bdcff, 2.15, 6);
+    lowerGlow.position.set(0, -0.85, 1.4);
+    scene.add(lowerGlow);
+    const textureLoader = new THREE.TextureLoader();
+    const maxAnisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    function loadTexture(path, colorTexture = false) {
+      const texture = textureLoader.load(
+        path,
+        () => { texture.needsUpdate = true; },
+        undefined,
+        (error) => console.error('Texture failed to load:', path, error)
       );
-
-
-    const status =
-      document.getElementById(
-        'status'
-      );
-
-
-    const scene =
-      new THREE.Scene();
-
-
-    const camera =
-      new THREE.PerspectiveCamera(
-
-        30,
-
-        window.innerWidth /
-        window.innerHeight,
-
-        0.01,
-
-        1000
-
-      );
-
-
-    const renderer =
-      new THREE.WebGLRenderer({
-
-        antialias:
-          true,
-
-        alpha:
-          true
-
-      });
-
-
-    renderer.setPixelRatio(
-
-      Math.min(
-
-        window.devicePixelRatio ||
-        1,
-
-        2
-
-      )
-
-    );
-
-
-    renderer.setSize(
-
-      window.innerWidth,
-
-      window.innerHeight
-
-    );
-
-
-    renderer.outputColorSpace =
-      THREE.SRGBColorSpace;
-
-
-    renderer.toneMapping =
-      THREE.ACESFilmicToneMapping;
-
-
-    renderer.toneMappingExposure =
-      1.04;
-
-
-    renderer.setClearColor(
-
-      0x000000,
-
-      0
-
-    );
-
-
-    stage.appendChild(
-      renderer.domElement
-    );
-
-
-    /*
-      LIGHTING
-    */
-
-    const ambient =
-      new THREE.HemisphereLight(
-
-        0xffeee3,
-
-        0x020607,
-
-        0.74
-
-      );
-
-
-    scene.add(
-      ambient
-    );
-
-
-    const keyLight =
-      new THREE.DirectionalLight(
-
-        0xffdbc7,
-
-        2.10
-
-      );
-
-
-    keyLight.position.set(
-
-      1.4,
-
-      4.0,
-
-      5.6
-
-    );
-
-
-    scene.add(
-      keyLight
-    );
-
-
-    const frontFill =
-      new THREE.PointLight(
-
-        0xffe1d2,
-
-        0.72,
-
-        6
-
-      );
-
-
-    frontFill.position.set(
-
-      -0.6,
-
-      1.6,
-
-      3.3
-
-    );
-
-
-    scene.add(
-      frontFill
-    );
-
-
-    const cyanLeft =
-      new THREE.DirectionalLight(
-
-        0x10d8ff,
-
-        2.15
-
-      );
-
-
-    cyanLeft.position.set(
-
-      -4.5,
-
-      3.7,
-
-      -3.8
-
-    );
-
-
-    scene.add(
-      cyanLeft
-    );
-
-
-    const cyanRight =
-      new THREE.DirectionalLight(
-
-        0x51e8ff,
-
-        1.25
-
-      );
-
-
-    cyanRight.position.set(
-
-      4.4,
-
-      3.1,
-
-      -3.1
-
-    );
-
-
-    scene.add(
-      cyanRight
-    );
-
-
-    const warmAccent =
-      new THREE.DirectionalLight(
-
-        0xffb56b,
-
-        0.48
-
-      );
-
-
-    warmAccent.position.set(
-
-      3.2,
-
-      2.5,
-
-      3.2
-
-    );
-
-
-    scene.add(
-      warmAccent
-    );
-
-
-    const lowerGlow =
-      new THREE.PointLight(
-
-        0x0bdcff,
-
-        2.15,
-
-        6
-
-      );
-
-
-    lowerGlow.position.set(
-
-      0,
-
-      -0.85,
-
-      1.4
-
-    );
-
-
-    scene.add(
-      lowerGlow
-    );
-
-
-    /*
-      TEXTURES
-    */
-
-    const textureLoader =
-      new THREE.TextureLoader();
-
-
-    const maxAnisotropy =
-      Math.min(
-
-        8,
-
-        renderer.capabilities
-          .getMaxAnisotropy()
-
-      );
-
-
-    function loadTexture(
-      path,
-      colorTexture = false
-    ) {
-
-      const texture =
-        textureLoader.load(
-
-          path,
-
-          () => {
-
-            texture.needsUpdate =
-              true;
-
-          },
-
-          undefined,
-
-          error => {
-
-            console.error(
-
-              'Texture failed to load:',
-
-              path,
-
-              error
-
-            );
-
-          }
-
-        );
-
-
-      texture.flipY =
-        false;
-
-
-      texture.anisotropy =
-        maxAnisotropy;
-
-
-      if (
-        colorTexture
-      ) {
-
-        texture.colorSpace =
-          THREE.SRGBColorSpace;
-
+      texture.flipY = false;
+      texture.anisotropy = maxAnisotropy;
+      if (colorTexture) {
+        texture.colorSpace = THREE.SRGBColorSpace;
       }
-
-
       return texture;
-
     }
-
-
-    /*
-      HEAD / LIPS
-    */
-
-    const headBaseColor =
-      loadTexture(
-
-        './head_basecolor.webp',
-
-        true
-
-      );
-
-
-    const headNormal =
-      loadTexture(
-        './head_normal.webp'
-      );
-
-
-    const headRoughness =
-      loadTexture(
-        './head_roughness.webp'
-      );
-
-
-    /*
-      BODY
-    */
-
-    const bodyBaseColor =
-      loadTexture(
-
-        './body_basecolor.webp',
-
-        true
-
-      );
-
-
-    const bodyNormal =
-      loadTexture(
-        './body_normal.webp'
-      );
-
-
-    const bodyRoughness =
-      loadTexture(
-        './body_roughness.webp'
-      );
-
-
-    /*
-      HAIR
-    */
-
-    const hairAlbedo =
-      loadTexture(
-
-        './hair_albedo.webp',
-
-        true
-
-      );
-
-
-    const hairAlpha =
-      loadTexture(
-        './hair_alpha.webp'
-      );
-
-
-    const hairNormal =
-      loadTexture(
-        './hair_normal.webp'
-      );
-
-
-    const hairRoughness =
-      loadTexture(
-        './hair_roughness.webp'
-      );
-
-
-    /*
-      EYELASHES
-    */
-
-    const lashesAlbedo =
-      loadTexture(
-
-        './lashes_albedo.webp',
-
-        true
-
-      );
-
-
-    const lashesAlpha =
-      loadTexture(
-        './lashes_alpha.webp'
-      );
-
-
-    const lashesNormal =
-      loadTexture(
-        './lashes_normal.webp'
-      );
-
-
-    /*
-      EYES
-    */
-
-    const eyeBaseColor =
-      loadTexture(
-
-        './eye_basecolor.webp',
-
-        true
-
-      );
-
-
-    const eyeWetNormal =
-      loadTexture(
-        './eye_wet_normal.webp'
-      );
-
-
-    /*
-      SKIN / BODY MATERIAL
-    */
-
-    const bodyMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0xffffff,
-
-        map:
-          bodyBaseColor,
-
-        normalMap:
-          bodyNormal,
-
-        normalScale:
-          new THREE.Vector2(
-            0.58,
-            0.58
-          ),
-
-        roughnessMap:
-          bodyRoughness,
-
-        roughness:
-          0.96,
-
-        metalness:
-          0,
-
-        clearcoat:
-          0.045,
-
-        clearcoatRoughness:
-          0.58
-
-      });
-
-
-    /*
-      FACE / LIPS MATERIAL
-    */
-
-    const faceMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0xffffff,
-
-        map:
-          headBaseColor,
-
-        normalMap:
-          headNormal,
-
-        normalScale:
-          new THREE.Vector2(
-            0.52,
-            0.52
-          ),
-
-        roughnessMap:
-          headRoughness,
-
-        roughness:
-          0.94,
-
-        metalness:
-          0,
-
-        clearcoat:
-          0.075,
-
-        clearcoatRoughness:
-          0.46
-
-      });
-
-
-    /*
-      SHIRT
-    */
-
-    const shirtMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0x080a0c,
-
-        emissive:
-          0x00090c,
-
-        emissiveIntensity:
-          0.012,
-
-        metalness:
-          0.025,
-
-        roughness:
-          0.67,
-
-        clearcoat:
-          0.035,
-
-        clearcoatRoughness:
-          0.72,
-
-        sheen:
-          0.08,
-
-        sheenColor:
-          new THREE.Color(
-            0x102e34
-          ),
-
-        side:
-          THREE.DoubleSide
-
-      });
-
-
-    const leggingsMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0x050607,
-
-        metalness:
-          0.025,
-
-        roughness:
-          0.65,
-
-        clearcoat:
-          0.035,
-
-        clearcoatRoughness:
-          0.70
-
-      });
-
-
-    /*
-      V15 HAIR
-
-      Fuller appearance.
-      Less plastic shine.
-      Softer specular response.
-      Better fine strands.
-    */
-
-    const hairMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          new THREE.Color(
-            0xc8beb8
-          ),
-
-        map:
-          hairAlbedo,
-
-        alphaMap:
-          hairAlpha,
-
-        normalMap:
-          hairNormal,
-
-        normalScale:
-          new THREE.Vector2(
-            0.34,
-            0.34
-          ),
-
-        roughnessMap:
-          hairRoughness,
-
-        roughness:
-          1.0,
-
-        metalness:
-          0,
-
-        clearcoat:
-          0.0,
-
-        clearcoatRoughness:
-          1.0,
-
-        sheen:
-          0.05,
-
-        sheenRoughness:
-          0.88,
-
-        sheenColor:
-          new THREE.Color(
-            0x241d1a
-          ),
-
-        anisotropy:
-          0.28,
-
-        anisotropyRotation:
-          0.0,
-
-        specularIntensity:
-          0.18,
-
-        specularColor:
-          new THREE.Color(
-            0xd9e5e8
-          ),
-
-        /*
-          Lower alphaTest keeps more
-          individual hair strands visible.
-        */
-
-        alphaTest:
-          0.07,
-
-        transparent:
-          false,
-
-        side:
-          THREE.DoubleSide,
-
-        depthWrite:
-          true
-
-      });
-
-
-    /*
-      V15 EYES
-
-      Real eye texture first.
-      Subtle cyan AI glow second.
-    */
-
-    const eyeMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0xffffff,
-
-        map:
-          eyeBaseColor,
-
-        metalness:
-          0,
-
-        roughness:
-          0.24,
-
-        clearcoat:
-          0.56,
-
-        clearcoatRoughness:
-          0.075,
-
-        emissive:
-          new THREE.Color(
-            0x028bb8
-          ),
-
-        emissiveIntensity:
-          0.075
-
-      });
-
-
-    /*
-      CORNEA / WET EYE
-    */
-
-    const eyeShellMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0xf7fbff,
-
-        normalMap:
-          eyeWetNormal,
-
-        normalScale:
-          new THREE.Vector2(
-            0.045,
-            0.045
-          ),
-
-        metalness:
-          0,
-
-        roughness:
-          0.055,
-
-        clearcoat:
-          1,
-
-        clearcoatRoughness:
-          0.025,
-
-        transparent:
-          true,
-
-        opacity:
-          0.10,
-
-        depthWrite:
-          false
-
-      });
-
-
-    const tearlineMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0xe8d8d2,
-
-        metalness:
-          0,
-
-        roughness:
-          0.10,
-
-        clearcoat:
-          1,
-
-        clearcoatRoughness:
-          0.035,
-
-        transparent:
-          true,
-
-        opacity:
-          0.24,
-
-        depthWrite:
-          false
-
-      });
-
-
-    /*
-      EYELASHES
-    */
-
-    const lashesMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0xffffff,
-
-        map:
-          lashesAlbedo,
-
-        alphaMap:
-          lashesAlpha,
-
-        normalMap:
-          lashesNormal,
-
-        normalScale:
-          new THREE.Vector2(
-            0.36,
-            0.36
-          ),
-
-        metalness:
-          0,
-
-        roughness:
-          0.72,
-
-        alphaTest:
-          0.22,
-
-        transparent:
-          false,
-
-        side:
-          THREE.DoubleSide,
-
-        depthWrite:
-          true
-
-      });
-
-
-    const teethMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0xf3ebe6,
-
-        metalness:
-          0,
-
-        roughness:
-          0.40,
-
-        clearcoat:
-          0.06
-
-      });
-
-
-    const nailMaterial =
-      new THREE.MeshPhysicalMaterial({
-
-        color:
-          0xb98672,
-
-        metalness:
-          0,
-
-        roughness:
-          0.44,
-
-        clearcoat:
-          0.18
-
-      });
-
-
-    /*
-      MODEL REFERENCES
-    */
-
-    let model =
-      null;
-
-
-    let modelSize =
-      null;
-
-
-    let shirtMesh =
-      null;
-
-
-    let torsoMesh =
-      null;
-
-
-    let faceMorphMesh =
-      null;
-
-
-    let headBone =
-      null;
-
-
-    let neck01 =
-      null;
-
-
-    let neck02 =
-      null;
-
-
-    let eyeLObject =
-      null;
-
-
-    let eyeRObject =
-      null;
-
-
-    let upperArmL =
-      null;
-
-
-    let upperArmR =
-      null;
-
-
-    let lowerArmL =
-      null;
-
-
-    let lowerArmR =
-      null;
-
-
-    let handL =
-      null;
-
-
-    let handR =
-      null;
-
-
-    let baseHeadRotation =
-      null;
-
-
-    let baseNeck01Rotation =
-      null;
-
-
-    let baseNeck02Rotation =
-      null;
-
-
-    let baseEyeLRotation =
-      null;
-
-
-    let baseEyeRRotation =
-      null;
-
-
-    let baseLowerArmLRotation =
-      null;
-
-
-    let baseLowerArmRRotation =
-      null;
-
-
-    let baseHandLRotation =
-      null;
-
-
-    let baseHandRRotation =
-      null;
-
-
-    let relaxedUpperArmLQuaternion =
-      null;
-
-
-    let relaxedUpperArmRQuaternion =
-      null;
-
-
-    const blinkMeshes =
-      [];
-
-
-    /*
-      POINTER TRACKING
-    */
-
-    const pointer =
-      new THREE.Vector2(
-        0,
-        0
-      );
-
-
-    const targetPointer =
-      new THREE.Vector2(
-        0,
-        0
-      );
-
-
-    window.addEventListener(
-
-      'pointermove',
-
-      event => {
-
-        let x =
-          (
-            event.clientX /
-            window.innerWidth
-          ) *
-          2 -
-          1;
-
-
-        let y =
-          -(
-            (
-              event.clientY /
-              window.innerHeight
-            ) *
-            2 -
-            1
-          );
-
-
-        const deadZone =
-          0.045;
-
-
-        if (
-          Math.abs(
-            x
-          ) <
-          deadZone
-        ) {
-
-          x =
-            0;
-
-        }
-
-
-        if (
-          Math.abs(
-            y
-          ) <
-          deadZone
-        ) {
-
-          y =
-            0;
-
-        }
-
-
-        x =
-          Math.sign(
-            x
-          ) *
-          Math.pow(
-            Math.abs(
-              x
-            ),
-            1.08
-          );
-
-
-        y =
-          Math.sign(
-            y
-          ) *
-          Math.pow(
-            Math.abs(
-              y
-            ),
-            1.05
-          );
-
-
-        targetPointer.set(
-
-          THREE.MathUtils.clamp(
-            x,
-            -1,
-            1
-          ),
-
-          THREE.MathUtils.clamp(
-            y,
-            -1,
-            1
-          )
-
-        );
-
-      }
-
-    );
-
-
-    document.documentElement
-      .addEventListener(
-
-        'mouseleave',
-
-        () => {
-
-          targetPointer.set(
-            0,
-            0
-          );
-
-        }
-
-      );
-
-
-    /*
-      FACIAL MORPHS
-    */
-
-    function registerFacialMorphs(
-      object
-    ) {
-
-      if (
-        !object.morphTargetDictionary ||
-        !object.morphTargetInfluences
-      ) {
-
-        return;
-
-      }
-
-
-      const d =
-        object.morphTargetDictionary;
-
-
-      const blinkLeft =
-        d.eyeBlinkLeft !== undefined
-          ?
-          d.eyeBlinkLeft
-          :
-          null;
-
-
-      const blinkRight =
-        d.eyeBlinkRight !== undefined
-          ?
-          d.eyeBlinkRight
-          :
-          null;
-
-
-      if (
-        blinkLeft !== null ||
-        blinkRight !== null
-      ) {
-
-        blinkMeshes.push({
-
-          mesh:
-            object,
-
-          left:
-            blinkLeft,
-
-          right:
-            blinkRight
-
-        });
-
-      }
-
-    }
-
-
-    const RESTING_SMILE =
-      0.96;
-
-
-    function setFaceMorph(
-      name,
-      value
-    ) {
-
-      if (
-        !faceMorphMesh ||
-        !faceMorphMesh
-          .morphTargetDictionary ||
-        !faceMorphMesh
-          .morphTargetInfluences
-      ) {
-
-        return;
-
-      }
-
-
-      const index =
-        faceMorphMesh
-          .morphTargetDictionary[
-            name
-          ];
-
-
-      if (
-        index !== undefined
-      ) {
-
-        faceMorphMesh
-          .morphTargetInfluences[
-            index
-          ] =
-            value;
-
-      }
-
-    }
-
-
-    function applyRestingSmile() {
-
-      setFaceMorph(
-        'mouthSmileLeft',
-        RESTING_SMILE
-      );
-
-
-      setFaceMorph(
-        'mouthSmileRight',
-        RESTING_SMILE
-      );
-
-
-      setFaceMorph(
-        'mouthFrownLeft',
-        0
-      );
-
-
-      setFaceMorph(
-        'mouthFrownRight',
-        0
-      );
-
-
-      setFaceMorph(
-        'mouthDimpleLeft',
-        0.14
-      );
-
-
-      setFaceMorph(
-        'mouthDimpleRight',
-        0.14
-      );
-
-
-      setFaceMorph(
-        'cheekSquintLeft',
-        0.075
-      );
-
-
-      setFaceMorph(
-        'cheekSquintRight',
-        0.075
-      );
-
-
-      setFaceMorph(
-        'mouthUpperUpLeft',
-        0.05
-      );
-
-
-      setFaceMorph(
-        'mouthUpperUpRight',
-        0.05
-      );
-
-    }
-
-
-    /*
-      RELAXED ARMS
-    */
-
-    function makeBoneDirectionTarget(
-
-      bone,
-
-      child,
-
-      targetDirection
-
-    ) {
-
-      if (
-        !bone ||
-        !child ||
-        !bone.parent ||
-        !model
-      ) {
-
-        return null;
-
-      }
-
-
-      model.updateMatrixWorld(
-        true
-      );
-
-
-      const bonePosition =
-        new THREE.Vector3();
-
-
-      const childPosition =
-        new THREE.Vector3();
-
-
-      bone.getWorldPosition(
-        bonePosition
-      );
-
-
-      child.getWorldPosition(
-        childPosition
-      );
-
-
-      const currentDirection =
-        childPosition
-          .sub(
-            bonePosition
-          )
-          .normalize();
-
-
-      const desiredDirection =
-        targetDirection
-          .clone()
-          .normalize();
-
-
-      const directionDelta =
-        new THREE.Quaternion()
-          .setFromUnitVectors(
-
-            currentDirection,
-
-            desiredDirection
-
-          );
-
-
-      const currentWorldQuaternion =
-        new THREE.Quaternion();
-
-
-      bone.getWorldQuaternion(
-        currentWorldQuaternion
-      );
-
-
-      const desiredWorldQuaternion =
-        directionDelta
-          .clone()
-          .multiply(
-            currentWorldQuaternion
-          );
-
-
-      const parentWorldQuaternion =
-        new THREE.Quaternion();
-
-
-      bone.parent
-        .getWorldQuaternion(
-          parentWorldQuaternion
-        );
-
-
-      return parentWorldQuaternion
-        .invert()
-        .multiply(
-          desiredWorldQuaternion
-        );
-
-    }
-
-
-    function configureRelaxedArms() {
-
-      relaxedUpperArmLQuaternion =
-        makeBoneDirectionTarget(
-
-          upperArmL,
-
-          lowerArmL,
-
-          new THREE.Vector3(
-            0.17,
-            -0.98,
-            0.08
-          )
-
-        );
-
-
-      relaxedUpperArmRQuaternion =
-        makeBoneDirectionTarget(
-
-          upperArmR,
-
-          lowerArmR,
-
-          new THREE.Vector3(
-            -0.17,
-            -0.98,
-            0.08
-          )
-
-        );
-
-    }
-
-
-    function applyRelaxedPose() {
-
-      if (
-        upperArmL &&
-        relaxedUpperArmLQuaternion
-      ) {
-
-        upperArmL.quaternion.copy(
-          relaxedUpperArmLQuaternion
-        );
-
-      }
-
-
-      if (
-        upperArmR &&
-        relaxedUpperArmRQuaternion
-      ) {
-
-        upperArmR.quaternion.copy(
-          relaxedUpperArmRQuaternion
-        );
-
-      }
-
-
-      if (
-        lowerArmL &&
-        baseLowerArmLRotation
-      ) {
-
-        lowerArmL.rotation.copy(
-          baseLowerArmLRotation
-        );
-
-      }
-
-
-      if (
-        lowerArmR &&
-        baseLowerArmRRotation
-      ) {
-
-        lowerArmR.rotation.copy(
-          baseLowerArmRRotation
-        );
-
-      }
-
-
-      if (
-        handL &&
-        baseHandLRotation
-      ) {
-
-        handL.rotation.copy(
-          baseHandLRotation
-        );
-
-      }
-
-
-      if (
-        handR &&
-        baseHandRRotation
-      ) {
-
-        handR.rotation.copy(
-          baseHandRRotation
-        );
-
-      }
-
-    }
-
-
-    /*
-      CAMERA
-    */
-
-    const headWorld =
-      new THREE.Vector3();
-
-
-    function setupCamera() {
-
-      if (
-        !model ||
-        !modelSize
-      ) {
-
-        return;
-
-      }
-
-
-      model.updateMatrixWorld(
-        true
-      );
-
-
-      if (
-        headBone
-      ) {
-
-        headBone.getWorldPosition(
-          headWorld
-        );
-
-      }
-
-      else {
-
-        headWorld.set(
-
-          0,
-
-          modelSize.y *
-          0.29,
-
-          0
-
-        );
-
-      }
-
-
-      let shirtBottomY;
-
-
-      if (
-        shirtMesh
-      ) {
-
-        const shirtBox =
-          new THREE.Box3()
-            .setFromObject(
-              shirtMesh
-            );
-
-
-        shirtBottomY =
-          shirtBox.min.y;
-
-      }
-
-      else {
-
-        shirtBottomY =
-          headWorld.y -
-          modelSize.y *
-          0.30;
-
-      }
-
-
-      const targetY =
-        headWorld.y +
-        modelSize.y *
-        0.018;
-
-
-      const targetX =
-        headWorld.x;
-
-
-      const requiredHalfHeight =
-        Math.max(
-
-          targetY -
-          shirtBottomY,
-
-          modelSize.y *
-          0.20
-
-        ) *
-        1.012;
-
-
-      const verticalFOV =
-        THREE.MathUtils.degToRad(
-          camera.fov
-        );
-
-
-      let distance =
-        requiredHalfHeight /
-        Math.tan(
-          verticalFOV /
-          2
-        );
-
-
-      distance *=
-        1.012;
-
-
-      camera.position.set(
-
-        targetX,
-
-        targetY,
-
-        distance
-
-      );
-
-
-      camera.lookAt(
-
-        targetX,
-
-        targetY,
-
-        0
-
-      );
-
-
-      camera.near =
-        Math.max(
-
-          distance /
-          120,
-
-          0.01
-
-        );
-
-
-      camera.far =
-        distance *
-        100;
-
-
-      camera.updateProjectionMatrix();
-
-    }
-
-
-    /*
-      LOAD MODEL
-    */
-
-    const loader =
-      new GLTFLoader();
-
-
-    loader.load(
-
-      './PrimeReceptionAI_Test01.glb',
-
-
-      gltf => {
-
-        model =
-          gltf.scene;
-
-
-        scene.add(
-          model
-        );
-
-
-        model.traverse(
-
-          object => {
-
-            if (
-              object.isMesh
-            ) {
-
-              const name =
-                object.name;
-
-
-              registerFacialMorphs(
-                object
-              );
-
-
-              /*
-                Hide conflicting duplicate meshes.
-              */
-
-              if (
-
-                name ===
-                  'Mesh010' ||
-
-                name ===
-                  'Mesh010_1' ||
-
-                name ===
-                  'SK_FemBase2_Torso' ||
-
-                name ===
-                  'SK_FemBase2_UnderWear' ||
-
-                name ===
-                  'SK_FemBase2_Unified_mesh' ||
-
-                name.startsWith(
-                  'SK_FemBase2_Unified_mesh'
-                )
-
-              ) {
-
-                object.visible =
-                  false;
-
-
-                return;
-
-              }
-
-
-              /*
-                Censored torso.
-              */
-
-              if (
-                name ===
-                'SK_FemBase2_Censored_Torso'
-              ) {
-
-                torsoMesh =
-                  object;
-
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  bodyMaterial;
-
-
-                return;
-
-              }
-
-
-              /*
-                ARKit face.
-              */
-
-              if (
-
-                name ===
-                  'SK_FemBase2_Head_52ArKit' ||
-
-                name ===
-                  'SK_FemBase2_Head_52ARKit'
-
-              ) {
-
-                faceMorphMesh =
-                  object;
-
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  faceMaterial;
-
-
-                return;
-
-              }
-
-
-              if (
-                name ===
-                'SK_FemBase2_TShirt'
-              ) {
-
-                shirtMesh =
-                  object;
-
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  shirtMaterial;
-
-
-                return;
-
-              }
-
-
-              if (
-                name ===
-                'SK_FemBase2_Leggings'
-              ) {
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  leggingsMaterial;
-
-
-                return;
-
-              }
-
-
-              /*
-                V15 HAIR
-              */
-
-              if (
-                name ===
-                'SK_FemBase2_Hair'
-              ) {
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  hairMaterial;
-
-
-                /*
-                  Prevent fine hair cards
-                  disappearing prematurely.
-                */
-
-                object.frustumCulled =
-                  false;
-
-
-                return;
-
-              }
-
-
-              /*
-                LEFT EYE
-              */
-
-              if (
-                name ===
-                'SK_FemBase2_EyeL'
-              ) {
-
-                eyeLObject =
-                  object;
-
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  eyeMaterial;
-
-
-                return;
-
-              }
-
-
-              /*
-                RIGHT EYE
-              */
-
-              if (
-                name ===
-                'SK_FemBase2_EyeR'
-              ) {
-
-                eyeRObject =
-                  object;
-
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  eyeMaterial;
-
-
-                return;
-
-              }
-
-
-              /*
-                CORNEA
-              */
-
-              if (
-                name ===
-                'SK_FemBase2_EyeShell'
-              ) {
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  eyeShellMaterial;
-
-
-                return;
-
-              }
-
-
-              /*
-                EYELASHES
-              */
-
-              if (
-                name ===
-                'SK_FemBase2_Lashes'
-              ) {
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  lashesMaterial;
-
-
-                return;
-
-              }
-
-
-              if (
-                name ===
-                'SK_FemBase2_EyeEdge'
-              ) {
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  tearlineMaterial;
-
-
-                return;
-
-              }
-
-
-              if (
-                name ===
-                'SK_FemBase2_Teeth'
-              ) {
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  teethMaterial;
-
-
-                return;
-
-              }
-
-
-              if (
-                name ===
-                'SK_FemBase2_Nails'
-              ) {
-
-                object.visible =
-                  true;
-
-
-                object.material =
-                  nailMaterial;
-
-
-                return;
-
-              }
-
-            }
-
-
-            /*
-              BONES
-            */
-
-            if (
-              object.isBone
-            ) {
-
-              const n =
-                object.name
-                  .toLowerCase();
-
-
-              if (
-
-                n ===
-                  'head' ||
-
-                n.endsWith(
-                  '_head'
-                )
-
-              ) {
-
-                headBone =
-                  object;
-
-              }
-
-
-              if (
-                n.includes(
-                  'neck_01'
-                )
-              ) {
-
-                neck01 =
-                  object;
-
-              }
-
-
-              if (
-                n.includes(
-                  'neck_02'
-                )
-              ) {
-
-                neck02 =
-                  object;
-
-              }
-
-
-              if (
-                n ===
-                'upperarm_l'
-              ) {
-
-                upperArmL =
-                  object;
-
-              }
-
-
-              if (
-                n ===
-                'upperarm_r'
-              ) {
-
-                upperArmR =
-                  object;
-
-              }
-
-
-              if (
-                n ===
-                'lowerarm_l'
-              ) {
-
-                lowerArmL =
-                  object;
-
-              }
-
-
-              if (
-                n ===
-                'lowerarm_r'
-              ) {
-
-                lowerArmR =
-                  object;
-
-              }
-
-
-              if (
-                n ===
-                'hand_l'
-              ) {
-
-                handL =
-                  object;
-
-              }
-
-
-              if (
-                n ===
-                'hand_r'
-              ) {
-
-                handR =
-                  object;
-
-              }
-
-            }
-
-          }
-
-        );
-
-
-        /*
-          STORE ORIGINAL ROTATIONS
-        */
-
-        if (
-          headBone
-        ) {
-
-          baseHeadRotation =
-            headBone.rotation.clone();
-
-        }
-
-
-        if (
-          neck01
-        ) {
-
-          baseNeck01Rotation =
-            neck01.rotation.clone();
-
-        }
-
-
-        if (
-          neck02
-        ) {
-
-          baseNeck02Rotation =
-            neck02.rotation.clone();
-
-        }
-
-
-        if (
-          eyeLObject
-        ) {
-
-          baseEyeLRotation =
-            eyeLObject.rotation.clone();
-
-        }
-
-
-        if (
-          eyeRObject
-        ) {
-
-          baseEyeRRotation =
-            eyeRObject.rotation.clone();
-
-        }
-
-
-        if (
-          lowerArmL
-        ) {
-
-          baseLowerArmLRotation =
-            lowerArmL.rotation.clone();
-
-        }
-
-
-        if (
-          lowerArmR
-        ) {
-
-          baseLowerArmRRotation =
-            lowerArmR.rotation.clone();
-
-        }
-
-
-        if (
-          handL
-        ) {
-
-          baseHandLRotation =
-            handL.rotation.clone();
-
-        }
-
-
-        if (
-          handR
-        ) {
-
-          baseHandRRotation =
-            handR.rotation.clone();
-
-        }
-
-
-        /*
-          CENTER MODEL
-        */
-
-        const box =
-          new THREE.Box3()
-            .setFromObject(
-              model
-            );
-
-
-        modelSize =
-          box.getSize(
-            new THREE.Vector3()
-          );
-
-
-        const center =
-          box.getCenter(
-            new THREE.Vector3()
-          );
-
-
-        model.position.set(
-
-          -center.x,
-
-          -center.y,
-
-          -center.z
-
-        );
-
-
-        model.updateMatrixWorld(
-          true
-        );
-
-
-        configureRelaxedArms();
-
-
-        setupCamera();
-
-
-        applyRestingSmile();
-
-
-        scheduleNextBlink();
-
-
-        console.log(
-
-          'V15 BODY:',
-
-          torsoMesh
-            ?
-            torsoMesh.name
-            :
-            'NOT FOUND'
-
-        );
-
-
-        console.log(
-
-          'V15 FACE:',
-
-          faceMorphMesh
-            ?
-            faceMorphMesh.name
-            :
-            'NOT FOUND'
-
-        );
-
-
-        status.style.display =
-          'none';
-
-      },
-
-
-      xhr => {
-
-        if (
-          xhr.total
-        ) {
-
-          const percent =
-            Math.round(
-
-              xhr.loaded /
-              xhr.total *
-              100
-
-            );
-
-
-          status.textContent =
-            `INITIALIZING PRIME RECEPTION AI… ${percent}%`;
-
-        }
-
-      },
-
-
-      error => {
-
-        console.error(
-
-          'GLB ERROR:',
-
-          error
-
-        );
-
-
-        status.textContent =
-          'MODEL FAILED TO LOAD';
-
-      }
-
-    );
-
-
-    /*
-      BLINK
-    */
-
-    function setBlinkAmount(
-      amount
-    ) {
-
-      const value =
-        THREE.MathUtils.clamp(
-
-          amount,
-
-          0,
-
-          1
-
-        );
-
-
-      for (
-        const entry
-        of blinkMeshes
-      ) {
-
-        const influences =
-          entry.mesh
-            .morphTargetInfluences;
-
-
-        if (
-          entry.left !== null
-        ) {
-
-          influences[
-            entry.left
-          ] =
-            value;
-
-        }
-
-
-        if (
-          entry.right !== null
-        ) {
-
-          influences[
-            entry.right
-          ] =
-            value;
-
-        }
-
-      }
-
-    }
-
-
-    let blinkActive =
-      false;
-
-
-    let blinkStart =
-      0;
-
-
-    let blinkDuration =
-      0.14;
-
-
-    let nextBlink =
-      Infinity;
-
-
-    let doubleBlink =
-      false;
-
-
-    let secondBlinkAt =
-      Infinity;
-
-
-    function scheduleNextBlink() {
-
-      nextBlink =
-        performance.now() /
-        1000 +
-        2.4 +
-        Math.random() *
-        3.8;
-
-    }
-
-
-    function beginBlink() {
-
-      blinkActive =
-        true;
-
-
-      blinkStart =
-        performance.now() /
-        1000;
-
-
-      blinkDuration =
-        0.12 +
-        Math.random() *
-        0.05;
-
-
-      doubleBlink =
-        Math.random() <
-        0.10;
-
-    }
-
-
-    function updateBlink(
-      now
-    ) {
-
-      if (
-
-        !blinkActive &&
-
-        now >=
-        nextBlink
-
-      ) {
-
-        beginBlink();
-
-      }
-
-
-      if (
-
-        !blinkActive &&
-
-        doubleBlink &&
-
-        now >=
-        secondBlinkAt
-
-      ) {
-
-        doubleBlink =
-          false;
-
-
-        beginBlink();
-
-
-        return;
-
-      }
-
-
-      if (
-        !blinkActive
-      ) {
-
-        setBlinkAmount(
-          0
-        );
-
-
-        return;
-
-      }
-
-
-      const progress =
-        (
-          now -
-          blinkStart
-        ) /
-        blinkDuration;
-
-
-      if (
-        progress <=
-        1
-      ) {
-
-        setBlinkAmount(
-
-          Math.sin(
-
-            progress *
-            Math.PI
-
-          )
-
-        );
-
-      }
-
-      else {
-
-        setBlinkAmount(
-          0
-        );
-
-
-        blinkActive =
-          false;
-
-
-        if (
-          doubleBlink
-        ) {
-
-          secondBlinkAt =
-            now +
-            0.14 +
-            Math.random() *
-            0.08;
-
-        }
-
-        else {
-
-          scheduleNextBlink();
-
-        }
-
-      }
-
-    }
-
-
-    /*
-      SWALLOW
-    */
-
-    const SWALLOW_DURATION =
-      1.45;
-
-
-    let swallowActive =
-      false;
-
-
-    let swallowStart =
-      0;
-
-
-    let swallowStrength =
-      0;
-
-
-    let nextSwallow =
-      performance.now() /
-      1000 +
-      8 +
-      Math.random() *
-      8;
-
-
-    function smooth01(
-      value
-    ) {
-
-      const x =
-        THREE.MathUtils.clamp(
-
-          value,
-
-          0,
-
-          1
-
-        );
-
-
-      return x *
-        x *
-        (
-          3 -
-          2 *
-          x
-        );
-
-    }
-
-
-    function scheduleNextSwallow(
-      now
-    ) {
-
-      nextSwallow =
-        now +
-        24 +
-        Math.random() *
-        32;
-
-    }
-
-
-    function updateSwallow(
-      now
-    ) {
-
-      if (
-
-        !swallowActive &&
-
-        now >=
-        nextSwallow
-
-      ) {
-
-        swallowActive =
-          true;
-
-
-        swallowStart =
-          now;
-
-      }
-
-
-      if (
-        !swallowActive
-      ) {
-
-        swallowStrength =
-          0;
-
-
-        return;
-
-      }
-
-
-      const progress =
-        (
-          now -
-          swallowStart
-        ) /
-        SWALLOW_DURATION;
-
-
-      if (
-        progress >=
-        1
-      ) {
-
-        swallowActive =
-          false;
-
-
-        swallowStrength =
-          0;
-
-
-        scheduleNextSwallow(
-          now
-        );
-
-
-        return;
-
-      }
-
-
-      if (
-        progress <
-        0.30
-      ) {
-
-        swallowStrength =
-          smooth01(
-
-            progress /
-            0.30
-
-          );
-
-      }
-
-      else if (
-        progress <
-        0.58
-      ) {
-
-        swallowStrength =
-          1;
-
-      }
-
-      else {
-
-        swallowStrength =
-          1 -
-          smooth01(
-
-            (
-              progress -
-              0.58
-            ) /
-            0.42
-
-          );
-
-      }
-
-    }
-
-
-    function applySwallowExpression() {
-
-      const s =
-        swallowStrength;
-
-
-      setFaceMorph(
-
-        'mouthSmileLeft',
-
-        RESTING_SMILE -
-        s *
-        0.07
-
-      );
-
-
-      setFaceMorph(
-
-        'mouthSmileRight',
-
-        RESTING_SMILE -
-        s *
-        0.07
-
-      );
-
-
-      setFaceMorph(
-
-        'mouthDimpleLeft',
-
-        0.14 -
-        s *
-        0.035
-
-      );
-
-
-      setFaceMorph(
-
-        'mouthDimpleRight',
-
-        0.14 -
-        s *
-        0.035
-
-      );
-
-
-      setFaceMorph(
-
-        'mouthPressLeft',
-
-        s *
-        0.14
-
-      );
-
-
-      setFaceMorph(
-
-        'mouthPressRight',
-
-        s *
-        0.14
-
-      );
-
-
-      setFaceMorph(
-
-        'mouthClose',
-
-        s *
-        0.10
-
-      );
-
-
-      setFaceMorph(
-
-        'mouthShrugLower',
-
-        s *
-        0.045
-
-      );
-
-
-      setFaceMorph(
-
-        'mouthShrugUpper',
-
-        s *
-        0.025
-
-      );
-
-    }
-
-
-    /*
-      HEAD / EYE TRACKING
-    */
-
-    const eyeHorizontalMax =
-      THREE.MathUtils.degToRad(
-        12
-      );
-
-
-    const eyeUpMax =
-      THREE.MathUtils.degToRad(
-        9
-      );
-
-
-    const eyeDownMax =
-      THREE.MathUtils.degToRad(
-        11
-      );
-
-
-    const headHorizontalMax =
-      THREE.MathUtils.degToRad(
-        10.75
-      );
-
-
-    const headUpMax =
-      THREE.MathUtils.degToRad(
-        8.5
-      );
-
-
-    const headDownMax =
-      THREE.MathUtils.degToRad(
-        13
-      );
-
-
-    const neckHorizontalMax =
-      THREE.MathUtils.degToRad(
-        3.35
-      );
-
-
-    const neckUpMax =
-      THREE.MathUtils.degToRad(
-        3.0
-      );
-
-
-    const neckDownMax =
-      THREE.MathUtils.degToRad(
-        4.5
-      );
-
-
-    let eyeHorizontal =
-      0;
-
-
-    let eyeVertical =
-      0;
-
-
-    let headHorizontal =
-      0;
-
-
-    let headVertical =
-      0;
-
-
-    let neckHorizontal =
-      0;
-
-
-    let neckVertical =
-      0;
-
-
-    function damp(
-
-      current,
-
-      target,
-
-      speed,
-
-      delta
-
-    ) {
-
-      return THREE.MathUtils.lerp(
-
-        current,
-
-        target,
-
-        1 -
-        Math.exp(
-
-          -speed *
-          delta
-
+    const headBaseColor = loadTexture('./head_basecolor.webp', true);
+    const headNormal = loadTexture('./head_normal.webp');
+    const headRoughness = loadTexture('./head_roughness.webp');
+    const bodyBaseColor = loadTexture('./body_basecolor.webp', true);
+    const bodyNormal = loadTexture('./body_normal.webp');
+    const bodyRoughness = loadTexture('./body_roughness.webp');
+    const hairAlbedo = loadTexture('./hair_albedo.webp', true);
+    const hairAlpha = loadTexture('./hair_alpha.webp');
+    const hairNormal = loadTexture('./hair_normal.webp');
+    const hairRoughness = loadTexture('./hair_roughness.webp');
+    const lashesAlbedo = loadTexture('./lashes_albedo.webp', true);
+    const lashesAlpha = loadTexture('./lashes_alpha.webp');
+    const lashesNormal = loadTexture('./lashes_normal.webp');
+    const eyeBaseColor = loadTexture('./eye_basecolor.webp', true);
+    const eyeWetNormal = loadTexture('./eye_wet_normal.webp');
+    const bodyMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      map: bodyBaseColor,
+      normalMap: bodyNormal,
+      normalScale: new THREE.Vector2(0.58, 0.58),
+      roughnessMap: bodyRoughness,
+      roughness: 0.96,
+      metalness: 0,
+      clearcoat: 0.045,
+      clearcoatRoughness: 0.58
+    });
+    const faceMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      map: headBaseColor,
+      normalMap: headNormal,
+      normalScale: new THREE.Vector2(0.52, 0.52),
+      roughnessMap: headRoughness,
+      roughness: 0.94,
+      metalness: 0,
+      clearcoat: 0.075,
+      clearcoatRoughness: 0.46
+    });
+    const shirtMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x080a0c,
+      emissive: 0x00090c,
+      emissiveIntensity: 0.012,
+      metalness: 0.025,
+      roughness: 0.67,
+      clearcoat: 0.035,
+      clearcoatRoughness: 0.72,
+      sheen: 0.08,
+      sheenColor: new THREE.Color(0x102e34),
+      side: THREE.DoubleSide
+    });
+    const leggingsMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x050607,
+      metalness: 0.025,
+      roughness: 0.65,
+      clearcoat: 0.035,
+      clearcoatRoughness: 0.70
+    });
+    const hairMaterial = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(0xf0e8e2),
+      map: hairAlbedo,
+      alphaMap: hairAlpha,
+      normalMap: hairNormal,
+      normalScale: new THREE.Vector2(0.22, 0.22),
+      roughnessMap: hairRoughness,
+      roughness: 0.92,
+      metalness: 0,
+      clearcoat: 0.0,
+      clearcoatRoughness: 1.0,
+      sheen: 0.025,
+      sheenRoughness: 0.95,
+      sheenColor: new THREE.Color(0x201715),
+      anisotropy: 0.18,
+      anisotropyRotation: 0.0,
+      specularIntensity: 0.11,
+      specularColor: new THREE.Color(0xcab8ab),
+      alphaTest: 0.045,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: true
+    });
+    hairMaterial.alphaToCoverage = true;
+    const eyeMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      map: eyeBaseColor,
+      metalness: 0,
+      roughness: 0.28,
+      clearcoat: 0.62,
+      clearcoatRoughness: 0.06,
+      emissive: new THREE.Color(0x000000),
+      emissiveIntensity: 0
+    });
+    let eyeShader = null;
+    eyeMaterial.onBeforeCompile = (shader) => {
+      shader.uniforms.uIrisGlow = { value: 0.12 };
+      shader.uniforms.uIrisGlowColor = { value: new THREE.Color(0x52cfff) };
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          '#include <common>',
+          '#include <common>\nuniform float uIrisGlow;\nuniform vec3 uIrisGlowColor;'
         )
-
+        .replace(
+          '#include <emissivemap_fragment>',
+          '#include <emissivemap_fragment>\n#ifdef USE_MAP\n  vec4 eyeTexel = texture2D(map, vMapUv);\n  float eyeLuma = dot(eyeTexel.rgb, vec3(0.2126, 0.7152, 0.0722));\n  float irisMask = 1.0 - smoothstep(0.42, 0.82, eyeLuma);\n  irisMask *= 0.92;\n  totalEmissiveRadiance += uIrisGlowColor * irisMask * uIrisGlow;\n#endif'
+        );
+      eyeShader = shader;
+    };
+    eyeMaterial.customProgramCacheKey = () => 'prime-v17-eye-iris-glow';
+    const eyeShellMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xf7fbff,
+      normalMap: eyeWetNormal,
+      normalScale: new THREE.Vector2(0.045, 0.045),
+      metalness: 0,
+      roughness: 0.055,
+      clearcoat: 1,
+      clearcoatRoughness: 0.025,
+      transparent: true,
+      opacity: 0.10,
+      depthWrite: false
+    });
+    const tearlineMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xe8d8d2,
+      metalness: 0,
+      roughness: 0.10,
+      clearcoat: 1,
+      clearcoatRoughness: 0.035,
+      transparent: true,
+      opacity: 0.24,
+      depthWrite: false
+    });
+    const lashesMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      map: lashesAlbedo,
+      alphaMap: lashesAlpha,
+      normalMap: lashesNormal,
+      normalScale: new THREE.Vector2(0.36, 0.36),
+      metalness: 0,
+      roughness: 0.72,
+      alphaTest: 0.22,
+      transparent: false,
+      side: THREE.DoubleSide,
+      depthWrite: true
+    });
+    const teethMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xf3ebe6,
+      metalness: 0,
+      roughness: 0.40,
+      clearcoat: 0.06
+    });
+    const nailMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xb98672,
+      metalness: 0,
+      roughness: 0.44,
+      clearcoat: 0.18
+    });
+    let model = null;
+    let modelSize = null;
+    let shirtMesh = null;
+    let torsoMesh = null;
+    let faceMorphMesh = null;
+    let headBone = null;
+    let neck01 = null;
+    let neck02 = null;
+    let eyeLObject = null;
+    let eyeRObject = null;
+    let hairObject = null;
+    let upperArmL = null;
+    let upperArmR = null;
+    let lowerArmL = null;
+    let lowerArmR = null;
+    let handL = null;
+    let handR = null;
+    let baseHeadRotation = null;
+    let baseNeck01Rotation = null;
+    let baseNeck02Rotation = null;
+    let baseEyeLRotation = null;
+    let baseEyeRRotation = null;
+    let baseLowerArmLRotation = null;
+    let baseLowerArmRRotation = null;
+    let baseHandLRotation = null;
+    let baseHandRRotation = null;
+    let relaxedUpperArmLQuaternion = null;
+    let relaxedUpperArmRQuaternion = null;
+    const blinkMeshes = [];
+    const eyeLookMeshes = [];
+    const pointer = new THREE.Vector2(0, 0);
+    const targetPointer = new THREE.Vector2(0, 0);
+    window.addEventListener('pointermove', (event) => {
+      let x = (event.clientX / window.innerWidth) * 2 - 1;
+      let y = -((event.clientY / window.innerHeight) * 2 - 1);
+      const deadZone = 0.045;
+      if (Math.abs(x) < deadZone) x = 0;
+      if (Math.abs(y) < deadZone) y = 0;
+      x = Math.sign(x) * Math.pow(Math.abs(x), 1.08);
+      y = Math.sign(y) * Math.pow(Math.abs(y), 1.05);
+      targetPointer.set(
+        THREE.MathUtils.clamp(x, -1, 1),
+        THREE.MathUtils.clamp(y, -1, 1)
       );
+    });
+    document.documentElement.addEventListener('mouseleave', () => {
+      targetPointer.set(0, 0);
+    });
+    function registerFacialMorphs(object) {
+      if (!object.morphTargetDictionary || !object.morphTargetInfluences) return;
 
-    }
+      const d = object.morphTargetDictionary;
 
+      const blinkLeft = d.eyeBlinkLeft !== undefined ? d.eyeBlinkLeft : null;
+      const blinkRight = d.eyeBlinkRight !== undefined ? d.eyeBlinkRight : null;
 
-    function getVerticalTargets() {
-
-      if (
-        pointer.y >=
-        0
-      ) {
-
-        return {
-
-          eye:
-            pointer.y *
-            eyeUpMax,
-
-          head:
-            pointer.y *
-            headUpMax,
-
-          neck:
-            pointer.y *
-            neckUpMax
-
-        };
-
+      if (blinkLeft !== null || blinkRight !== null) {
+        blinkMeshes.push({ mesh: object, left: blinkLeft, right: blinkRight });
       }
 
-
-      const down =
-        Math.abs(
-          pointer.y
-        );
-
-
-      return {
-
-        eye:
-          -down *
-          eyeDownMax,
-
-        head:
-          -down *
-          headDownMax,
-
-        neck:
-          -down *
-          neckDownMax
-
+      /*
+        V17: use the model's real ARKit eye-look morphs.
+        These move the eyeballs correctly inside their sockets and also
+        keep the surrounding eye geometry coordinated with the gaze.
+      */
+      const look = {
+        mesh: object,
+        downLeft: d.eyeLookDownLeft,
+        inLeft: d.eyeLookInLeft,
+        outLeft: d.eyeLookOutLeft,
+        upLeft: d.eyeLookUpLeft,
+        downRight: d.eyeLookDownRight,
+        inRight: d.eyeLookInRight,
+        outRight: d.eyeLookOutRight,
+        upRight: d.eyeLookUpRight
       };
 
+      if (
+        look.downLeft !== undefined ||
+        look.inLeft !== undefined ||
+        look.outLeft !== undefined ||
+        look.upLeft !== undefined ||
+        look.downRight !== undefined ||
+        look.inRight !== undefined ||
+        look.outRight !== undefined ||
+        look.upRight !== undefined
+      ) {
+        eyeLookMeshes.push(look);
+      }
     }
 
-
-    /*
-      ANIMATION
-    */
-
-    const clock =
-      new THREE.Clock();
-
-
-    function animate() {
-
-      requestAnimationFrame(
-        animate
-      );
-
-
-      const delta =
-        Math.min(
-
-          clock.getDelta(),
-
-          0.05
-
-        );
-
-
-      const now =
-        performance.now() /
-        1000;
-
-
-      pointer.x =
-        damp(
-
-          pointer.x,
-
-          targetPointer.x,
-
-          7.5,
-
-          delta
-
-        );
-
-
-      pointer.y =
-        damp(
-
-          pointer.y,
-
-          targetPointer.y,
-
-          7.5,
-
-          delta
-
-        );
-
-
-      updateSwallow(
-        now
-      );
-
-
-      const vertical =
-        getVerticalTargets();
-
-
-      /*
-        EYES
-      */
-
-      eyeHorizontal =
-        damp(
-
-          eyeHorizontal,
-
-          pointer.x *
-          eyeHorizontalMax,
-
-          16,
-
-          delta
-
-        );
-
-
-      eyeVertical =
-        damp(
-
-          eyeVertical,
-
-          vertical.eye,
-
-          16,
-
-          delta
-
-        );
-
-
-      /*
-        HEAD
-      */
-
-      headHorizontal =
-        damp(
-
-          headHorizontal,
-
-          pointer.x *
-          headHorizontalMax,
-
-          4.25,
-
-          delta
-
-        );
-
-
-      headVertical =
-        damp(
-
-          headVertical,
-
-          vertical.head,
-
-          pointer.y <
-          0
-            ?
-            4.6
-            :
-            3.75,
-
-          delta
-
-        );
-
-
-      /*
-        NECK
-      */
-
-      neckHorizontal =
-        damp(
-
-          neckHorizontal,
-
-          pointer.x *
-          neckHorizontalMax,
-
-          2.6,
-
-          delta
-
-        );
-
-
-      neckVertical =
-        damp(
-
-          neckVertical,
-
-          vertical.neck,
-
-          pointer.y <
-          0
-            ?
-            3.3
-            :
-            2.35,
-
-          delta
-
-        );
-
-
-      /*
-        LEFT EYE
-      */
-
-      if (
-
-        eyeLObject &&
-
-        baseEyeLRotation
-
-      ) {
-
-        eyeLObject.rotation.copy(
-          baseEyeLRotation
-        );
-
-
-        eyeLObject.rotation.y +=
-          eyeHorizontal;
-
-
-        eyeLObject.rotation.x -=
-          eyeVertical;
-
-      }
-
-
-      /*
-        RIGHT EYE
-      */
-
-      if (
-
-        eyeRObject &&
-
-        baseEyeRRotation
-
-      ) {
-
-        eyeRObject.rotation.copy(
-          baseEyeRRotation
-        );
-
-
-        eyeRObject.rotation.y +=
-          eyeHorizontal;
-
-
-        eyeRObject.rotation.x -=
-          eyeVertical;
-
-      }
-
-
-      /*
-        HEAD
-
-        Confirmed rig:
-        X = left/right
-        Z = up/down
-      */
-
-      if (
-
-        headBone &&
-
-        baseHeadRotation
-
-      ) {
-
-        headBone.rotation.copy(
-          baseHeadRotation
-        );
-
-
-        headBone.rotation.x +=
-          headHorizontal;
-
-
-        headBone.rotation.z +=
-
-          headVertical +
-
-          THREE.MathUtils.degToRad(
-            -0.85
-          ) *
-          swallowStrength;
-
-
-        headBone.rotation.y =
-          baseHeadRotation.y;
-
-      }
-
-
-      /*
-        NECK 02
-      */
-
-      if (
-
-        neck02 &&
-
-        baseNeck02Rotation
-
-      ) {
-
-        neck02.rotation.copy(
-          baseNeck02Rotation
-        );
-
-
-        neck02.rotation.x +=
-          neckHorizontal;
-
-
-        neck02.rotation.z +=
-
-          neckVertical +
-
-          THREE.MathUtils.degToRad(
-            -0.55
-          ) *
-          swallowStrength;
-
-
-        neck02.rotation.y =
-          baseNeck02Rotation.y;
-
-      }
-
-
-      /*
-        NECK 01
-      */
-
-      if (
-
-        neck01 &&
-
-        baseNeck01Rotation
-
-      ) {
-
-        neck01.rotation.copy(
-          baseNeck01Rotation
-        );
-
-
-        neck01.rotation.x +=
-          neckHorizontal *
-          0.30;
-
-
-        neck01.rotation.z +=
-
-          neckVertical *
-          0.28 +
-
-          THREE.MathUtils.degToRad(
-            -0.20
-          ) *
-          swallowStrength;
-
-
-        neck01.rotation.y =
-          baseNeck01Rotation.y;
-
-      }
-
-
-      /*
-        KEEP ARMS RELAXED
-      */
-
-      applyRelaxedPose();
-
-
-      /*
-        SMILE
-      */
-
-      applyRestingSmile();
-
-
-      applySwallowExpression();
-
-
-      /*
-        BLINK
-      */
-
-      updateBlink(
-        now
-      );
-
-
-      /*
-        V15 EYE GLOW
-
-        Visible cyan glow,
-        but still restrained enough
-        to preserve the iris texture.
-      */
-
-      const eyePulse =
-
-        Math.sin(
-          now *
-          1.15
-        ) *
-        0.5 +
-        0.5;
-
-
-      eyeMaterial.emissiveIntensity =
-
-        0.075 +
-
-        eyePulse *
-        0.045;
-
-
-      lowerGlow.intensity =
-
-        2.02 +
-
-        eyePulse *
-        0.16;
-
-
-      renderer.render(
-
-        scene,
-
-        camera
-
-      );
-
+    function setMorphValue(entry, index, value) {
+      if (index === undefined || index === null) return;
+      entry.mesh.morphTargetInfluences[index] = THREE.MathUtils.clamp(value, 0, 1);
     }
 
+    function applyEyeLookMorphs(horizontal, vertical) {
+      /*
+        horizontal: -1 = mouse left, +1 = mouse right
+        vertical:   -1 = mouse down, +1 = mouse up
 
-    animate();
+        ARKit's "in/out" values are different for the left and right eye,
+        so each eye is driven separately below.
+      */
+      const x = THREE.MathUtils.clamp(horizontal, -1, 1);
+      const y = THREE.MathUtils.clamp(vertical, -1, 1);
 
+      const horizontalAmount = Math.min(0.92, Math.abs(x) * 0.92);
+      const verticalAmount = Math.min(0.88, Math.abs(y) * 0.88);
 
-    /*
-      RESIZE
-    */
+      for (const entry of eyeLookMeshes) {
+        /* Always clear the previous direction before applying the new one. */
+        setMorphValue(entry, entry.inLeft, 0);
+        setMorphValue(entry, entry.outLeft, 0);
+        setMorphValue(entry, entry.inRight, 0);
+        setMorphValue(entry, entry.outRight, 0);
+        setMorphValue(entry, entry.upLeft, 0);
+        setMorphValue(entry, entry.downLeft, 0);
+        setMorphValue(entry, entry.upRight, 0);
+        setMorphValue(entry, entry.downRight, 0);
 
-    window.addEventListener(
-
-      'resize',
-
-      () => {
-
-        camera.aspect =
-
-          window.innerWidth /
-          window.innerHeight;
-
-
-        camera.updateProjectionMatrix();
-
-
-        renderer.setSize(
-
-          window.innerWidth,
-
-          window.innerHeight
-
-        );
-
-
-        if (
-          model
-        ) {
-
-          setupCamera();
-
+        if (x > 0) {
+          /* Mouse to screen-right. */
+          setMorphValue(entry, entry.outLeft, horizontalAmount);
+          setMorphValue(entry, entry.inRight, horizontalAmount);
+        } else if (x < 0) {
+          /* Mouse to screen-left. */
+          setMorphValue(entry, entry.inLeft, horizontalAmount);
+          setMorphValue(entry, entry.outRight, horizontalAmount);
         }
 
+        if (y > 0) {
+          setMorphValue(entry, entry.upLeft, verticalAmount);
+          setMorphValue(entry, entry.upRight, verticalAmount);
+        } else if (y < 0) {
+          setMorphValue(entry, entry.downLeft, verticalAmount);
+          setMorphValue(entry, entry.downRight, verticalAmount);
+        }
+      }
+    }
+    const RESTING_SMILE = 0.96;
+    function setFaceMorph(name, value) {
+      if (!faceMorphMesh?.morphTargetDictionary || !faceMorphMesh?.morphTargetInfluences) return;
+      const index = faceMorphMesh.morphTargetDictionary[name];
+      if (index !== undefined) {
+        faceMorphMesh.morphTargetInfluences[index] = value;
+      }
+    }
+    function applyRestingSmile() {
+      setFaceMorph('mouthSmileLeft', RESTING_SMILE);
+      setFaceMorph('mouthSmileRight', RESTING_SMILE);
+      setFaceMorph('mouthFrownLeft', 0);
+      setFaceMorph('mouthFrownRight', 0);
+      setFaceMorph('mouthDimpleLeft', 0.14);
+      setFaceMorph('mouthDimpleRight', 0.14);
+      setFaceMorph('cheekSquintLeft', 0.075);
+      setFaceMorph('cheekSquintRight', 0.075);
+      setFaceMorph('mouthUpperUpLeft', 0.05);
+      setFaceMorph('mouthUpperUpRight', 0.05);
+    }
+    function makeBoneDirectionTarget(bone, child, targetDirection) {
+      if (!bone || !child || !bone.parent || !model) return null;
+      model.updateMatrixWorld(true);
+      const bonePosition = new THREE.Vector3();
+      const childPosition = new THREE.Vector3();
+      bone.getWorldPosition(bonePosition);
+      child.getWorldPosition(childPosition);
+      const currentDirection = childPosition.sub(bonePosition).normalize();
+      const desiredDirection = targetDirection.clone().normalize();
+      const directionDelta = new THREE.Quaternion().setFromUnitVectors(
+        currentDirection,
+        desiredDirection
+      );
+      const currentWorldQuaternion = new THREE.Quaternion();
+      bone.getWorldQuaternion(currentWorldQuaternion);
+      const desiredWorldQuaternion = directionDelta
+        .clone()
+        .multiply(currentWorldQuaternion);
+      const parentWorldQuaternion = new THREE.Quaternion();
+      bone.parent.getWorldQuaternion(parentWorldQuaternion);
+      return parentWorldQuaternion
+        .invert()
+        .multiply(desiredWorldQuaternion);
+    }
+    function configureRelaxedArms() {
+      relaxedUpperArmLQuaternion = makeBoneDirectionTarget(
+        upperArmL,
+        lowerArmL,
+        new THREE.Vector3(0.17, -0.98, 0.08)
+      );
+      relaxedUpperArmRQuaternion = makeBoneDirectionTarget(
+        upperArmR,
+        lowerArmR,
+        new THREE.Vector3(-0.17, -0.98, 0.08)
+      );
+    }
+    function applyRelaxedPose() {
+      if (upperArmL && relaxedUpperArmLQuaternion) {
+        upperArmL.quaternion.copy(relaxedUpperArmLQuaternion);
+      }
+      if (upperArmR && relaxedUpperArmRQuaternion) {
+        upperArmR.quaternion.copy(relaxedUpperArmRQuaternion);
+      }
+      if (lowerArmL && baseLowerArmLRotation) {
+        lowerArmL.rotation.copy(baseLowerArmLRotation);
+      }
+      if (lowerArmR && baseLowerArmRRotation) {
+        lowerArmR.rotation.copy(baseLowerArmRRotation);
+      }
+      if (handL && baseHandLRotation) {
+        handL.rotation.copy(baseHandLRotation);
+      }
+      if (handR && baseHandRRotation) {
+        handR.rotation.copy(baseHandRRotation);
+      }
+    }
+    const headWorld = new THREE.Vector3();
+    function setupCamera() {
+      if (!model || !modelSize) return;
+      model.updateMatrixWorld(true);
+      if (headBone) {
+        headBone.getWorldPosition(headWorld);
+      } else {
+        headWorld.set(0, modelSize.y * 0.29, 0);
+      }
+      let shirtBottomY;
+      if (shirtMesh) {
+        const shirtBox = new THREE.Box3().setFromObject(shirtMesh);
+        shirtBottomY = shirtBox.min.y;
+      } else {
+        shirtBottomY = headWorld.y - modelSize.y * 0.30;
+      }
+      const targetY = headWorld.y + modelSize.y * 0.018;
+      const targetX = headWorld.x;
+      const requiredHalfHeight = Math.max(
+        targetY - shirtBottomY,
+        modelSize.y * 0.20
+      ) * 1.012;
+      const verticalFOV = THREE.MathUtils.degToRad(camera.fov);
+      let distance = requiredHalfHeight / Math.tan(verticalFOV / 2);
+      distance *= 1.012;
+      camera.position.set(targetX, targetY, distance);
+      camera.lookAt(targetX, targetY, 0);
+      camera.near = Math.max(distance / 120, 0.01);
+      camera.far = distance * 100;
+      camera.updateProjectionMatrix();
+    }
+    const loader = new GLTFLoader();
+    loader.load(
+      './PrimeReceptionAI_Test01.glb',
+      (gltf) => {
+        model = gltf.scene;
+        scene.add(model);
+        model.traverse((object) => {
+          if (object.isMesh) {
+            const name = object.name;
+            registerFacialMorphs(object);
+            if (
+              name === 'Mesh010' ||
+              name === 'Mesh010_1' ||
+              name === 'SK_FemBase2_Torso' ||
+              name === 'SK_FemBase2_UnderWear' ||
+              name === 'SK_FemBase2_Unified_mesh' ||
+              name.startsWith('SK_FemBase2_Unified_mesh')
+            ) {
+              object.visible = false;
+              return;
+            }
+            if (name === 'SK_FemBase2_Censored_Torso') {
+              torsoMesh = object;
+              object.visible = true;
+              object.material = bodyMaterial;
+              return;
+            }
+            if (
+              name === 'SK_FemBase2_Head_52ArKit' ||
+              name === 'SK_FemBase2_Head_52ARKit'
+            ) {
+              faceMorphMesh = object;
+              object.visible = true;
+              object.material = faceMaterial;
+              return;
+            }
+            if (name === 'SK_FemBase2_TShirt') {
+              shirtMesh = object;
+              object.visible = true;
+              object.material = shirtMaterial;
+              return;
+            }
+            if (name === 'SK_FemBase2_Leggings') {
+              object.visible = true;
+              object.material = leggingsMaterial;
+              return;
+            }
+            if (name === 'SK_FemBase2_Hair') {
+              hairObject = object;
+              object.visible = true;
+              object.material = hairMaterial;
+              object.frustumCulled = false;
+              object.scale.set(1.035, 1.02, 1.04);
+              return;
+            }
+            if (name === 'SK_FemBase2_EyeL') {
+              eyeLObject = object;
+              object.visible = true;
+              object.material = eyeMaterial;
+              return;
+            }
+            if (name === 'SK_FemBase2_EyeR') {
+              eyeRObject = object;
+              object.visible = true;
+              object.material = eyeMaterial;
+              return;
+            }
+            if (name === 'SK_FemBase2_EyeShell') {
+              object.visible = true;
+              object.material = eyeShellMaterial;
+              return;
+            }
+            if (name === 'SK_FemBase2_Lashes') {
+              object.visible = true;
+              object.material = lashesMaterial;
+              return;
+            }
+            if (name === 'SK_FemBase2_EyeEdge') {
+              object.visible = true;
+              object.material = tearlineMaterial;
+              return;
+            }
+            if (name === 'SK_FemBase2_Teeth') {
+              object.visible = true;
+              object.material = teethMaterial;
+              return;
+            }
+            if (name === 'SK_FemBase2_Nails') {
+              object.visible = true;
+              object.material = nailMaterial;
+              return;
+            }
+          }
+          if (object.isBone) {
+            const n = object.name.toLowerCase();
+            if (n === 'head' || n.endsWith('_head')) headBone = object;
+            if (n.includes('neck_01')) neck01 = object;
+            if (n.includes('neck_02')) neck02 = object;
+            if (n === 'upperarm_l') upperArmL = object;
+            if (n === 'upperarm_r') upperArmR = object;
+            if (n === 'lowerarm_l') lowerArmL = object;
+            if (n === 'lowerarm_r') lowerArmR = object;
+            if (n === 'hand_l') handL = object;
+            if (n === 'hand_r') handR = object;
+          }
+        });
+        if (headBone) baseHeadRotation = headBone.rotation.clone();
+        if (neck01) baseNeck01Rotation = neck01.rotation.clone();
+        if (neck02) baseNeck02Rotation = neck02.rotation.clone();
+        if (eyeLObject) baseEyeLRotation = eyeLObject.rotation.clone();
+        if (eyeRObject) baseEyeRRotation = eyeRObject.rotation.clone();
+        if (lowerArmL) baseLowerArmLRotation = lowerArmL.rotation.clone();
+        if (lowerArmR) baseLowerArmRRotation = lowerArmR.rotation.clone();
+        if (handL) baseHandLRotation = handL.rotation.clone();
+        if (handR) baseHandRRotation = handR.rotation.clone();
+        const box = new THREE.Box3().setFromObject(model);
+        modelSize = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.set(-center.x, -center.y, -center.z);
+        model.updateMatrixWorld(true);
+        configureRelaxedArms();
+        setupCamera();
+        applyRestingSmile();
+        scheduleNextBlink();
+        console.log('V17 BODY:', torsoMesh?.name || 'NOT FOUND');
+        console.log('V17 FACE:', faceMorphMesh?.name || 'NOT FOUND');
+        status.style.display = 'none';
+      },
+      (xhr) => {
+        if (xhr.total) {
+          const percent = Math.round((xhr.loaded / xhr.total) * 100);
+          status.textContent = `INITIALIZING PRIME RECEPTION AI… ${percent}%`;
+        }
+      },
+      (error) => {
+        console.error('GLB ERROR:', error);
+        status.textContent = 'MODEL FAILED TO LOAD';
+      }
+    );
+    function setBlinkAmount(amount) {
+      const value = THREE.MathUtils.clamp(amount, 0, 1);
+      for (const entry of blinkMeshes) {
+        const influences = entry.mesh.morphTargetInfluences;
+        if (entry.left !== null) influences[entry.left] = value;
+        if (entry.right !== null) influences[entry.right] = value;
+      }
+    }
+    let blinkActive = false;
+    let blinkStart = 0;
+    let blinkDuration = 0.14;
+    let nextBlink = Infinity;
+    let doubleBlink = false;
+    let secondBlinkAt = Infinity;
+    function scheduleNextBlink() {
+      nextBlink = performance.now() / 1000 + 2.4 + Math.random() * 3.8;
+    }
+    function beginBlink() {
+      blinkActive = true;
+      blinkStart = performance.now() / 1000;
+      blinkDuration = 0.12 + Math.random() * 0.05;
+      doubleBlink = Math.random() < 0.10;
+    }
+    function updateBlink(now) {
+      if (!blinkActive && now >= nextBlink) beginBlink();
+      if (!blinkActive && doubleBlink && now >= secondBlinkAt) {
+        doubleBlink = false;
+        beginBlink();
+        return;
+      }
+      if (!blinkActive) {
+        setBlinkAmount(0);
+        return;
+      }
+      const progress = (now - blinkStart) / blinkDuration;
+      if (progress <= 1) {
+        setBlinkAmount(Math.sin(progress * Math.PI));
+      } else {
+        setBlinkAmount(0);
+        blinkActive = false;
+        if (doubleBlink) {
+          secondBlinkAt = now + 0.14 + Math.random() * 0.08;
+        } else {
+          scheduleNextBlink();
+        }
+      }
+    }
+    const SWALLOW_DURATION = 1.45;
+    let swallowActive = false;
+    let swallowStart = 0;
+    let swallowStrength = 0;
+    let nextSwallow = performance.now() / 1000 + 8 + Math.random() * 8;
+    function smooth01(value) {
+      const x = THREE.MathUtils.clamp(value, 0, 1);
+      return x * x * (3 - 2 * x);
+    }
+    function scheduleNextSwallow(now) {
+      nextSwallow = now + 24 + Math.random() * 32;
+    }
+    function updateSwallow(now) {
+      if (!swallowActive && now >= nextSwallow) {
+        swallowActive = true;
+        swallowStart = now;
+      }
+      if (!swallowActive) {
+        swallowStrength = 0;
+        return;
+      }
+      const progress = (now - swallowStart) / SWALLOW_DURATION;
+      if (progress >= 1) {
+        swallowActive = false;
+        swallowStrength = 0;
+        scheduleNextSwallow(now);
+        return;
+      }
+      if (progress < 0.30) {
+        swallowStrength = smooth01(progress / 0.30);
+      } else if (progress < 0.58) {
+        swallowStrength = 1;
+      } else {
+        swallowStrength = 1 - smooth01((progress - 0.58) / 0.42);
+      }
+    }
+    function applySwallowExpression() {
+      const s = swallowStrength;
+      setFaceMorph('mouthSmileLeft', RESTING_SMILE - s * 0.07);
+      setFaceMorph('mouthSmileRight', RESTING_SMILE - s * 0.07);
+      setFaceMorph('mouthDimpleLeft', 0.14 - s * 0.035);
+      setFaceMorph('mouthDimpleRight', 0.14 - s * 0.035);
+      setFaceMorph('mouthPressLeft', s * 0.14);
+      setFaceMorph('mouthPressRight', s * 0.14);
+      setFaceMorph('mouthClose', s * 0.10);
+      setFaceMorph('mouthShrugLower', s * 0.045);
+      setFaceMorph('mouthShrugUpper', s * 0.025);
+    }
+    const eyeHorizontalMax = THREE.MathUtils.degToRad(15);
+    const eyeUpMax = THREE.MathUtils.degToRad(11);
+    const eyeDownMax = THREE.MathUtils.degToRad(13);
+    const headHorizontalMax = THREE.MathUtils.degToRad(10.75);
+    const headUpMax = THREE.MathUtils.degToRad(8.5);
+    const headDownMax = THREE.MathUtils.degToRad(13);
+    const neckHorizontalMax = THREE.MathUtils.degToRad(3.35);
+    const neckUpMax = THREE.MathUtils.degToRad(3.0);
+    const neckDownMax = THREE.MathUtils.degToRad(4.5);
+    let eyeHorizontal = 0;
+    let eyeVertical = 0;
+    let headHorizontal = 0;
+    let headVertical = 0;
+    let neckHorizontal = 0;
+    let neckVertical = 0;
+    function damp(current, target, speed, delta) {
+      return THREE.MathUtils.lerp(
+        current,
+        target,
+        1 - Math.exp(-speed * delta)
+      );
+    }
+    function getVerticalTargets() {
+      if (pointer.y >= 0) {
+        return {
+          eye: pointer.y * eyeUpMax,
+          head: pointer.y * headUpMax,
+          neck: pointer.y * neckUpMax
+        };
+      }
+      const down = Math.abs(pointer.y);
+      return {
+        eye: -down * eyeDownMax,
+        head: -down * headDownMax,
+        neck: -down * neckDownMax
+      };
+    }
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), 0.05);
+      const now = performance.now() / 1000;
+      pointer.x = damp(pointer.x, targetPointer.x, 8.2, delta);
+      pointer.y = damp(pointer.y, targetPointer.y, 8.2, delta);
+      updateSwallow(now);
+      const vertical = getVerticalTargets();
+      eyeHorizontal = damp(
+        eyeHorizontal,
+        pointer.x * eyeHorizontalMax,
+        18,
+        delta
+      );
+      eyeVertical = damp(eyeVertical, vertical.eye, 18, delta);
+      headHorizontal = damp(
+        headHorizontal,
+        pointer.x * headHorizontalMax,
+        4.25,
+        delta
+      );
+      headVertical = damp(
+        headVertical,
+        vertical.head,
+        pointer.y < 0 ? 4.6 : 3.75,
+        delta
+      );
+      neckHorizontal = damp(
+        neckHorizontal,
+        pointer.x * neckHorizontalMax,
+        2.6,
+        delta
+      );
+      neckVertical = damp(
+        neckVertical,
+        vertical.neck,
+        pointer.y < 0 ? 3.3 : 2.35,
+        delta
+      );
+      /*
+        V17 EYEBALL TRACKING
+
+        Keep the eye mesh objects at their original transforms and drive the
+        supplied ARKit eyeLook morphs instead. This is much more reliable for
+        this rig than rotating the skinned eye mesh as a whole.
+      */
+      if (eyeLObject && baseEyeLRotation) {
+        eyeLObject.rotation.copy(baseEyeLRotation);
       }
 
-    );
+      if (eyeRObject && baseEyeRRotation) {
+        eyeRObject.rotation.copy(baseEyeRRotation);
+      }
 
+      const normalizedEyeX = THREE.MathUtils.clamp(
+        (eyeHorizontal / eyeHorizontalMax) * 1.18,
+        -1,
+        1
+      );
+
+      const normalizedEyeY = eyeVertical >= 0
+        ? THREE.MathUtils.clamp((eyeVertical / eyeUpMax) * 1.15, 0, 1)
+        : THREE.MathUtils.clamp((eyeVertical / eyeDownMax) * 1.15, -1, 0);
+
+      applyEyeLookMorphs(normalizedEyeX, normalizedEyeY);
+      if (headBone && baseHeadRotation) {
+        headBone.rotation.copy(baseHeadRotation);
+        headBone.rotation.x += headHorizontal;
+        headBone.rotation.z +=
+          headVertical +
+          THREE.MathUtils.degToRad(-0.85) * swallowStrength;
+        headBone.rotation.y = baseHeadRotation.y;
+      }
+      if (neck02 && baseNeck02Rotation) {
+        neck02.rotation.copy(baseNeck02Rotation);
+        neck02.rotation.x += neckHorizontal;
+        neck02.rotation.z +=
+          neckVertical +
+          THREE.MathUtils.degToRad(-0.55) * swallowStrength;
+        neck02.rotation.y = baseNeck02Rotation.y;
+      }
+      if (neck01 && baseNeck01Rotation) {
+        neck01.rotation.copy(baseNeck01Rotation);
+        neck01.rotation.x += neckHorizontal * 0.30;
+        neck01.rotation.z +=
+          neckVertical * 0.28 +
+          THREE.MathUtils.degToRad(-0.20) * swallowStrength;
+        neck01.rotation.y = baseNeck01Rotation.y;
+      }
+      applyRelaxedPose();
+      applyRestingSmile();
+      applySwallowExpression();
+      updateBlink(now);
+      const eyePulse = Math.sin(now * 1.15) * 0.5 + 0.5;
+      if (eyeShader) {
+        eyeShader.uniforms.uIrisGlow.value = 0.11 + eyePulse * 0.055;
+      }
+      lowerGlow.intensity = 1.88 + eyePulse * 0.12;
+      renderer.render(scene, camera);
+    }
+    animate();
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (model) setupCamera();
+    });
   </script>
-
 </body>
 </html>
