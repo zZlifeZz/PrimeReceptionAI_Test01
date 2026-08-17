@@ -36,17 +36,13 @@
 
       background:
         radial-gradient(
-          ellipse at 50% 45%,
-          #09202c 0%,
-          #04131b 27%,
-          #02080d 55%,
-          #000000 100%
+          ellipse at 50% 43%,
+          #081c27 0%,
+          #04121a 29%,
+          #02080d 57%,
+          #000 100%
         );
     }
-
-    /* -----------------------------------------
-       Very subtle digital scan atmosphere
-    ----------------------------------------- */
 
     #stage::before {
       content: "";
@@ -58,19 +54,19 @@
 
       pointer-events: none;
 
-      opacity: 0.028;
+      opacity: 0.025;
 
       background:
         repeating-linear-gradient(
           to bottom,
           transparent 0px,
           transparent 5px,
-          rgba(69, 227, 255, 0.14) 6px,
+          rgba(40, 212, 255, 0.14) 6px,
           transparent 7px
         );
 
       animation:
-        scanMove 13s linear infinite;
+        scanMove 14s linear infinite;
     }
 
     @keyframes scanMove {
@@ -82,11 +78,6 @@
         background-position-y: 240px;
       }
     }
-
-
-    /* -----------------------------------------
-       Cinematic vignette
-    ----------------------------------------- */
 
     #stage::after {
       content: "";
@@ -102,15 +93,13 @@
         radial-gradient(
           ellipse at center,
           transparent 37%,
-          rgba(0, 0, 0, 0.08) 59%,
-          rgba(0, 0, 0, 0.78) 100%
+          rgba(0, 0, 0, 0.08) 61%,
+          rgba(0, 0, 0, 0.80) 100%
         );
     }
 
-
     #stage canvas {
       position: relative;
-
       z-index: 1;
 
       display: block;
@@ -118,7 +107,6 @@
       width: 100%;
       height: 100%;
     }
-
 
     #status {
       position: absolute;
@@ -132,7 +120,7 @@
         translate(-50%, -50%);
 
       color:
-        #62e7ff;
+        #55dfff;
 
       font-family:
         Arial,
@@ -224,16 +212,14 @@
       );
 
 
-    /* =====================================================
-       RENDERER
-    ===================================================== */
-
     const renderer =
       new THREE.WebGLRenderer({
 
-        antialias: true,
+        antialias:
+          true,
 
-        alpha: true
+        alpha:
+          true
 
       });
 
@@ -242,7 +228,8 @@
 
       Math.min(
 
-        window.devicePixelRatio || 1,
+        window.devicePixelRatio ||
+        1,
 
         2
 
@@ -269,7 +256,7 @@
 
 
     renderer.toneMappingExposure =
-      1.05;
+      1.04;
 
 
     renderer.setClearColor(
@@ -292,17 +279,17 @@
 
 
     /*
-      General environment illumination.
+      Neutral ambient.
     */
 
     const ambient =
       new THREE.HemisphereLight(
 
-        0xfff4ec,
+        0xffeee3,
 
         0x020607,
 
-        0.92
+        0.88
 
       );
 
@@ -313,27 +300,26 @@
 
 
     /*
-      Main human-face key light.
-      Slight warmth helps the skin.
+      Warm human-skin key light.
     */
 
     const keyLight =
       new THREE.DirectionalLight(
 
-        0xffe8d9,
+        0xffdbc7,
 
-        2.6
+        2.35
 
       );
 
 
     keyLight.position.set(
 
-      1.5,
+      1.4,
 
-      4.3,
+      4.0,
 
-      5.8
+      5.6
 
     );
 
@@ -344,15 +330,15 @@
 
 
     /*
-      Soft frontal fill.
+      Gentle frontal fill.
     */
 
     const frontFill =
       new THREE.PointLight(
 
-        0xffe9dd,
+        0xffe1d2,
 
-        1.0,
+        0.85,
 
         6
 
@@ -361,11 +347,11 @@
 
     frontFill.position.set(
 
-      -0.4,
+      -0.6,
 
-      1.7,
+      1.6,
 
-      3.2
+      3.3
 
     );
 
@@ -376,15 +362,15 @@
 
 
     /*
-      Strong cyan holographic silhouette.
+      Cyan left rim.
     */
 
     const cyanLeft =
       new THREE.DirectionalLight(
 
-        0x19ddff,
+        0x10d8ff,
 
-        4.8
+        4.3
 
       );
 
@@ -405,23 +391,27 @@
     );
 
 
+    /*
+      Cyan right rim.
+    */
+
     const cyanRight =
       new THREE.DirectionalLight(
 
-        0x63e9ff,
+        0x51e8ff,
 
-        2.7
+        2.4
 
       );
 
 
     cyanRight.position.set(
 
-      4.5,
+      4.4,
 
-      3.2,
+      3.1,
 
-      -3.2
+      -3.1
 
     );
 
@@ -432,45 +422,45 @@
 
 
     /*
-      Gold illumination reinforces clothing.
+      Very subtle warm accent.
     */
 
-    const goldKey =
+    const warmAccent =
       new THREE.DirectionalLight(
 
-        0xffc35a,
+        0xffb56b,
 
-        1.45
+        0.72
 
       );
 
 
-    goldKey.position.set(
+    warmAccent.position.set(
 
       3.2,
 
-      2.8,
+      2.5,
 
-      3.5
+      3.2
 
     );
 
 
     scene.add(
-      goldKey
+      warmAccent
     );
 
 
     /*
-      Lower cyan projection.
+      Cyan illumination from below.
     */
 
     const lowerGlow =
       new THREE.PointLight(
 
-        0x16dfff,
+        0x0bdcff,
 
-        6.5,
+        5.3,
 
         6
 
@@ -481,7 +471,7 @@
 
       0,
 
-      -1.0,
+      -0.85,
 
       1.4
 
@@ -494,19 +484,15 @@
 
 
     /* =====================================================
-       MOVING "WATER / HOLOGRAM REFLECTION" LIGHTS
-
-       These produce animated cyan reflections across the
-       character instead of making her skin look wet.
+       MOVING HOLOGRAPHIC / WATER REFLECTION LIGHTS
     ===================================================== */
-
 
     const waterLightA =
       new THREE.PointLight(
 
-        0x11e5ff,
+        0x00d8ff,
 
-        1.7,
+        1.15,
 
         4
 
@@ -521,9 +507,9 @@
     const waterLightB =
       new THREE.PointLight(
 
-        0x55edff,
+        0x45e7ff,
 
-        1.15,
+        0.85,
 
         4
 
@@ -538,9 +524,9 @@
     const waterLightC =
       new THREE.PointLight(
 
-        0x008fb3,
+        0x007ea8,
 
-        0.9,
+        0.55,
 
         3.5
 
@@ -558,10 +544,12 @@
 
 
     /*
-      HUMAN-LOOKING EXPOSED SKIN
+      BRONZE / OLIVE HUMAN SKIN
 
-      This material is used for torso/arms/hands.
-      We deliberately keep metalness almost zero.
+      Warm enough to contrast beautifully with:
+      - black hair
+      - black clothing
+      - cyan eyes / lighting
     */
 
     const bodyMaterial =
@@ -569,44 +557,42 @@
 
         color:
           new THREE.Color(
-            0xc9aba0
+            0x9f684f
           ),
 
         emissive:
           new THREE.Color(
-            0x080d0e
+            0x080706
           ),
 
         emissiveIntensity:
-          0.018,
+          0.012,
 
         metalness:
-          0.01,
+          0.0,
 
         roughness:
           0.49,
 
         clearcoat:
-          0.10,
+          0.08,
 
         clearcoatRoughness:
-          0.46,
+          0.48,
 
         sheen:
-          0.08,
+          0.06,
 
         sheenColor:
           new THREE.Color(
-            0xffcabe
+            0xd89a7d
           )
 
       });
 
 
     /*
-      FACE
-
-      Slightly brighter than the body.
+      Face slightly lighter than body.
     */
 
     const faceMaterial =
@@ -614,42 +600,44 @@
 
         color:
           new THREE.Color(
-            0xd3b4a9
+            0xb7795c
           ),
 
         emissive:
           new THREE.Color(
-            0x06090a
+            0x060504
           ),
 
         emissiveIntensity:
-          0.012,
+          0.008,
 
         metalness:
-          0,
+          0.0,
 
         roughness:
-          0.50,
+          0.48,
 
         clearcoat:
-          0.085,
+          0.075,
 
         clearcoatRoughness:
           0.48,
 
         sheen:
-          0.075,
+          0.065,
 
         sheenColor:
           new THREE.Color(
-            0xffd2c5
+            0xe2a58b
           )
 
       });
 
 
     /*
-      PREMIUM GOLD SHIRT
+      MATTE BLACK SHIRT
+
+      Deliberately NOT latex/chrome.
     */
 
     const shirtMaterial =
@@ -657,43 +645,42 @@
 
         color:
           new THREE.Color(
-            0xc4942e
+            0x080a0c
           ),
 
         emissive:
           new THREE.Color(
-            0x251503
+            0x00090c
           ),
 
         emissiveIntensity:
-          0.055,
+          0.018,
 
         metalness:
-          0.73,
+          0.08,
 
         roughness:
-          0.25,
+          0.60,
 
         clearcoat:
-          0.48,
+          0.06,
 
         clearcoatRoughness:
-          0.19,
+          0.65,
 
         sheen:
-          0.24,
+          0.11,
 
         sheenColor:
           new THREE.Color(
-            0xffd46b
+            0x14434d
           )
 
       });
 
 
     /*
-      Matching gold lower uniform.
-      Most of this will be outside our new camera crop.
+      Black lower garment.
     */
 
     const leggingsMaterial =
@@ -701,34 +688,34 @@
 
         color:
           new THREE.Color(
-            0x9e711b
+            0x050607
           ),
 
         emissive:
           new THREE.Color(
-            0x1c1001
+            0x000709
           ),
 
         emissiveIntensity:
-          0.040,
+          0.012,
 
         metalness:
-          0.69,
+          0.07,
 
         roughness:
-          0.29,
+          0.57,
 
         clearcoat:
-          0.40,
+          0.07,
 
         clearcoatRoughness:
-          0.23
+          0.60
 
       });
 
 
     /*
-      Dark hair.
+      Hair.
     */
 
     const hairMaterial =
@@ -736,7 +723,7 @@
 
         color:
           new THREE.Color(
-            0x030405
+            0x020304
           ),
 
         emissive:
@@ -745,26 +732,25 @@
           ),
 
         emissiveIntensity:
-          0.10,
+          0.085,
 
         metalness:
-          0.12,
+          0.11,
 
         roughness:
-          0.38,
+          0.37,
 
         clearcoat:
-          0.28,
+          0.24,
 
         clearcoatRoughness:
-          0.27
+          0.29
 
       });
 
 
     /*
-      Eyes remain futuristic,
-      but not overwhelmingly bright.
+      BLUE GLOWING EYES
     */
 
     const eyeMaterial =
@@ -772,28 +758,28 @@
 
         color:
           new THREE.Color(
-            0xd9f9ff
+            0xc8f5ff
           ),
 
         emissive:
           new THREE.Color(
-            0x1cd9f5
+            0x00bfff
           ),
 
         emissiveIntensity:
-          0.72,
+          1.05,
 
         metalness:
           0,
 
         roughness:
-          0.14,
+          0.13,
 
         clearcoat:
           1,
 
         clearcoatRoughness:
-          0.04
+          0.035
 
       });
 
@@ -802,22 +788,26 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          0xe3fbff,
+          new THREE.Color(
+            0xd8faff
+          ),
 
         emissive:
-          0x054a54,
+          new THREE.Color(
+            0x006d91
+          ),
 
         emissiveIntensity:
-          0.15,
+          0.22,
 
         transparent:
           true,
 
         opacity:
-          0.26,
+          0.25,
 
         roughness:
-          0.08,
+          0.07,
 
         clearcoat:
           1
@@ -829,10 +819,12 @@
       new THREE.MeshStandardMaterial({
 
         color:
-          0x010101,
+          new THREE.Color(
+            0x010101
+          ),
 
         roughness:
-          0.46
+          0.47
 
       });
 
@@ -841,13 +833,18 @@
       new THREE.MeshPhysicalMaterial({
 
         color:
-          0xf4eee9,
+          new THREE.Color(
+            0xf3ebe6
+          ),
+
+        metalness:
+          0,
 
         roughness:
-          0.34,
+          0.35,
 
         clearcoat:
-          0.10
+          0.08
 
       });
 
@@ -857,23 +854,23 @@
 
         color:
           new THREE.Color(
-            0xd1a259
+            0xb98672
           ),
 
         metalness:
-          0.18,
+          0,
 
         roughness:
-          0.36,
+          0.42,
 
         clearcoat:
-          0.35
+          0.22
 
       });
 
 
     /* =====================================================
-       CLEAN MATERIAL HELPER
+       MATERIAL HELPER
     ===================================================== */
 
     function forceCleanMaterial(
@@ -933,7 +930,6 @@
 
     /* =====================================================
        MODEL REFERENCES
-       DECLARED ONCE.
     ===================================================== */
 
     let model =
@@ -941,10 +937,6 @@
 
 
     let modelSize =
-      null;
-
-
-    let modelBox =
       null;
 
 
@@ -972,6 +964,46 @@
       null;
 
 
+    /*
+      Arm bones.
+    */
+
+    let clavicleL =
+      null;
+
+
+    let clavicleR =
+      null;
+
+
+    let upperArmL =
+      null;
+
+
+    let upperArmR =
+      null;
+
+
+    let lowerArmL =
+      null;
+
+
+    let lowerArmR =
+      null;
+
+
+    let handL =
+      null;
+
+
+    let handR =
+      null;
+
+
+    /*
+      Base rotations.
+    */
+
     let baseHeadRotation =
       null;
 
@@ -989,6 +1021,38 @@
 
 
     let baseEyeRRotation =
+      null;
+
+
+    let baseClavicleLRotation =
+      null;
+
+
+    let baseClavicleRRotation =
+      null;
+
+
+    let baseUpperArmLRotation =
+      null;
+
+
+    let baseUpperArmRRotation =
+      null;
+
+
+    let baseLowerArmLRotation =
+      null;
+
+
+    let baseLowerArmRRotation =
+      null;
+
+
+    let baseHandLRotation =
+      null;
+
+
+    let baseHandRRotation =
       null;
 
 
@@ -1046,10 +1110,6 @@
           );
 
 
-        /*
-          Small dead zone near screen center.
-        */
-
         const deadZone =
           0.045;
 
@@ -1080,11 +1140,6 @@
         }
 
 
-        /*
-          Slight curve makes center movements gentle
-          while still allowing strong movement at edges.
-        */
-
         x =
           Math.sign(
             x
@@ -1093,7 +1148,7 @@
             Math.abs(
               x
             ),
-            1.10
+            1.08
           );
 
 
@@ -1105,7 +1160,7 @@
             Math.abs(
               y
             ),
-            1.06
+            1.05
           );
 
 
@@ -1147,108 +1202,18 @@
 
 
     /* =====================================================
-       MORPH UTILITIES
+       FACIAL MORPHS
     ===================================================== */
 
-    function normalizeMorphName(
-      name
-    ) {
 
-      return name
-        .toLowerCase()
-        .replace(
-          /[^a-z0-9]/g,
-          ''
-        );
+    /*
+      These names are confirmed to exist in the GLB:
 
-    }
-
-
-    function findMorphIndex(
-      dictionary,
-      possibilities
-    ) {
-
-      /*
-        First try exact names.
-      */
-
-      for (
-        const possibility
-        of possibilities
-      ) {
-
-        if (
-          dictionary[possibility] !==
-          undefined
-        ) {
-
-          return dictionary[
-            possibility
-          ];
-
-        }
-
-      }
-
-
-      /*
-        Then try normalized fuzzy matching.
-      */
-
-      const entries =
-        Object.entries(
-          dictionary
-        );
-
-
-      for (
-        const [
-          morphName,
-          index
-        ]
-        of entries
-      ) {
-
-        const normalizedMorph =
-          normalizeMorphName(
-            morphName
-          );
-
-
-        for (
-          const possibility
-          of possibilities
-        ) {
-
-          const normalizedPossibility =
-            normalizeMorphName(
-              possibility
-            );
-
-
-          if (
-            normalizedMorph ===
-            normalizedPossibility
-            ||
-            normalizedMorph.includes(
-              normalizedPossibility
-            )
-          ) {
-
-            return index;
-
-          }
-
-        }
-
-      }
-
-
-      return null;
-
-    }
-
+      mouthSmileLeft
+      mouthSmileRight
+      cheekSquintLeft
+      cheekSquintRight
+    */
 
     function registerFacialMorphs(
       object
@@ -1264,44 +1229,28 @@
       }
 
 
-      const dictionary =
+      const d =
         object.morphTargetDictionary;
 
 
-      /* =========================================
-         BLINK
-      ========================================= */
+      /* -----------------------------------------
+         Blink
+      ----------------------------------------- */
 
       const blinkLeft =
-        findMorphIndex(
-
-          dictionary,
-
-          [
-            'eyeBlinkLeft',
-            'EyeBlinkLeft',
-            'blinkLeft',
-            'eyeBlink_L',
-            'eyeBlinkL'
-          ]
-
-        );
+        d.eyeBlinkLeft !== undefined
+          ?
+          d.eyeBlinkLeft
+          :
+          null;
 
 
       const blinkRight =
-        findMorphIndex(
-
-          dictionary,
-
-          [
-            'eyeBlinkRight',
-            'EyeBlinkRight',
-            'blinkRight',
-            'eyeBlink_R',
-            'eyeBlinkR'
-          ]
-
-        );
+        d.eyeBlinkRight !== undefined
+          ?
+          d.eyeBlinkRight
+          :
+          null;
 
 
       if (
@@ -1328,72 +1277,40 @@
       }
 
 
-      /* =========================================
-         SMILE
-      ========================================= */
+      /* -----------------------------------------
+         Smile
+      ----------------------------------------- */
 
       const smileLeft =
-        findMorphIndex(
-
-          dictionary,
-
-          [
-            'mouthSmileLeft',
-            'MouthSmileLeft',
-            'smileLeft',
-            'SmileLeft',
-            'mouthSmile_L',
-            'mouthSmileL',
-            'smile_L'
-          ]
-
-        );
+        d.mouthSmileLeft !== undefined
+          ?
+          d.mouthSmileLeft
+          :
+          null;
 
 
       const smileRight =
-        findMorphIndex(
-
-          dictionary,
-
-          [
-            'mouthSmileRight',
-            'MouthSmileRight',
-            'smileRight',
-            'SmileRight',
-            'mouthSmile_R',
-            'mouthSmileR',
-            'smile_R'
-          ]
-
-        );
+        d.mouthSmileRight !== undefined
+          ?
+          d.mouthSmileRight
+          :
+          null;
 
 
       const cheekLeft =
-        findMorphIndex(
-
-          dictionary,
-
-          [
-            'cheekSquintLeft',
-            'CheekSquintLeft',
-            'cheekSquint_L'
-          ]
-
-        );
+        d.cheekSquintLeft !== undefined
+          ?
+          d.cheekSquintLeft
+          :
+          null;
 
 
       const cheekRight =
-        findMorphIndex(
-
-          dictionary,
-
-          [
-            'cheekSquintRight',
-            'CheekSquintRight',
-            'cheekSquint_R'
-          ]
-
-        );
+        d.cheekSquintRight !== undefined
+          ?
+          d.cheekSquintRight
+          :
+          null;
 
 
       if (
@@ -1425,37 +1342,21 @@
 
       }
 
-
-      /*
-        Debugging information.
-
-        If smile is still unavailable,
-        this gives us the model's exact morph names.
-      */
-
-      console.log(
-
-        'FACIAL MORPHS:',
-        object.name,
-        Object.keys(
-          dictionary
-        )
-
-      );
-
     }
 
 
-    /* =====================================================
-       PROFESSIONAL RESTING SMILE
-    ===================================================== */
+    /*
+      Much stronger than previous 0.28.
+
+      Still below a full smile.
+    */
 
     const RESTING_SMILE =
-      0.28;
+      0.52;
 
 
-    const CHEEK_SMILE =
-      0.075;
+    const RESTING_CHEEK =
+      0.11;
 
 
     function applyRestingSmile() {
@@ -1505,7 +1406,7 @@
           influences[
             entry.cheekLeft
           ] =
-            CHEEK_SMILE;
+            RESTING_CHEEK;
 
         }
 
@@ -1518,7 +1419,7 @@
           influences[
             entry.cheekRight
           ] =
-            CHEEK_SMILE;
+            RESTING_CHEEK;
 
         }
 
@@ -1540,7 +1441,7 @@
     ) {
 
       const count =
-        250;
+        235;
 
 
       const positions =
@@ -1620,20 +1521,20 @@
         new THREE.PointsMaterial({
 
           color:
-            0x24dfff,
+            0x20d9ff,
 
           size:
             Math.max(
               size.y *
-              0.0017,
-              0.0017
+              0.0016,
+              0.0016
             ),
 
           transparent:
             true,
 
           opacity:
-            0.18,
+            0.16,
 
           depthWrite:
             false,
@@ -1659,7 +1560,7 @@
 
 
     /* =====================================================
-       MODEL LOADING
+       LOAD MODEL
     ===================================================== */
 
     const loader =
@@ -1690,9 +1591,8 @@
             object
           ) {
 
-
             /* =============================================
-               MESHES
+               MESH
             ============================================= */
 
             if (
@@ -1709,7 +1609,7 @@
 
 
               /*
-                Hide known unwanted auxiliary layers.
+                Hide unwanted auxiliary meshes.
               */
 
               if (
@@ -1730,7 +1630,7 @@
 
 
               /*
-                Body / arms / hands / torso.
+                Body / hands / arms.
               */
 
               if (
@@ -1793,7 +1693,7 @@
 
 
               /*
-                GOLD SHIRT.
+                Shirt.
               */
 
               if (
@@ -1824,7 +1724,7 @@
 
 
               /*
-                GOLD LEGGINGS.
+                Lower garment.
               */
 
               if (
@@ -1851,7 +1751,7 @@
 
 
               /*
-                HAIR.
+                Hair.
               */
 
               if (
@@ -1878,7 +1778,7 @@
 
 
               /*
-                LEFT EYE.
+                Eyes.
               */
 
               if (
@@ -1908,10 +1808,6 @@
               }
 
 
-              /*
-                RIGHT EYE.
-              */
-
               if (
                 name ===
                   'SK_FemBase2_EyeR'
@@ -1939,10 +1835,6 @@
               }
 
 
-              /*
-                EYE SHELL.
-              */
-
               if (
                 name ===
                   'SK_FemBase2_EyeShell'
@@ -1965,10 +1857,6 @@
 
               }
 
-
-              /*
-                LASHES.
-              */
 
               if (
                 name ===
@@ -1996,10 +1884,6 @@
               }
 
 
-              /*
-                TEETH.
-              */
-
               if (
                 name ===
                   'SK_FemBase2_Teeth'
@@ -2022,10 +1906,6 @@
 
               }
 
-
-              /*
-                NAILS.
-              */
 
               if (
                 name ===
@@ -2060,17 +1940,17 @@
               object.isBone
             ) {
 
-              const lowerName =
+              const n =
                 object
                   .name
                   .toLowerCase();
 
 
               if (
-                lowerName ===
+                n ===
                   'head'
                 ||
-                lowerName.endsWith(
+                n.endsWith(
                   '_head'
                 )
               ) {
@@ -2082,7 +1962,7 @@
 
 
               if (
-                lowerName.includes(
+                n.includes(
                   'neck_01'
                 )
               ) {
@@ -2094,12 +1974,104 @@
 
 
               if (
-                lowerName.includes(
+                n.includes(
                   'neck_02'
                 )
               ) {
 
                 neck02 =
+                  object;
+
+              }
+
+
+              /*
+                Actual arm bone names from this GLB.
+              */
+
+              if (
+                n ===
+                'clavicle_l'
+              ) {
+
+                clavicleL =
+                  object;
+
+              }
+
+
+              if (
+                n ===
+                'clavicle_r'
+              ) {
+
+                clavicleR =
+                  object;
+
+              }
+
+
+              if (
+                n ===
+                'upperarm_l'
+              ) {
+
+                upperArmL =
+                  object;
+
+              }
+
+
+              if (
+                n ===
+                'upperarm_r'
+              ) {
+
+                upperArmR =
+                  object;
+
+              }
+
+
+              if (
+                n ===
+                'lowerarm_l'
+              ) {
+
+                lowerArmL =
+                  object;
+
+              }
+
+
+              if (
+                n ===
+                'lowerarm_r'
+              ) {
+
+                lowerArmR =
+                  object;
+
+              }
+
+
+              if (
+                n ===
+                'hand_l'
+              ) {
+
+                handL =
+                  object;
+
+              }
+
+
+              if (
+                n ===
+                'hand_r'
+              ) {
+
+                handR =
                   object;
 
               }
@@ -2112,7 +2084,7 @@
 
 
         /* =================================================
-           STORE ORIGINAL BONE ROTATIONS
+           STORE BASE ROTATIONS
         ================================================= */
 
         if (
@@ -2175,11 +2147,107 @@
         }
 
 
+        if (
+          clavicleL
+        ) {
+
+          baseClavicleLRotation =
+            clavicleL
+              .rotation
+              .clone();
+
+        }
+
+
+        if (
+          clavicleR
+        ) {
+
+          baseClavicleRRotation =
+            clavicleR
+              .rotation
+              .clone();
+
+        }
+
+
+        if (
+          upperArmL
+        ) {
+
+          baseUpperArmLRotation =
+            upperArmL
+              .rotation
+              .clone();
+
+        }
+
+
+        if (
+          upperArmR
+        ) {
+
+          baseUpperArmRRotation =
+            upperArmR
+              .rotation
+              .clone();
+
+        }
+
+
+        if (
+          lowerArmL
+        ) {
+
+          baseLowerArmLRotation =
+            lowerArmL
+              .rotation
+              .clone();
+
+        }
+
+
+        if (
+          lowerArmR
+        ) {
+
+          baseLowerArmRRotation =
+            lowerArmR
+              .rotation
+              .clone();
+
+        }
+
+
+        if (
+          handL
+        ) {
+
+          baseHandLRotation =
+            handL
+              .rotation
+              .clone();
+
+        }
+
+
+        if (
+          handR
+        ) {
+
+          baseHandRRotation =
+            handR
+              .rotation
+              .clone();
+
+        }
+
+
         /* =================================================
-           CENTER ENTIRE MODEL
+           CENTER MODEL
         ================================================= */
 
-        modelBox =
+        const box =
           new THREE.Box3()
             .setFromObject(
               model
@@ -2187,24 +2255,24 @@
 
 
         modelSize =
-          modelBox.getSize(
+          box.getSize(
             new THREE.Vector3()
           );
 
 
-        const modelCenter =
-          modelBox.getCenter(
+        const center =
+          box.getCenter(
             new THREE.Vector3()
           );
 
 
         model.position.set(
 
-          -modelCenter.x,
+          -center.x,
 
-          -modelCenter.y,
+          -center.y,
 
-          -modelCenter.z
+          -center.z
 
         );
 
@@ -2216,16 +2284,9 @@
 
         /* =================================================
            CAMERA
-
-           PRIMARY GOALS:
-
-           1. Head centered.
-           2. Tight corporate portrait.
-           3. Bottom of frame around shirt hem.
-           4. Belly/lower body no longer emphasized.
         ================================================= */
 
-        setupPortraitCamera();
+        setupCamera();
 
 
         /* =================================================
@@ -2237,9 +2298,9 @@
         );
 
 
-        /* =================================================
-           FACE
-        ================================================= */
+        /*
+          Apply smile immediately.
+        */
 
         applyRestingSmile();
 
@@ -2262,10 +2323,6 @@
       },
 
 
-      /* ===================================================
-         PROGRESS
-      =================================================== */
-
       function (
         xhr
       ) {
@@ -2277,10 +2334,8 @@
           const percent =
             Math.round(
 
-              (
-                xhr.loaded /
-                xhr.total
-              ) *
+              xhr.loaded /
+              xhr.total *
               100
 
             );
@@ -2295,10 +2350,6 @@
 
       },
 
-
-      /* ===================================================
-         ERROR
-      =================================================== */
 
       function (
         error
@@ -2322,14 +2373,19 @@
 
 
     /* =====================================================
-       CAMERA SETUP
+       CAMERA
+
+       Shirt hem should almost touch bottom of viewport.
+
+       Camera target is moved slightly ABOVE the head
+       position, which visually moves the character DOWN.
     ===================================================== */
 
-    const headWorldPosition =
+    const headWorld =
       new THREE.Vector3();
 
 
-    function setupPortraitCamera() {
+    function setupCamera() {
 
       if (
         !model ||
@@ -2346,23 +2402,19 @@
       );
 
 
-      /*
-        Find actual head location.
-      */
-
       if (
         headBone
       ) {
 
         headBone.getWorldPosition(
-          headWorldPosition
+          headWorld
         );
 
       }
 
       else {
 
-        headWorldPosition.set(
+        headWorld.set(
 
           0,
 
@@ -2375,10 +2427,6 @@
 
       }
 
-
-      /*
-        Find the actual lower edge of the shirt.
-      */
 
       let shirtBottomY;
 
@@ -2402,36 +2450,35 @@
       else {
 
         shirtBottomY =
-          headWorldPosition.y -
+          headWorld.y -
           modelSize.y *
-          0.31;
+          0.30;
 
       }
 
 
       /*
-        HEAD IS THE CAMERA TARGET.
+        Look slightly ABOVE her head center.
 
-        Therefore the head sits at the center
-        of the viewport vertically and horizontally.
+        This makes the entire model render lower
+        on the screen.
       */
 
       const targetY =
-        headWorldPosition.y;
+        headWorld.y +
+        modelSize.y *
+        0.018;
 
 
       const targetX =
-        headWorldPosition.x;
+        headWorld.x;
 
 
       /*
-        We need enough room from head-center down
-        to the shirt hem.
-
-        Small margin prevents accidental clipping.
+        We frame from target point down to shirt hem.
       */
 
-      const distanceHeadToShirt =
+      const requiredHalfHeight =
         Math.max(
 
           targetY -
@@ -2440,16 +2487,8 @@
           modelSize.y *
           0.20
 
-        );
-
-
-      /*
-        Frame reaches just slightly below shirt.
-      */
-
-      const requiredHalfHeight =
-        distanceHeadToShirt *
-        1.075;
+        ) *
+        1.012;
 
 
       const verticalFOV =
@@ -2458,7 +2497,7 @@
         );
 
 
-      let cameraDistance =
+      let distance =
         requiredHalfHeight /
         Math.tan(
           verticalFOV /
@@ -2466,12 +2505,8 @@
         );
 
 
-      /*
-        Small safety margin.
-      */
-
-      cameraDistance *=
-        1.025;
+      distance *=
+        1.012;
 
 
       camera.position.set(
@@ -2480,7 +2515,7 @@
 
         targetY,
 
-        cameraDistance
+        distance
 
       );
 
@@ -2499,7 +2534,7 @@
       camera.near =
         Math.max(
 
-          cameraDistance /
+          distance /
           120,
 
           0.01
@@ -2508,7 +2543,7 @@
 
 
       camera.far =
-        cameraDistance *
+        distance *
         100;
 
 
@@ -2518,7 +2553,7 @@
 
 
     /* =====================================================
-       BLINKING
+       BLINK
     ===================================================== */
 
     function setBlinkAmount(
@@ -2587,7 +2622,7 @@
 
 
     let blinkDuration =
-      0.15;
+      0.14;
 
 
     let nextBlink =
@@ -2607,7 +2642,7 @@
       nextBlink =
         performance.now() /
         1000 +
-        2.3 +
+        2.4 +
         Math.random() *
         3.8;
 
@@ -2628,7 +2663,7 @@
       blinkDuration =
         0.12 +
         Math.random() *
-        0.055;
+        0.05;
 
 
       doubleBlink =
@@ -2644,8 +2679,7 @@
 
       if (
         !blinkActive &&
-        now >=
-        nextBlink
+        now >= nextBlink
       ) {
 
         beginBlink();
@@ -2656,8 +2690,7 @@
       if (
         !blinkActive &&
         doubleBlink &&
-        now >=
-        secondBlinkAt
+        now >= secondBlinkAt
       ) {
 
         doubleBlink =
@@ -2695,17 +2728,14 @@
 
 
       if (
-        progress <=
-        1
+        progress <= 1
       ) {
 
         setBlinkAmount(
 
           Math.sin(
-
             progress *
             Math.PI
-
           )
 
         );
@@ -2747,13 +2777,9 @@
 
 
     /* =====================================================
-       TRACKING SETTINGS
+       TRACKING
     ===================================================== */
 
-
-    /*
-      Eyes react considerably more than before.
-    */
 
     const eyeHorizontalMax =
       THREE.MathUtils.degToRad(
@@ -2761,33 +2787,28 @@
       );
 
 
-    const eyeVerticalUpMax =
+    const eyeUpMax =
       THREE.MathUtils.degToRad(
         7
       );
 
 
-    const eyeVerticalDownMax =
+    const eyeDownMax =
       THREE.MathUtils.degToRad(
         11
       );
 
 
     /*
-      Horizontal head movement remains restrained.
+      Old version was ~5 degrees.
+      This is about 13% higher.
     */
 
     const headHorizontalMax =
       THREE.MathUtils.degToRad(
-        5
+        5.65
       );
 
-
-    /*
-      UP and DOWN intentionally use different limits.
-
-      Looking down needs to be unmistakable.
-    */
 
     const headUpMax =
       THREE.MathUtils.degToRad(
@@ -2795,15 +2816,19 @@
       );
 
 
+    /*
+      Down remains much stronger.
+    */
+
     const headDownMax =
       THREE.MathUtils.degToRad(
-        12
+        13
       );
 
 
     const neckHorizontalMax =
       THREE.MathUtils.degToRad(
-        1.7
+        1.9
       );
 
 
@@ -2815,7 +2840,7 @@
 
     const neckDownMax =
       THREE.MathUtils.degToRad(
-        4.2
+        4.5
       );
 
 
@@ -2867,34 +2892,18 @@
     }
 
 
-    /* =====================================================
-       TRACKING TARGET CALCULATION
-    ===================================================== */
-
-    function calculateVerticalTargets() {
-
-      /*
-        pointer.y:
-
-        +1 = cursor at TOP
-        -1 = cursor at BOTTOM
-      */
-
+    function getVerticalTargets() {
 
       if (
         pointer.y >=
         0
       ) {
 
-        /*
-          LOOKING UP
-        */
-
         return {
 
           eye:
             pointer.y *
-            eyeVerticalUpMax,
+            eyeUpMax,
 
           head:
             pointer.y *
@@ -2909,14 +2918,7 @@
       }
 
 
-      /*
-        LOOKING DOWN
-
-        Negative values use substantially greater
-        rotation than upward gaze.
-      */
-
-      const downAmount =
+      const down =
         Math.abs(
           pointer.y
         );
@@ -2925,15 +2927,15 @@
       return {
 
         eye:
-          -downAmount *
-          eyeVerticalDownMax,
+          -down *
+          eyeDownMax,
 
         head:
-          -downAmount *
+          -down *
           headDownMax,
 
         neck:
-          -downAmount *
+          -down *
           neckDownMax
 
       };
@@ -2942,7 +2944,221 @@
 
 
     /* =====================================================
-       ANIMATION LOOP
+       RELAXED ARM / SHOULDER POSE
+    ===================================================== */
+
+
+    /*
+      The purchased model loads in an A-pose.
+
+      We lower the upper arms toward the torso.
+      These rotations are intentionally modest.
+    */
+
+    const ARM_DROP =
+      THREE.MathUtils.degToRad(
+        22
+      );
+
+
+    const ELBOW_RELAX =
+      THREE.MathUtils.degToRad(
+        6
+      );
+
+
+    const SHOULDER_DROP =
+      THREE.MathUtils.degToRad(
+        2.2
+      );
+
+
+    function applyRelaxedPose(
+      now
+    ) {
+
+      /*
+        Extremely subtle natural idle motion.
+        The torso itself stays fixed.
+      */
+
+      const idle =
+        Math.sin(
+          now *
+          0.72
+        ) *
+        THREE.MathUtils.degToRad(
+          0.55
+        );
+
+
+      const idle2 =
+        Math.sin(
+          now *
+          0.49 +
+          1.3
+        ) *
+        THREE.MathUtils.degToRad(
+          0.35
+        );
+
+
+      if (
+        clavicleL &&
+        baseClavicleLRotation
+      ) {
+
+        clavicleL.rotation.copy(
+          baseClavicleLRotation
+        );
+
+
+        clavicleL.rotation.z -=
+          SHOULDER_DROP;
+
+
+        clavicleL.rotation.x +=
+          idle2;
+
+      }
+
+
+      if (
+        clavicleR &&
+        baseClavicleRRotation
+      ) {
+
+        clavicleR.rotation.copy(
+          baseClavicleRRotation
+        );
+
+
+        clavicleR.rotation.z +=
+          SHOULDER_DROP;
+
+
+        clavicleR.rotation.x -=
+          idle2;
+
+      }
+
+
+      /*
+        LEFT ARM DOWN
+      */
+
+      if (
+        upperArmL &&
+        baseUpperArmLRotation
+      ) {
+
+        upperArmL.rotation.copy(
+          baseUpperArmLRotation
+        );
+
+
+        upperArmL.rotation.z -=
+          ARM_DROP;
+
+
+        upperArmL.rotation.x +=
+          idle;
+
+      }
+
+
+      /*
+        RIGHT ARM DOWN
+      */
+
+      if (
+        upperArmR &&
+        baseUpperArmRRotation
+      ) {
+
+        upperArmR.rotation.copy(
+          baseUpperArmRRotation
+        );
+
+
+        upperArmR.rotation.z +=
+          ARM_DROP;
+
+
+        upperArmR.rotation.x -=
+          idle;
+
+      }
+
+
+      /*
+        Gentle elbow bend.
+      */
+
+      if (
+        lowerArmL &&
+        baseLowerArmLRotation
+      ) {
+
+        lowerArmL.rotation.copy(
+          baseLowerArmLRotation
+        );
+
+
+        lowerArmL.rotation.z -=
+          ELBOW_RELAX;
+
+      }
+
+
+      if (
+        lowerArmR &&
+        baseLowerArmRRotation
+      ) {
+
+        lowerArmR.rotation.copy(
+          baseLowerArmRRotation
+        );
+
+
+        lowerArmR.rotation.z +=
+          ELBOW_RELAX;
+
+      }
+
+
+      /*
+        Keep wrists near their original orientation.
+      */
+
+      if (
+        handL &&
+        baseHandLRotation
+      ) {
+
+        handL.rotation.copy(
+          baseHandLRotation
+        );
+
+      }
+
+
+      if (
+        handR &&
+        baseHandRRotation
+      ) {
+
+        handR.rotation.copy(
+          baseHandRRotation
+        );
+
+      }
+
+    }
+
+
+    /* =====================================================
+       ANIMATION
     ===================================================== */
 
     const clock =
@@ -2972,7 +3188,7 @@
 
 
       /* =========================================
-         POINTER SMOOTHING
+         POINTER
       ========================================= */
 
       pointer.x =
@@ -3003,14 +3219,12 @@
         );
 
 
-      const verticalTargets =
-        calculateVerticalTargets();
+      const vertical =
+        getVerticalTargets();
 
 
       /* =========================================
          EYES
-
-         Eyes react fastest.
       ========================================= */
 
       eyeHorizontal =
@@ -3033,7 +3247,7 @@
 
           eyeVertical,
 
-          verticalTargets.eye,
+          vertical.eye,
 
           16,
 
@@ -3044,8 +3258,6 @@
 
       /* =========================================
          HEAD
-
-         Faster and more obvious than old version.
       ========================================= */
 
       headHorizontal =
@@ -3056,7 +3268,7 @@
           pointer.x *
           headHorizontalMax,
 
-          3.7,
+          3.8,
 
           delta
 
@@ -3068,14 +3280,14 @@
 
           headVertical,
 
-          verticalTargets.head,
+          vertical.head,
 
           pointer.y <
             0
             ?
-            4.4
+            4.6
             :
-            3.2,
+            3.25,
 
           delta
 
@@ -3094,7 +3306,7 @@
           pointer.x *
           neckHorizontalMax,
 
-          2.2,
+          2.3,
 
           delta
 
@@ -3106,12 +3318,12 @@
 
           neckVertical,
 
-          verticalTargets.neck,
+          vertical.neck,
 
           pointer.y <
             0
             ?
-            3.2
+            3.3
             :
             2.0,
 
@@ -3121,7 +3333,7 @@
 
 
       /* =========================================
-         APPLY EYES
+         EYE ROTATION
       ========================================= */
 
       if (
@@ -3165,13 +3377,11 @@
 
 
       /* =========================================
-         APPLY HEAD
+         HEAD
 
-         Confirmed rig mapping from our testing:
-
-         X = LEFT / RIGHT
-         Z = UP / DOWN
-         Y must remain untouched.
+         Confirmed rig:
+         X = horizontal
+         Z = vertical
       ========================================= */
 
       if (
@@ -3228,9 +3438,6 @@
 
       /* =========================================
          NECK 01
-
-         Reduced contribution so most of the
-         downward expression comes from upper neck/head.
       ========================================= */
 
       if (
@@ -3260,11 +3467,24 @@
 
 
       /* =========================================
-         FACIAL EXPRESSION
+         RELAX ARMS / SHOULDERS
+      ========================================= */
+
+      applyRelaxedPose(
+        now
+      );
+
+
+      /* =========================================
+         SMILE
       ========================================= */
 
       applyRestingSmile();
 
+
+      /* =========================================
+         BLINK
+      ========================================= */
 
       updateBlink(
         now
@@ -3272,15 +3492,12 @@
 
 
       /* =========================================
-         WATER-LIKE CYAN LIGHT REFLECTIONS
-
-         No actual body movement.
-         Only light moves.
+         MOVING CYAN REFLECTION
       ========================================= */
 
       const waterTime =
         now *
-        0.75;
+        0.72;
 
 
       waterLightA.position.set(
@@ -3288,20 +3505,20 @@
         Math.sin(
           waterTime
         ) *
-        1.4,
+        1.3,
 
-        0.45 +
+        0.35 +
         Math.sin(
           waterTime *
           1.8
         ) *
-        0.45,
+        0.42,
 
         1.45 +
         Math.cos(
           waterTime
         ) *
-        0.55
+        0.50
 
       );
 
@@ -3310,19 +3527,19 @@
 
         Math.cos(
           waterTime *
-          1.15
+          1.13
         ) *
-        1.25,
+        1.20,
 
-        1.15 +
+        1.05 +
         Math.sin(
           waterTime *
-          1.45 +
+          1.44 +
           1.7
         ) *
-        0.48,
+        0.44,
 
-        1.2
+        1.15
 
       );
 
@@ -3334,27 +3551,22 @@
           0.72 +
           2.2
         ) *
-        1.6,
+        1.5,
 
         -0.05 +
         Math.cos(
           waterTime *
           1.3
         ) *
-        0.40,
+        0.38,
 
         0.75
 
       );
 
 
-      /*
-        Light intensity also moves slightly,
-        resembling reflected water caustics.
-      */
-
       waterLightA.intensity =
-        1.30 +
+        0.95 +
         (
           Math.sin(
             now *
@@ -3363,25 +3575,25 @@
           0.5 +
           0.5
         ) *
-        0.65;
+        0.52;
 
 
       waterLightB.intensity =
-        0.85 +
+        0.65 +
         (
           Math.sin(
             now *
-            2.7 +
+            2.65 +
             1.4
           ) *
           0.5 +
           0.5
         ) *
-        0.55;
+        0.42;
 
 
       waterLightC.intensity =
-        0.55 +
+        0.38 +
         (
           Math.sin(
             now *
@@ -3391,44 +3603,38 @@
           0.5 +
           0.5
         ) *
-        0.45;
+        0.34;
 
 
       /* =========================================
-         SUBTLE AI ENERGY PULSE
+         EYE PULSE
       ========================================= */
 
-      const pulse =
+      const eyePulse =
         (
           Math.sin(
             now *
-            1.1
+            1.35
           ) *
           0.5 +
           0.5
         );
 
 
-      lowerGlow.intensity =
-        5.8 +
-        pulse *
-        1.4;
-
-
       eyeMaterial.emissiveIntensity =
-        0.64 +
-        pulse *
-        0.14;
+        0.98 +
+        eyePulse *
+        0.18;
 
 
-      shirtMaterial.emissiveIntensity =
-        0.045 +
-        pulse *
-        0.018;
+      lowerGlow.intensity =
+        4.8 +
+        eyePulse *
+        0.8;
 
 
       /* =========================================
-         BACKGROUND PARTICLES
+         PARTICLES
       ========================================= */
 
       if (
@@ -3436,7 +3642,7 @@
       ) {
 
         backgroundParticles.rotation.y +=
-          0.00010;
+          0.00009;
 
       }
 
@@ -3457,7 +3663,7 @@
 
 
     /* =====================================================
-       RESPONSIVE
+       RESIZE
     ===================================================== */
 
     window.addEventListener(
@@ -3483,16 +3689,11 @@
         );
 
 
-        /*
-          Recalculate camera framing,
-          keeping her head centered.
-        */
-
         if (
           model
         ) {
 
-          setupPortraitCamera();
+          setupCamera();
 
         }
 
@@ -3503,5 +3704,4 @@
   </script>
 
 </body>
-
 </html>
