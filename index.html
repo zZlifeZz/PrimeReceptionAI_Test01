@@ -1294,7 +1294,7 @@
 
 
     /*
-      V11 FACE EXPRESSION
+      V12 FACE EXPRESSION
 
       We drive the confirmed visible ARKit head mesh directly.
       Negative frown is intentional: it reinforces the upward
@@ -3048,6 +3048,254 @@
 
 
     /* =====================================================
+       OCCASIONAL SWALLOW / THROAT RESET — V12
+
+       There is no dedicated larynx/throat morph in this GLB,
+       so the effect is intentionally subtle. We combine a brief
+       lip compression with a tiny chin/neck dip and release.
+       No arms, wrists or fingers are animated.
+    ===================================================== */
+
+    const SWALLOW_DURATION =
+      1.45;
+
+
+    let swallowActive =
+      false;
+
+
+    let swallowStart =
+      0;
+
+
+    let swallowStrength =
+      0;
+
+
+    let nextSwallow =
+      performance.now() /
+      1000 +
+      8 +
+      Math.random() *
+      8;
+
+
+    function smooth01(
+      value
+    ) {
+
+      const x =
+        THREE.MathUtils.clamp(
+          value,
+          0,
+          1
+        );
+
+
+      return x * x *
+        (
+          3 -
+          2 * x
+        );
+
+    }
+
+
+    function scheduleNextSwallow(
+      now
+    ) {
+
+      nextSwallow =
+        now +
+        24 +
+        Math.random() *
+        32;
+
+    }
+
+
+    function beginSwallow(
+      now
+    ) {
+
+      swallowActive =
+        true;
+
+
+      swallowStart =
+        now;
+
+    }
+
+
+    function updateSwallow(
+      now
+    ) {
+
+      if (
+        !swallowActive &&
+        now >= nextSwallow
+      ) {
+
+        beginSwallow(
+          now
+        );
+
+      }
+
+
+      if (
+        !swallowActive
+      ) {
+
+        swallowStrength =
+          0;
+
+
+        return;
+
+      }
+
+
+      const progress =
+        (
+          now -
+          swallowStart
+        ) /
+        SWALLOW_DURATION;
+
+
+      if (
+        progress >= 1
+      ) {
+
+        swallowActive =
+          false;
+
+
+        swallowStrength =
+          0;
+
+
+        scheduleNextSwallow(
+          now
+        );
+
+
+        return;
+
+      }
+
+
+      if (
+        progress < 0.30
+      ) {
+
+        swallowStrength =
+          smooth01(
+            progress /
+            0.30
+          );
+
+      }
+
+      else if (
+        progress < 0.58
+      ) {
+
+        swallowStrength =
+          1;
+
+      }
+
+      else {
+
+        swallowStrength =
+          1 -
+          smooth01(
+            (
+              progress -
+              0.58
+            ) /
+            0.42
+          );
+
+      }
+
+    }
+
+
+    function applySwallowExpression() {
+
+      const s =
+        swallowStrength;
+
+
+      /*
+        Briefly soften the smile as the lips compress.
+        The resting expression returns automatically afterward.
+      */
+      setFaceMorph(
+        'mouthSmileLeft',
+        RESTING_SMILE -
+        s * 0.07
+      );
+
+
+      setFaceMorph(
+        'mouthSmileRight',
+        RESTING_SMILE -
+        s * 0.07
+      );
+
+
+      setFaceMorph(
+        'mouthDimpleLeft',
+        0.14 -
+        s * 0.035
+      );
+
+
+      setFaceMorph(
+        'mouthDimpleRight',
+        0.14 -
+        s * 0.035
+      );
+
+
+      setFaceMorph(
+        'mouthPressLeft',
+        s * 0.14
+      );
+
+
+      setFaceMorph(
+        'mouthPressRight',
+        s * 0.14
+      );
+
+
+      setFaceMorph(
+        'mouthClose',
+        s * 0.10
+      );
+
+
+      setFaceMorph(
+        'mouthShrugLower',
+        s * 0.045
+      );
+
+
+      setFaceMorph(
+        'mouthShrugUpper',
+        s * 0.025
+      );
+
+    }
+
+
+    /* =====================================================
        TRACKING
     ===================================================== */
 
@@ -3060,7 +3308,7 @@
 
     const eyeUpMax =
       THREE.MathUtils.degToRad(
-        7
+        9
       );
 
 
@@ -3077,13 +3325,13 @@
 
     const headHorizontalMax =
       THREE.MathUtils.degToRad(
-        5.65
+        9.25
       );
 
 
     const headUpMax =
       THREE.MathUtils.degToRad(
-        5
+        8.5
       );
 
 
@@ -3099,13 +3347,13 @@
 
     const neckHorizontalMax =
       THREE.MathUtils.degToRad(
-        1.9
+        3.0
       );
 
 
     const neckUpMax =
       THREE.MathUtils.degToRad(
-        1.8
+        3.0
       );
 
 
@@ -3215,7 +3463,7 @@
 
 
     /* =====================================================
-       STATIC RELAXED ARM / SHOULDER POSE — V11
+       STATIC RELAXED ARM / SHOULDER POSE — V12
 
        No random hand gestures, no IK, no wrist animation,
        and no finger animation. Arms remain in the relaxed
@@ -3381,6 +3629,11 @@
         );
 
 
+      updateSwallow(
+        now
+      );
+
+
       const vertical =
         getVerticalTargets();
 
@@ -3430,7 +3683,7 @@
           pointer.x *
           headHorizontalMax,
 
-          3.8,
+          4.25,
 
           delta
 
@@ -3449,7 +3702,7 @@
             ?
             4.6
             :
-            3.25,
+            3.75,
 
           delta
 
@@ -3468,7 +3721,7 @@
           pointer.x *
           neckHorizontalMax,
 
-          2.3,
+          2.6,
 
           delta
 
@@ -3487,7 +3740,7 @@
             ?
             3.3
             :
-            2.0,
+            2.35,
 
           delta
 
@@ -3561,7 +3814,11 @@
 
 
         headBone.rotation.z +=
-          headVertical;
+          headVertical +
+          THREE.MathUtils.degToRad(
+            -0.85
+          ) *
+          swallowStrength;
 
 
         headBone.rotation.y =
@@ -3589,7 +3846,11 @@
 
 
         neck02.rotation.z +=
-          neckVertical;
+          neckVertical +
+          THREE.MathUtils.degToRad(
+            -0.55
+          ) *
+          swallowStrength;
 
 
         neck02.rotation.y =
@@ -3619,7 +3880,11 @@
 
         neck01.rotation.z +=
           neckVertical *
-          0.28;
+          0.28 +
+          THREE.MathUtils.degToRad(
+            -0.20
+          ) *
+          swallowStrength;
 
 
         neck01.rotation.y =
@@ -3642,6 +3907,9 @@
       ========================================= */
 
       applyRestingSmile();
+
+
+      applySwallowExpression();
 
 
       /* =========================================
