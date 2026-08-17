@@ -629,34 +629,42 @@
     */
 
     const hairMaterial =
-      new THREE.MeshPhysicalMaterial({
+  new THREE.MeshPhysicalMaterial({
 
-        color:
-          new THREE.Color(
-            0x020304
-          ),
+    color:
+      new THREE.Color(
+        0x15110f
+      ),
 
-        emissive:
-          new THREE.Color(
-            0x00141a
-          ),
+    emissive:
+      new THREE.Color(
+        0x000000
+      ),
 
-        emissiveIntensity:
-          0.085,
+    emissiveIntensity:
+      0.0,
 
-        metalness:
-          0.11,
+    metalness:
+      0.0,
 
-        roughness:
-          0.37,
+    roughness:
+      0.63,
 
-        clearcoat:
-          0.24,
+    clearcoat:
+      0.04,
 
-        clearcoatRoughness:
-          0.29
+    clearcoatRoughness:
+      0.82,
 
-      });
+    sheen:
+      0.08,
+
+    sheenColor:
+      new THREE.Color(
+        0x2d2623
+      )
+
+  });
 
 
     /*
