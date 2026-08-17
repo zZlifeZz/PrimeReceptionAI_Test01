@@ -1655,11 +1655,11 @@
     */
 
     const RESTING_SMILE =
-      1.25;
+      0.80;
 
 
     /*
-      V7 FACE EXPRESSION
+      V8 FACE EXPRESSION
 
       We drive the confirmed visible ARKit head mesh directly.
       Negative frown is intentional: it reinforces the upward
@@ -1712,34 +1712,38 @@
         RESTING_SMILE
       );
 
+      /*
+        Do not drive frown morphs negative. The ARKit targets in
+        this asset are authored for the normal 0..1 range.
+      */
       setFaceMorph(
         'mouthFrownLeft',
-        -0.16
+        0
       );
 
       setFaceMorph(
         'mouthFrownRight',
-        -0.16
+        0
       );
 
       setFaceMorph(
         'mouthDimpleLeft',
-        0.20
+        0.10
       );
 
       setFaceMorph(
         'mouthDimpleRight',
-        0.20
+        0.10
       );
 
       setFaceMorph(
         'cheekSquintLeft',
-        0.09
+        0.055
       );
 
       setFaceMorph(
         'cheekSquintRight',
-        0.09
+        0.055
       );
 
       setFaceMorph(
@@ -1987,7 +1991,7 @@
     }
 
     /* =====================================================
-       V7 CHEST MASK
+       LEGACY CHEST MASK (UNUSED IN V8)
 
        The purchased torso and shirt occupy almost the same
        surface around the chest. The skin-colored circles are
@@ -2229,7 +2233,7 @@
 
 
       console.log(
-        'V7 CHEST MASK:',
+        'LEGACY CHEST MASK (UNUSED IN V8):',
         sourceIndex.length / 3,
         'triangles ->',
         kept.length / 3
@@ -2428,64 +2432,61 @@
 
 
               /*
-                Hide unwanted auxiliary meshes.
+                V8 IMPORTANT MESH SELECTION
+
+                The GLB contains duplicate unified body/head meshes.
+                In earlier versions we accidentally rendered BOTH the
+                duplicates (Mesh010 / Mesh010_1) and the real meshes.
+
+                That explains both remaining problems:
+                - the duplicate full torso pushed nipples through shirt
+                - the duplicate static head covered the smiling ARKit head
+
+                V8 renders only:
+                - SK_FemBase2_Censored_Torso for body/arms/hands
+                - SK_FemBase2_Head_52ArKit for the face
               */
 
               if (
-                name ===
-                  'SK_FemBase2_Censored_Torso'
+                name === 'Mesh010'
                 ||
-                name ===
-                  'SK_FemBase2_UnderWear'
+                name === 'Mesh010_1'
                 ||
-                name ===
-                  'SK_FemBase2_Unified_mesh'
+                name === 'SK_FemBase2_Torso'
+                ||
+                name === 'SK_FemBase2_UnderWear'
+                ||
+                name === 'SK_FemBase2_Unified_mesh'
+                ||
+                name.startsWith('SK_FemBase2_Unified_mesh')
               ) {
 
-                object.visible =
-                  false;
-
-
+                object.visible = false;
                 return;
 
               }
 
 
               /*
-                Body / hands / arms.
+                CENSORED BODY / ARMS / HANDS
+
+                This purchased asset includes a dedicated censored torso.
+                Its chest geometry is specifically recessed compared with
+                the normal torso, so it is the correct body mesh to wear
+                the tight T-shirt without anatomy breaking through it.
               */
 
               if (
-                name ===
-                  'Mesh010'
-                ||
-                name ===
-                  'SK_FemBase2_Torso'
+                name === 'SK_FemBase2_Censored_Torso'
               ) {
 
-                if (
-                  name ===
-                  'SK_FemBase2_Torso'
-                ) {
-
-                  torsoMesh =
-                    object;
-
-                }
-
-
-                object.visible =
-                  true;
-
+                torsoMesh = object;
+                object.visible = true;
 
                 forceCleanMaterial(
-
                   object,
-
                   bodyMaterial
-
                 );
-
 
                 return;
 
@@ -2493,46 +2494,26 @@
 
 
               /*
-                Face.
+                VISIBLE ARKIT FACE ONLY
+
+                Mesh010_1 is deliberately hidden above. This makes the
+                actual morph-capable face visible, so mouthSmileLeft/Right
+                can finally be seen.
               */
 
               if (
-                name ===
-                  'Mesh010_1'
+                name === 'SK_FemBase2_Head_52ArKit'
                 ||
-                name ===
-                  'SK_FemBase2_Head_52ArKit'
-                ||
-                name ===
-                  'SK_FemBase2_Head_52ARKit'
+                name === 'SK_FemBase2_Head_52ARKit'
               ) {
 
-                if (
-                  name ===
-                    'SK_FemBase2_Head_52ArKit'
-                  ||
-                  name ===
-                    'SK_FemBase2_Head_52ARKit'
-                ) {
-
-                  faceMorphMesh =
-                    object;
-
-                }
-
-
-                object.visible =
-                  true;
-
+                faceMorphMesh = object;
+                object.visible = true;
 
                 forceCleanMaterial(
-
                   object,
-
                   faceMaterial
-
                 );
-
 
                 return;
 
@@ -3138,14 +3119,18 @@
 
 
         /*
-          Fix the shirt/body intersection without deforming
-          the purchased shirt mesh.
+          V8: no shirt inflation and no triangle surgery.
+          We use the asset's purpose-built censored torso instead.
         */
-        maskTorsoBehindShirt(
-          torsoMesh,
-          shirtMesh
+        console.log(
+          'V8 BODY MESH:',
+          torsoMesh ? torsoMesh.name : 'NOT FOUND'
         );
 
+        console.log(
+          'V8 FACE MESH:',
+          faceMorphMesh ? faceMorphMesh.name : 'NOT FOUND'
+        );
 
         configureRelaxedArms();
 
@@ -3160,7 +3145,7 @@
         /* =================================================
            EFFECTS
 
-           Disabled in V7. Character only.
+           Disabled in V8. Character only.
         ================================================= */
 
         waterLightA.visible = false;
@@ -3182,6 +3167,28 @@
           smileMeshes.length
 
         );
+
+        if (
+          faceMorphMesh &&
+          faceMorphMesh.morphTargetDictionary &&
+          faceMorphMesh.morphTargetInfluences
+        ) {
+
+          const d = faceMorphMesh.morphTargetDictionary;
+
+          console.log(
+            'V8 SMILE VALUES:',
+            {
+              left: d.mouthSmileLeft !== undefined
+                ? faceMorphMesh.morphTargetInfluences[d.mouthSmileLeft]
+                : 'missing',
+              right: d.mouthSmileRight !== undefined
+                ? faceMorphMesh.morphTargetInfluences[d.mouthSmileRight]
+                : 'missing'
+            }
+          );
+
+        }
 
 
         status.style.display =
