@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prime Reception AI — Realism V18 — Network</title>
+  <title>Prime Reception AI — V20 Website Pointer Relay</title>
   <style>
     * { box-sizing: border-box; }
     html, body {
@@ -122,7 +122,7 @@
 
        A restrained 3D node-and-link field inspired by a connected
        AI/network graph. It sits behind the character, uses depth so
-       the model naturally occludes it, and reacts very subtly to gentle self-driven motion for a premium flowing backdrop.
+       the model naturally occludes it, and moves on its own with a slow fluid/water-like motion.
     ============================================================ */
 
     let networkRoot = null;
@@ -658,6 +658,32 @@
     });
     document.documentElement.addEventListener('mouseleave', () => {
       targetPointer.set(0, 0);
+    });
+
+    /* ============================================================
+       V20 — WEBSITE POINTER RELAY
+
+       Carrd interface elements sit above the GitHub iframe. When the
+       visitor hovers the logo, menu button, menu drawer, or information
+       panels, those elements receive the pointer instead of the iframe.
+       The Carrd Home controller relays normalized pointer coordinates
+       here so Prime keeps looking at the visitor's mouse everywhere.
+    ============================================================ */
+
+    window.addEventListener('message', (event) => {
+      if (event.source !== window.parent) return;
+
+      const data = event.data;
+      if (!data || data.type !== 'prime-pointer') return;
+
+      const x = Number(data.x);
+      const y = Number(data.y);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+
+      targetPointer.set(
+        THREE.MathUtils.clamp(x, -1, 1),
+        THREE.MathUtils.clamp(y, -1, 1)
+      );
     });
     function registerFacialMorphs(object) {
       if (!object.morphTargetDictionary || !object.morphTargetInfluences) return;
