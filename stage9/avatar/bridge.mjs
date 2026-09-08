@@ -25,8 +25,12 @@ export function createBridge(){
  player.packet=p;player.bytes=bytes;pending=null;return p;
  };
  player.attention=new Attention();
- const enable=document.createElement('button');enable.textContent='Enable voice';enable.style.cssText='position:fixed;z-index:99;bottom:150px;left:50%;transform:translateX(-50%);padding:12px 20px;background:#d6b765;color:#111;border:0;border-radius:7px;font:16px Arial';document.body.append(enable);
- enable.onclick=async()=>{player.context ||= new AudioContext();await player.context.resume();if(player.context.state!=='running')return;enable.remove();post('prime-audio-ready');};
+ // Audio remains owned by this iframe; top-bar activation is origin/nonce checked.
+ async function unlockAudio(){
+  player.context ||= new AudioContext();
+  player.context.resume().then(()=>{if(player.context.state==='running')post('prime-audio-ready');}).catch(()=>post('prime-audio-blocked'));
+  setTimeout(()=>{if(player.context.state!=='running')post('prime-audio-blocked');},1500);
+ }
  window.addEventListener('prime-model-ready',()=>{ready=true;post('prime-ready');});
  window.addEventListener('pagehide',()=>{guard.stop();player.stop();});
  window.addEventListener('message',async e=>{
@@ -35,6 +39,7 @@ export function createBridge(){
  if(d.version!==1)return;
  if(d.type==='prime-bind'&&typeof d.sessionId==='string'&&typeof d.nonce==='string'){guard.stop();player.stop();pending=null;guard.bind(d.sessionId,d.nonce);window.primeStage8Nonce=d.nonce;player.fence=new GenerationFence();post('prime-bound');if(ready)post('prime-ready');if(player.context?.state==='running')post('prime-audio-ready');return;}
  if(!messageAllowed(e,parent,origin,guard.nonce))return;
+ if(d.type==='prime-audio-enable'){await unlockAudio();return;}
  if(d.type==='prime-attention'&&['idle_tracking','attentive_processing','speaking','returning_to_idle','section'].includes(d.state)){player.attention.set(d.state,Number.isFinite(d.x)?d.x:0,Number.isFinite(d.y)?d.y:0);document.documentElement.dataset.primeInteraction=player.attention.state;post('prime-attention-applied',{state:player.attention.state});return;}
  if(d.type==='prime-speech-stop'){guard.stop();pending=null;player.stop();return;}
  if(d.type==='prime-sound'){muted=d.muted===true;if(muted){guard.stop();pending=null;player.stop();}return;}
