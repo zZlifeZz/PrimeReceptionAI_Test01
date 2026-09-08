@@ -14,7 +14,7 @@ export const VISEMES={
 
 export class CurrentModelAdapter {
  role(mesh){return /SK_FemBase2_Head_52ArKit/i.test(mesh.name)?'head':mesh.name==='SK_FemBase2_Teeth'?'teeth':'other';}
- shapes(weights){const out={};for(const [viseme,w]of Object.entries(weights))for(const [name,v]of Object.entries(VISEMES[viseme]||{}))out[name]=(out[name]||0)+w*v;return out;}
+ shapes(weights){const out={};for(const [viseme,w]of Object.entries(weights))for(const [name,v]of Object.entries(VISEMES[viseme]||{}))out[name]=(out[name]||0)+w*v;for(const name in out)out[name]=Math.min(1,out[name]*(name==='jawOpen'?1.22:1.18));return out;}
  target(role,name,base,amount,shapes,time){let value=base;
  if(role==='head'&&(name.startsWith('mouth')||name.startsWith('jaw')))value=base*(1-amount)+(shapes[name]||0)*amount;
  if(role==='head'&&(name==='mouthSmileLeft'||name==='mouthSmileRight')){

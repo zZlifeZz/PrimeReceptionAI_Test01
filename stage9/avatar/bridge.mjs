@@ -1,5 +1,5 @@
 import {Attention} from './attention.mjs';
-import {SpeechPlayer} from './speech-player.mjs';
+import {SpeechPlayer} from './speech-player.mjs?v=polish1';
 import {GenerationFence} from './speech-core.mjs';
 import {Guard,messageAllowed} from './guard.mjs';
 export const parentOrigin=new URLSearchParams(location.search).get('parentOrigin');

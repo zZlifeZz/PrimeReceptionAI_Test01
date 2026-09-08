@@ -75,8 +75,10 @@
   <script type="module">
     import * as THREE from 'three';
     import {FacialMixer,evaluate} from './speech-core.mjs';
-    import {CurrentModelAdapter} from './current-model-adapter.mjs';
-    import {createBridge,parentOrigin} from './bridge.mjs?v=aurelia1';
+    import {CurrentModelAdapter} from './current-model-adapter.mjs?v=polish1';
+    import {createBridge,parentOrigin} from './bridge.mjs?v=polish1';
+    import {speakingMotion} from './presentation.mjs?v=polish1';
+    let speakingLife=0, speakingLifeTime=0;
     const facialMixer=new FacialMixer(new CurrentModelAdapter());
     const speechPlayer=createBridge();
     window.primeReview={facialMixer,speechPlayer};
@@ -1247,13 +1249,16 @@
         : THREE.MathUtils.clamp((eyeVertical / eyeDownMax) * 1.15, -1, 0);
 
       applyEyeLookMorphs(normalizedEyeX, normalizedEyeY);
+      speakingLife=damp(speakingLife,Number(speechPlayer.speaking),3.5,delta);
+      if(speechPlayer.speaking)speakingLifeTime=speechPlayer.time;
+      const speechMotion=speakingMotion(speakingLifeTime,speakingLife);
       if (headBone && baseHeadRotation) {
         headBone.rotation.copy(baseHeadRotation);
-        headBone.rotation.x += headHorizontal;
+        headBone.rotation.x += headHorizontal + speechMotion.yaw;
         headBone.rotation.z +=
-          headVertical +
+          headVertical + speechMotion.pitch +
           THREE.MathUtils.degToRad(-0.85) * swallowStrength;
-        headBone.rotation.y = baseHeadRotation.y;
+        headBone.rotation.y = baseHeadRotation.y + speechMotion.roll;
       }
       if (neck02 && baseNeck02Rotation) {
         neck02.rotation.copy(baseNeck02Rotation);

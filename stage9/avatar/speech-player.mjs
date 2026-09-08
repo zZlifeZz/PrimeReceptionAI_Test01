@@ -1,3 +1,4 @@
+import {connectVoice} from './presentation.mjs?v=polish1';
 import {GenerationFence,sha256,validatePacket} from './speech-core.mjs';
 export class SpeechPlayer{
  constructor(onstate){this.fence=new GenerationFence();this.onstate=onstate;this.speaking=false;this.packet=null;this.context=null;this.source=null;this.ready=null;}
@@ -8,11 +9,11 @@ export class SpeechPlayer{
  const p=await this.load();if(this.fence.epoch!==intent)return;
  const epoch=this.fence.begin(p);const buffer=await this.context.decodeAudioData(this.bytes.slice(0));if(!this.fence.valid(epoch,p))return;
  if(Math.abs(buffer.duration-p.duration)>.003)throw Error('Audio duration mismatch');
- const source=this.context.createBufferSource();source.buffer=buffer;source.connect(this.context.destination);this.source=source;this.started=this.context.currentTime+.04;
- source.onended=()=>{source.disconnect();if(this.fence.valid(epoch,p)){this.speaking=false;this.source=null;this.onstate('Ready');}};
+ const source=this.context.createBufferSource();source.buffer=buffer;this.disposeVoice=connectVoice(this.context,source,p.transcript);this.source=source;this.started=this.context.currentTime+.04;
+ source.onended=()=>{source.disconnect();this.disposeVoice?.();this.disposeVoice=null;if(this.fence.valid(epoch,p)){this.speaking=false;this.source=null;this.onstate('Ready');}};
  source.start(this.started);this.speaking=true;this.onstate('Speaking');
  }catch(e){this.stop();this.onstate('Unable to play — '+e.message);}
  }
  get time(){return this.context?Math.max(0,this.context.currentTime-this.started):0;}
- stop(){this.fence.stop();this.speaking=false;if(this.source){this.source.onended=null;try{this.source.stop();}catch{}this.source.disconnect();this.source=null;}this.onstate('Ready');}
+ stop(){this.disposeVoice?.();this.disposeVoice=null;this.fence.stop();this.speaking=false;if(this.source){this.source.onended=null;try{this.source.stop();}catch{}this.source.disconnect();this.source=null;}this.onstate('Ready');}
 }
