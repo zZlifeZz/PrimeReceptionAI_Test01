@@ -608,10 +608,16 @@
       side: THREE.DoubleSide,
       depthWrite: true
     });
+    // Original mouth atlas covers teeth, gums, tongue and inner mouth.
+    // GLTF UV orientation is preserved by loadTexture's flipY=false.
     const teethMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xf3ebe6,
+      color: 0xffffff,
+      map: loadTexture('./stage9/assets/mouth-basecolor.png', true),
+      normalMap: loadTexture('./stage9/assets/mouth-normal.png'),
+      normalScale: new THREE.Vector2(0.6, 0.6),
+      roughnessMap: loadTexture('./stage9/assets/mouth-roughness.png'),
       metalness: 0,
-      roughness: 0.40,
+      roughness: 1.0,
       clearcoat: 0.06
     });
     const nailMaterial = new THREE.MeshPhysicalMaterial({
