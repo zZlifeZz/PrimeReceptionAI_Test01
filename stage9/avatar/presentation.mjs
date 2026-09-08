@@ -1,9 +1,11 @@
 // Stage 9 presentation only: no changes to audio identity or speech timing.
-export const VOICE_GAIN = 0.82;
+export const VOICE_GAIN = 0.58;
 export function connectVoice(context, source, transcript) {
  const master=context.createGain();master.gain.value=VOICE_GAIN;
- master.connect(context.destination);
- const nodes=[master];
+ // A mild high-shelf cut softens close-mic brightness without delaying the dry voice.
+ const tone=context.createBiquadFilter();tone.type='highshelf';tone.frequency.value=3200;tone.gain.value=-2.5;
+ master.connect(tone);tone.connect(context.destination);
+ const nodes=[master,tone];
  const welcome=transcript.startsWith("Welcome to Prime Reception AI. I'm Aurelia,");
  if(welcome){
   const dry=context.createGain();dry.gain.value=.86;source.connect(dry);dry.connect(master);nodes.push(dry);

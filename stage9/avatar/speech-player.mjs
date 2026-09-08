@@ -1,4 +1,4 @@
-import {connectVoice} from './presentation.mjs?v=polish1';
+import {connectVoice} from './presentation.mjs?v=polish2';
 import {GenerationFence,sha256,validatePacket} from './speech-core.mjs';
 export class SpeechPlayer{
  constructor(onstate){this.fence=new GenerationFence();this.onstate=onstate;this.speaking=false;this.packet=null;this.context=null;this.source=null;this.ready=null;}
