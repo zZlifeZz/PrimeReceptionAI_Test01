@@ -23,8 +23,8 @@ export function createBridge(){
  try{if(!await guard.check(p,bytes))return p;}catch(e){if(serial!==guard.serial)return p;throw e;}
  player.packet=p;player.bytes=bytes;pending=null;return p;
  };
- const enable=document.createElement('button');enable.textContent='Enable voice';enable.style.cssText='position:fixed;z-index:99;bottom:18px;left:50%;transform:translateX(-50%);padding:12px 20px;background:#d6b765;color:#111;border:0;border-radius:7px;font:16px Arial';document.body.append(enable);
- enable.onclick=async()=>{player.context ||= new AudioContext();await player.context.resume();enable.textContent='Voice ready';post('prime-audio-ready');};
+ const enable=document.createElement('button');enable.textContent='Enable voice';enable.style.cssText='position:fixed;z-index:99;bottom:150px;left:50%;transform:translateX(-50%);padding:12px 20px;background:#d6b765;color:#111;border:0;border-radius:7px;font:16px Arial';document.body.append(enable);
+ enable.onclick=async()=>{player.context ||= new AudioContext();await player.context.resume();enable.remove();post('prime-audio-ready');};
  window.addEventListener('prime-model-ready',()=>{ready=true;post('prime-ready');});
  window.addEventListener('pagehide',()=>{guard.stop();player.stop();});
  window.addEventListener('message',async e=>{
@@ -33,6 +33,7 @@ export function createBridge(){
  if(d.version!==1)return;
  if(d.type==='prime-bind'&&typeof d.sessionId==='string'&&typeof d.nonce==='string'){guard.stop();player.stop();pending=null;guard.bind(d.sessionId,d.nonce);window.primeStage8Nonce=d.nonce;player.fence=new GenerationFence();if(ready)post('prime-ready');return;}
  if(!messageAllowed(e,parent,origin,guard.nonce))return;
+ if(d.type==='prime-attention'&&['idle_tracking','attentive_processing','speaking','section'].includes(d.state)){window.dispatchEvent(new CustomEvent('prime-attention',{detail:{state:d.state,x:Number.isFinite(d.x)?Math.max(-1,Math.min(1,d.x)):0,y:Number.isFinite(d.y)?Math.max(-1,Math.min(1,d.y)):0}}));return;}
  if(d.type==='prime-speech-stop'){guard.stop();pending=null;player.stop();return;}
  if(d.type==='prime-sound'){muted=d.muted===true;if(muted){guard.stop();pending=null;player.stop();}return;}
  if(d.type==='prime-speech-play'){

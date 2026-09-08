@@ -651,6 +651,8 @@
     const eyeLookMeshes = [];
     const pointer = new THREE.Vector2(0, 0);
     const targetPointer = new THREE.Vector2(0, 0);
+    let attention={state:'idle_tracking',x:0,y:0};
+    window.addEventListener('prime-attention',e=>{attention=e.detail;});
     window.addEventListener('pointermove', (event) => {
       let x = (event.clientX / window.innerWidth) * 2 - 1;
       let y = -((event.clientY / window.innerHeight) * 2 - 1);
@@ -1172,8 +1174,8 @@
       requestAnimationFrame(animate);
       const delta = Math.min(clock.getDelta(), 0.05);
       const now = performance.now() / 1000;
-      pointer.x = damp(pointer.x, targetPointer.x, 8.2, delta);
-      pointer.y = damp(pointer.y, targetPointer.y, 8.2, delta);
+      pointer.x = damp(pointer.x, attention.state==='idle_tracking'?targetPointer.x:attention.x, attention.state==='idle_tracking'?8.2:4, delta);
+      pointer.y = damp(pointer.y, attention.state==='idle_tracking'?targetPointer.y:attention.y, attention.state==='idle_tracking'?8.2:4, delta);
       updateSwallow(now);
       const vertical = getVerticalTargets();
       eyeHorizontal = damp(

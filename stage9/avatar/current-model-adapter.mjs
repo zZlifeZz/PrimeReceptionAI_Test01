@@ -17,6 +17,12 @@ export class CurrentModelAdapter {
  shapes(weights){const out={};for(const [viseme,w]of Object.entries(weights))for(const [name,v]of Object.entries(VISEMES[viseme]||{}))out[name]=(out[name]||0)+w*v;return out;}
  target(role,name,base,amount,shapes,time){let value=base;
  if(role==='head'&&(name.startsWith('mouth')||name.startsWith('jaw')))value=base*(1-amount)+(shapes[name]||0)*amount;
+ if(role==='head'&&(name==='mouthSmileLeft'||name==='mouthSmileRight')){
+ // Retain warmth continuously, relaxing corners only where rounding/closure needs it.
+ const conflict=Math.min(1,Math.max(shapes.mouthPucker||0,shapes.mouthFunnel||0,(shapes.mouthClose||0)*.7));
+ const warm=base*(.28+.18*(1-conflict));
+ value=base*(1-amount)+warm*amount;
+ }
  if(role==='teeth'&&name.startsWith('jaw'))value=base*(1-amount)+(shapes[name]||0)*amount;
  if(role==='head'&&name==='browInnerUp')value+=amount*.025*(.5+.5*Math.sin(time*2));
  return Math.max(0,Math.min(1,value));}
