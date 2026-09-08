@@ -10,4 +10,4 @@
 #primeChat button:hover{border-color:#d8a646;background:linear-gradient(#28231a,#13110d)}
 #primeChat input{color:#f5f6f7}#primeChat input::placeholder{color:#c7c5bf}
 #primeChatStatus{color:#d9d6ce}
-@media(max-width:700px){#primeEnableVoice{font-size:10px;letter-spacing:.03em;padding:8px 10px;margin-right:7px;min-height:36px}#primeChat input{font-size:16px}}
+@media(max-width:700px){#primeEnableVoice{min-width:0;font-size:10px;letter-spacing:.03em;padding:8px 10px;margin-right:7px;min-height:36px}#primeChat input{font-size:16px}}
