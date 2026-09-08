@@ -5,7 +5,8 @@ const status=root.querySelector('#primeChatStatus'),input=root.querySelector('in
 root.querySelector('#primeChatLog')?.remove();root.querySelector('#primeChatExplain')?.remove();
 const labels={demo:'Live AI Demo',why:'Why Prime',services:'Services',features:'Features',industries:'Industries',pricing:'Pricing',consultation:'Consultation',about:'About Prime'};
 const unavailable='Prime is temporarily unavailable. Please try again shortly.';
-let token='',sessionId='',nonce=crypto.randomUUID(),order=0,intent=0,active=null,ready=false,audioReady=false,initializing=null,currentSection='home',state='idle_tracking',focus={x:0,y:0},watch=null,settle=null,errorTimer=null,pending=null,cancelQueue=Promise.resolve(),liveArmed=false,liveUsed=false;
+const arrivalURL=new URL(location.href);let arrivalTicket=arrivalURL.searchParams.get('primeAcceptance');
+let token='',sessionId='',nonce=crypto.randomUUID(),order=0,intent=0,active=null,ready=false,audioReady=false,initializing=null,currentSection='home',state='idle_tracking',focus={x:0,y:0},watch=null,settle=null,errorTimer=null,pending=null,cancelQueue=Promise.resolve(),liveArmed=false;
 const post=(type,data={})=>frame.contentWindow.postMessage({version:1,type,nonce,...data},AVATAR);
 function face(next){clearTimeout(settle);state=next;root.dataset.interaction=state;post('prime-attention',{state,...focus});}
 function idle(){face('returning_to_idle');settle=setTimeout(()=>face('idle_tracking'),1200);stopButton.hidden=true;status.textContent='';}
@@ -16,8 +17,8 @@ async function initialize(){
  if(sessionId)return;if(initializing)return initializing;
  initializing=(async()=>{const s=await raw('session',{},AbortSignal.timeout(20000));if(s.scope!=='test-ui-only'||!s.token||!s.sessionId)throw Error(unavailable);token=s.token;sessionId=s.sessionId;bind();root.dataset.connection='available';
  // Optional one-use acceptance credential, never a provider/bridge credential.
- const url=new URL(location.href),ticket=url.searchParams.get('primeAcceptance');
- if(ticket){url.searchParams.delete('primeAcceptance');history.replaceState(history.state,'',url);await raw('acceptance',{ticket});liveArmed=true;}
+ const url=new URL(location.href),ticket=arrivalTicket;
+ if(ticket){url.searchParams.delete('primeAcceptance');history.replaceState(history.state,'',url);await raw('acceptance',{ticket});arrivalTicket=null;liveArmed=true;}
  })();try{await initializing;}finally{initializing=null;}
 }
 function clear(){post('prime-speech-stop');active=null;clearInterval(watch);watch=null;pending?.abort();pending=null;}
@@ -45,12 +46,11 @@ async function submit(text,kind='turn'){
  const mine=intent+1;const cancelled=cancel(false);face(kind==='section'?'section':'attentive_processing');stopButton.hidden=false;status.textContent='Prime is thinking…';clearTimeout(errorTimer);
  try{
   await cancelled;if(mine!==intent)return;await initialize();if(mine!==intent)return;
-  if(kind==='turn'&&(!ready||!audioReady))throw Error('Voice activation required');
-  if(kind==='turn'&&liveUsed)throw Error('Acceptance already submitted');
+  if(kind==='turn'&&(!ready||!audioReady))throw Error(!ready?'avatar_not_ready':'audio_not_enabled');
   const controller=new AbortController();pending=controller;
   const action=kind==='turn'?'live-turn':kind;
   // A live click is consumed locally too; no automatic retry or second live submission.
-  if(action==='live-turn'){liveArmed=false;liveUsed=true;}
+  if(action==='live-turn')liveArmed=false;
   const started=performance.now();
   const r=await raw(action,kind==='section'?{section:currentSection,clientOrder:++order}:{text,section:labels[currentSection]?currentSection:'demo',clientOrder:++order},controller.signal);
   if(mine!==intent)return;pending=null;
@@ -64,7 +64,7 @@ async function submit(text,kind='turn'){
   if(!ready||!audioReady||window.PrimeSite?.state.soundOn===false){await raw('ack',{...active,state:'stopped'});active=null;idle();return;}
   post('prime-speech-play',{packet:r.speech,expectedRef:{...active,transcript:r.text}});
   watch=setInterval(async()=>{const ref=active;if(!ref)return;try{const s=await raw('status');if(ref===active&&(!s.active||s.active.responseId!==ref.responseId)){clear();idle();}}catch{if(ref===active){clear();fail();}}},4000);
- }catch(e){if(mine!==intent)return;clear();if(e.name!=='AbortError')fail();}
+ }catch(e){if(mine!==intent)return;clear();if(e.name!=='AbortError'){console.error('Prime turn stopped',{reason:['avatar_not_ready','audio_not_enabled'].includes(e.message)?e.message:'request_or_packet_failed'});fail();}}
 }
 form.onsubmit=e=>{e.preventDefault();const text=input.value;if(!text.trim()||text.length>2000)return;input.value='';submit(text);};
 function sectionChanged(section){
