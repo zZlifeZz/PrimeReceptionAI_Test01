@@ -1096,7 +1096,7 @@
       nextSwallow = now + 24 + Math.random() * 32;
     }
     function updateSwallow(now) {
-      if(speechPlayer.speaking || facialMixer.amount>.01){swallowActive=false;swallowStrength=0;nextSwallow=Math.max(nextSwallow,now+2);return;}
+      if(attention.state==='attentive_processing' || attention.state==='speaking' || speechPlayer.speaking || facialMixer.amount>.01){swallowActive=false;swallowStrength=0;nextSwallow=Math.max(nextSwallow,now+2);return;}
       if (!swallowActive && now >= nextSwallow) {
         swallowActive = true;
         swallowStart = now;
@@ -1154,15 +1154,15 @@
         1 - Math.exp(-speed * delta)
       );
     }
-    function getVerticalTargets() {
-      if (pointer.y >= 0) {
+    function getVerticalTargets(y=pointer.y) {
+      if (y >= 0) {
         return {
-          eye: pointer.y * eyeUpMax,
-          head: pointer.y * headUpMax,
-          neck: pointer.y * neckUpMax
+          eye: y * eyeUpMax,
+          head: y * headUpMax,
+          neck: y * neckUpMax
         };
       }
-      const down = Math.abs(pointer.y);
+      const down = Math.abs(y);
       return {
         eye: -down * eyeDownMax,
         head: -down * headDownMax,
@@ -1179,36 +1179,40 @@
       pointer.x = damp(pointer.x, focus.x, focus.speed, delta);
       pointer.y = damp(pointer.y, focus.y, focus.speed, delta);
       updateSwallow(now);
-      const vertical = getVerticalTargets();
+      // Attentive gaze targets are independent of the last cursor/composer position.
+      // Bone/eye damping still interpolates smoothly; never snap the pose.
+      const engaged=attention.state==='attentive_processing'||attention.state==='speaking'||attention.state==='section';
+      const lookX=engaged?focus.x:pointer.x,lookY=engaged?focus.y:pointer.y;
+      const vertical = getVerticalTargets(lookY);
       eyeHorizontal = damp(
         eyeHorizontal,
-        pointer.x * eyeHorizontalMax,
+        lookX * eyeHorizontalMax,
         18,
         delta
       );
       eyeVertical = damp(eyeVertical, vertical.eye, 18, delta);
       headHorizontal = damp(
         headHorizontal,
-        pointer.x * headHorizontalMax,
+        lookX * headHorizontalMax,
         4.25,
         delta
       );
       headVertical = damp(
         headVertical,
         vertical.head,
-        pointer.y < 0 ? 4.6 : 3.75,
+        engaged ? 6 : pointer.y < 0 ? 4.6 : 3.75,
         delta
       );
       neckHorizontal = damp(
         neckHorizontal,
-        pointer.x * neckHorizontalMax,
+        lookX * neckHorizontalMax,
         2.6,
         delta
       );
       neckVertical = damp(
         neckVertical,
         vertical.neck,
-        pointer.y < 0 ? 3.3 : 2.35,
+        engaged ? 5 : pointer.y < 0 ? 3.3 : 2.35,
         delta
       );
       /*

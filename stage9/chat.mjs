@@ -55,7 +55,7 @@ async function submit(text,kind='turn'){
   const r=await raw(action,kind==='section'?{section:currentSection,clientOrder:++order}:{text,section:labels[currentSection]?currentSection:'demo',clientOrder:++order},controller.signal);
   if(mine!==intent)return;pending=null;
   if(r.ref?.sessionId!==sessionId||!Number.isInteger(r.ref.generation)||typeof r.text!=='string')throw Error('Identity');
-  root.dataset.reply='received';root.dataset.roundTripMs=String(Math.round(performance.now()-started));status.textContent='';
+  root.dataset.reply='received';root.dataset.speech=r.speech?'prepared':'unavailable';root.dataset.roundTripMs=String(Math.round(performance.now()-started));status.textContent='';
   // Context remains in the expiring backend session; no transcript DOM/browser storage.
   if(!r.speech){idle();if(r.fallback)fail();return;}
   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(r.text))),n=>n.toString(16).padStart(2,'0')).join('');if(mine!==intent)return;
@@ -66,6 +66,7 @@ async function submit(text,kind='turn'){
   watch=setInterval(async()=>{const ref=active;if(!ref)return;try{const s=await raw('status');if(ref===active&&(!s.active||s.active.responseId!==ref.responseId)){clear();idle();}}catch{if(ref===active){clear();fail();}}},4000);
  }catch(e){if(mine!==intent)return;clear();if(e.name!=='AbortError'){console.error('Prime turn stopped',{reason:['avatar_not_ready','audio_not_enabled'].includes(e.message)?e.message:'request_or_packet_failed'});fail();}}
 }
+if(arrivalURL.searchParams.get('primeReplay')==='1'){const replay=document.createElement('button');replay.type='button';replay.textContent='Replay saved answer';replay.id='primeReplay';replay.onclick=()=>submit('Replay saved answer','replay');form.append(replay);}
 form.onsubmit=e=>{e.preventDefault();const text=input.value;if(!text.trim()||text.length>2000)return;input.value='';submit(text);};
 function sectionChanged(section){
  if(section===currentSection||(!labels[section]&&section!=='home'))return;currentSection=section;root.dataset.section=section;
