@@ -5,7 +5,7 @@ const status=root.querySelector('#primeChatStatus'),input=root.querySelector('in
 root.querySelector('#primeChatLog')?.remove();root.querySelector('#primeChatExplain')?.remove();
 const labels={demo:'Live AI Demo',why:'Why Prime',services:'Services',features:'Features',industries:'Industries',pricing:'Pricing',consultation:'Consultation',about:'About Prime'};
 const unavailable='Prime is temporarily unavailable. Please try again shortly.';
-let token='',sessionId='',nonce=crypto.randomUUID(),order=0,intent=0,active=null,ready=false,audioReady=false,initializing=null,currentSection='home',state='idle_tracking',focus={x:0,y:0},watch=null,settle=null,errorTimer=null,pending=null,cancelQueue=Promise.resolve(),liveArmed=false;
+let token='',sessionId='',nonce=crypto.randomUUID(),order=0,intent=0,active=null,ready=false,audioReady=false,initializing=null,currentSection='home',state='idle_tracking',focus={x:0,y:0},watch=null,settle=null,errorTimer=null,pending=null,cancelQueue=Promise.resolve(),liveArmed=false,liveUsed=false;
 const post=(type,data={})=>frame.contentWindow.postMessage({version:1,type,nonce,...data},AVATAR);
 function face(next){clearTimeout(settle);state=next;root.dataset.interaction=state;post('prime-attention',{state,...focus});}
 function idle(){face('returning_to_idle');settle=setTimeout(()=>face('idle_tracking'),1200);stopButton.hidden=true;status.textContent='';}
@@ -45,11 +45,12 @@ async function submit(text,kind='turn'){
  const mine=intent+1;const cancelled=cancel(false);face(kind==='section'?'section':'attentive_processing');stopButton.hidden=false;status.textContent='Prime is thinking…';clearTimeout(errorTimer);
  try{
   await cancelled;if(mine!==intent)return;await initialize();if(mine!==intent)return;
-  if(liveArmed&&kind==='turn'&&(!ready||!audioReady))throw Error('Voice activation required');
+  if(kind==='turn'&&(!ready||!audioReady))throw Error('Voice activation required');
+  if(kind==='turn'&&liveUsed)throw Error('Acceptance already submitted');
   const controller=new AbortController();pending=controller;
-  const action=kind==='turn'&&liveArmed?'live-turn':kind;
+  const action=kind==='turn'?'live-turn':kind;
   // A live click is consumed locally too; no automatic retry or second live submission.
-  if(action==='live-turn')liveArmed=false;
+  if(action==='live-turn'){liveArmed=false;liveUsed=true;}
   const started=performance.now();
   const r=await raw(action,kind==='section'?{section:currentSection,clientOrder:++order}:{text,section:labels[currentSection]?currentSection:'demo',clientOrder:++order},controller.signal);
   if(mine!==intent)return;pending=null;
