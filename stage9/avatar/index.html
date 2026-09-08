@@ -76,7 +76,7 @@
     import * as THREE from 'three';
     import {FacialMixer,evaluate} from './speech-core.mjs';
     import {CurrentModelAdapter} from './current-model-adapter.mjs';
-    import {createBridge,parentOrigin} from './bridge.mjs';
+    import {createBridge,parentOrigin} from './bridge.mjs?v=coherent1';
     const facialMixer=new FacialMixer(new CurrentModelAdapter());
     const speechPlayer=createBridge();
     window.primeReview={facialMixer,speechPlayer};
@@ -476,7 +476,8 @@
     const hairAlpha = loadTexture('./hair_alpha.webp');
     const hairNormal = loadTexture('./hair_normal.webp');
     const hairRoughness = loadTexture('./hair_roughness.webp');
-    const lashesAlbedo = loadTexture('./lashes_albedo.webp', true);
+    // No albedo asset exists. Retain the alpha/normal lash geometry with dark pigment.
+    const lashesAlbedo = null;
     const lashesAlpha = loadTexture('./lashes_alpha.webp');
     const lashesNormal = loadTexture('./lashes_normal.webp');
     const eyeBaseColor = loadTexture('./eye_basecolor.webp', true);
@@ -595,7 +596,7 @@
       depthWrite: false
     });
     const lashesMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
+      color: 0x171310,
       map: lashesAlbedo,
       alphaMap: lashesAlpha,
       normalMap: lashesNormal,
@@ -651,8 +652,7 @@
     const eyeLookMeshes = [];
     const pointer = new THREE.Vector2(0, 0);
     const targetPointer = new THREE.Vector2(0, 0);
-    let attention={state:'idle_tracking',x:0,y:0};
-    window.addEventListener('prime-attention',e=>{attention=e.detail;});
+    const attention=speechPlayer.attention;
     window.addEventListener('pointermove', (event) => {
       let x = (event.clientX / window.innerWidth) * 2 - 1;
       let y = -((event.clientY / window.innerHeight) * 2 - 1);
@@ -1174,8 +1174,10 @@
       requestAnimationFrame(animate);
       const delta = Math.min(clock.getDelta(), 0.05);
       const now = performance.now() / 1000;
-      pointer.x = damp(pointer.x, attention.state==='idle_tracking'?targetPointer.x:attention.x, attention.state==='idle_tracking'?8.2:4, delta);
-      pointer.y = damp(pointer.y, attention.state==='idle_tracking'?targetPointer.y:attention.y, attention.state==='idle_tracking'?8.2:4, delta);
+      const focus=attention.target(targetPointer);
+      document.documentElement.dataset.primeInteraction=attention.state;
+      pointer.x = damp(pointer.x, focus.x, focus.speed, delta);
+      pointer.y = damp(pointer.y, focus.y, focus.speed, delta);
       updateSwallow(now);
       const vertical = getVerticalTargets();
       eyeHorizontal = damp(
