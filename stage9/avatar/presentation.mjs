@@ -22,7 +22,7 @@ export function connectVoice(context, source, transcript) {
 export function speakingMotion(time,amount){
  const t=Math.max(0,time),fade=Math.min(1,t/1.1)*amount;
  // Small independent head movement, keeping the gaze close to the visitor.
- return {yaw:fade*(.026*Math.sin(t*1.15)+.013*Math.sin(t*.49)),
- pitch:fade*(.015*Math.sin(t*1.7)+.009*Math.sin(t*.71)),
- roll:fade*.009*Math.sin(t*.85)};
+ return {yaw:fade*(.037*Math.sin(t*1.15)+.016*Math.sin(t*.49)),
+ pitch:fade*(.022*Math.sin(t*1.7)+.011*Math.sin(t*.71)),
+ roll:fade*.012*Math.sin(t*.85)};
 }

@@ -9,7 +9,7 @@ export const VISEMES={
  aa:{jawOpen:.38,mouthLowerDownLeft:.12,mouthLowerDownRight:.12},
  E:{jawOpen:.27,mouthStretchLeft:.24,mouthStretchRight:.24},
  I:{jawOpen:.13,mouthStretchLeft:.38,mouthStretchRight:.38},
- O:{jawOpen:.24,mouthFunnel:.65,mouthPucker:.22},U:{jawOpen:.14,mouthPucker:.60,mouthFunnel:.18}
+ O:{jawOpen:.24,mouthFunnel:.74,mouthPucker:.28},U:{jawOpen:.14,mouthPucker:.68,mouthFunnel:.20}
 };
 
 export class CurrentModelAdapter {

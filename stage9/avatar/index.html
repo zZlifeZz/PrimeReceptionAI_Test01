@@ -75,9 +75,9 @@
   <script type="module">
     import * as THREE from 'three';
     import {FacialMixer,evaluate} from './speech-core.mjs';
-    import {CurrentModelAdapter} from './current-model-adapter.mjs?v=polish2';
-    import {createBridge,parentOrigin} from './bridge.mjs?v=polish2';
-    import {speakingMotion} from './presentation.mjs?v=polish2';
+    import {CurrentModelAdapter} from './current-model-adapter.mjs?v=polish3';
+    import {createBridge,parentOrigin} from './bridge.mjs?v=polish3';
+    import {speakingMotion} from './presentation.mjs?v=polish3';
     let speakingLife=0, speakingLifeTime=0;
     const facialMixer=new FacialMixer(new CurrentModelAdapter());
     const speechPlayer=createBridge();
@@ -1250,7 +1250,7 @@
 
       applyEyeLookMorphs(normalizedEyeX, normalizedEyeY);
       speakingLife=damp(speakingLife,Number(speechPlayer.speaking),3.5,delta);
-      if(speechPlayer.speaking)speakingLifeTime=speechPlayer.time;
+      if(speechPlayer.speaking)speakingLifeTime=speechPlayer.time*2;
       const speechMotion=speakingMotion(speakingLifeTime,speakingLife);
       if (headBone && baseHeadRotation) {
         headBone.rotation.copy(baseHeadRotation);
@@ -1288,7 +1288,7 @@
 
       updateNetworkBackdrop(now, delta);
 
-      facialMixer.apply(delta,speechPlayer.speaking,speechPlayer.speaking?evaluate(speechPlayer.packet.speechCues,speechPlayer.time):{},speechPlayer.time||0);
+      facialMixer.apply(delta,speechPlayer.speaking,speechPlayer.speaking?evaluate(speechPlayer.packet.speechCues,speechPlayer.cueTime):{},speechPlayer.time||0);
       renderer.render(scene, camera);
     }
     animate();
