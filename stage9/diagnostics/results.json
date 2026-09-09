@@ -1,0 +1,32 @@
+{
+  "fixtureSha256": "ae30f18b9efb58ebac63919857aea472b2b73933a693c6e19c7eb3fb741a6f56",
+  "duration": 5.154833333333333,
+  "frames": 655,
+  "closures": [
+    {
+      "time": 0.452592,
+      "before": 0.42839220333296496,
+      "after": 1
+    },
+    {
+      "time": 2.0589465000000002,
+      "before": 0.862389557951329,
+      "after": 1
+    },
+    {
+      "time": 4.4818955,
+      "before": 0.5911379071523991,
+      "after": 1
+    },
+    {
+      "time": 4.7135,
+      "before": 0.5911501969705255,
+      "after": 1
+    }
+  ],
+  "performancePreparationMs": 1.9633299999999991,
+  "emphasisBeats": 5,
+  "providerRequests": 0,
+  "tests": "PASS",
+  "limitations": "Phoneme timing remains estimated from character timing; cloud browser WebGL unavailable. Not a visual acceptance result."
+}
