@@ -1,5 +1,5 @@
-import {preparePerformance} from './natural-speech.mjs?v=natural1';
-import {connectVoice} from './presentation.mjs?v=natural1';
+import {preparePerformance} from './natural-speech.mjs?v=expression1';
+import {connectVoice} from './presentation.mjs?v=expression1';
 import {GenerationFence,sha256,validatePacket} from './speech-core.mjs';
 export class SpeechPlayer{
  constructor(onstate){this.fence=new GenerationFence();this.onstate=onstate;this.speaking=false;this.packet=null;this.context=null;this.source=null;this.ready=null;}
@@ -11,7 +11,7 @@ export class SpeechPlayer{
  const epoch=this.fence.begin(p);activeEpoch=epoch;const buffer=await this.context.decodeAudioData(this.bytes.slice(0));if(!this.fence.valid(epoch,p))return;
  if(Math.abs(buffer.duration-p.duration)>.003)throw Error('Audio duration mismatch');
  this.performance=preparePerformance(buffer);
- const media=new Audio();media.preload='auto';media.playbackRate=.5;media.preservesPitch=true;
+ const media=new Audio();media.preload='auto';media.playbackRate=1.0;media.preservesPitch=true;
  const url=URL.createObjectURL(new Blob([this.bytes],{type:'audio/wav'}));media.src=url;
  const source=this.context.createMediaElementSource(media);this.source=source;this.media=media;this.mediaUrl=url;
  this.disposeVoice=connectVoice(this.context,source,p.transcript);
@@ -22,7 +22,7 @@ export class SpeechPlayer{
  this.started=this.context.currentTime;this.speaking=true;this.onstate('Speaking');
  }catch(e){if(this.fence.epoch!==activeEpoch)return;this.stop();this.onstate('Unable to play — '+e.message);}
  }
- // Media time is in original transcript seconds even at half-speed playback.
+ // Media time is in original transcript seconds at the provider-generated speaking pace.
  get time(){return this.media?Math.max(0,this.media.currentTime):0;}
  get cueTime(){return this.time;}
  stop(){this.fence.stop();this.speaking=false;

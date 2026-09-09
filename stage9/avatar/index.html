@@ -75,12 +75,10 @@
   <script type="module">
     import * as THREE from 'three';
     import {FacialMixer} from './speech-core.mjs';
-    import {CurrentModelAdapter} from './current-model-adapter.mjs?v=natural1';
-    import {createBridge,parentOrigin} from './bridge.mjs?v=natural1';
-    import {naturalVisemes,performanceMotion} from './natural-speech.mjs?v=natural1';
+    import {CurrentModelAdapter} from './current-model-adapter.mjs?v=expression1';
+    import {createBridge,parentOrigin} from './bridge.mjs?v=expression1';
+    import {naturalVisemes,performanceMotion,performanceExpression} from './natural-speech.mjs?v=expression1';
     let speakingLife=0, speakingLifeTime=0;
-    let baseModelQuaternion=null;
-    const bodyMotionQuaternion=new THREE.Quaternion(),bodyMotionEuler=new THREE.Euler();
     const facialMixer=new FacialMixer(new CurrentModelAdapter());
     const speechPlayer=createBridge();
     window.primeReview={facialMixer,speechPlayer};
@@ -1020,7 +1018,6 @@
         if (lowerArmR) baseLowerArmRRotation = lowerArmR.rotation.clone();
         if (handL) baseHandLRotation = handL.rotation.clone();
         if (handR) baseHandRRotation = handR.rotation.clone();
-        baseModelQuaternion=model.quaternion.clone();
         const box = new THREE.Box3().setFromObject(model);
         modelSize = box.getSize(new THREE.Vector3());
         const center = box.getCenter(new THREE.Vector3());
@@ -1256,11 +1253,6 @@
       if(speechPlayer.speaking)speakingLifeTime=speechPlayer.time;
       const speechMotion=performanceMotion(speechPlayer.performance,speakingLifeTime,speakingLife);
       const neckMotion=performanceMotion(speechPlayer.performance,Math.max(0,speakingLifeTime-.055),speakingLife);
-      if(model&&baseModelQuaternion){
-        bodyMotionEuler.set(0,speechMotion.bodyYaw,speechMotion.bodyRoll);
-        bodyMotionQuaternion.setFromEuler(bodyMotionEuler);
-        model.quaternion.copy(baseModelQuaternion).premultiply(bodyMotionQuaternion);
-      }
       if (headBone && baseHeadRotation) {
         headBone.rotation.copy(baseHeadRotation);
         headBone.rotation.x += headHorizontal + speechMotion.yaw;
@@ -1297,6 +1289,7 @@
 
       updateNetworkBackdrop(now, delta);
 
+      facialMixer.adapter.expression=performanceExpression(speechPlayer.performance,speakingLifeTime,speakingLife);
       facialMixer.apply(delta,speechPlayer.speaking,speechPlayer.speaking?naturalVisemes(speechPlayer.packet.speechCues,speechPlayer.cueTime):{},speechPlayer.time||0);
       renderer.render(scene, camera);
     }

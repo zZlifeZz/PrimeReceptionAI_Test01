@@ -52,8 +52,20 @@ export function performanceMotion(track,time,amount){
   out.yaw+=side*.028*envelope;
   out.pitch+=.021*envelope*Math.sin(Math.PI*2*phase);
   out.roll+=side*.010*envelope;
-  out.bodyYaw+=side*.004*envelope;
-  out.bodyRoll+=side*.003*envelope;
+  // No torso/body movement: expressive head and face only.
+
  }
  return out;
+}
+
+export function performanceExpression(track,time,amount){
+ if(!track||!amount)return {emphasis:0,warmth:0};
+ let emphasis=0,warmth=0;
+ for(const beat of track.beats){
+  const phase=(time-beat.time+.05)/.65;
+  if(phase>=0&&phase<=1)emphasis=Math.max(emphasis,Math.sin(Math.PI*phase)**2*beat.strength*amount);
+  const settling=(time-beat.time-.12)/.85;
+  if(settling>=0&&settling<=1)warmth=Math.max(warmth,Math.sin(Math.PI*settling)**2*amount);
+ }
+ return {emphasis,warmth};
 }

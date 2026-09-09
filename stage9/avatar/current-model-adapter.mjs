@@ -15,15 +15,16 @@ export const VISEMES={
 export class CurrentModelAdapter {
  role(mesh){return /SK_FemBase2_Head_52ArKit/i.test(mesh.name)?'head':mesh.name==='SK_FemBase2_Teeth'?'teeth':'other';}
  shapes(weights){const out={};for(const [viseme,w]of Object.entries(weights))for(const [name,v]of Object.entries(VISEMES[viseme]||{}))out[name]=(out[name]||0)+w*v;for(const name in out)out[name]=Math.max(0,Math.min(1,out[name]));return out;}
- target(role,name,base,amount,shapes,time){let value=base;
+ target(role,name,base,amount,shapes,time){let value=base;const expression=this.expression||{emphasis:0,warmth:0};
  if(role==='head'&&(name.startsWith('mouth')||name.startsWith('jaw')))value=base*(1-amount)+(shapes[name]||0)*amount;
  if(role==='head'&&(name==='mouthSmileLeft'||name==='mouthSmileRight')){
  // Retain warmth continuously, relaxing corners only where rounding/closure needs it.
  const conflict=Math.min(1,Math.max(shapes.mouthPucker||0,shapes.mouthFunnel||0,(shapes.mouthClose||0)*.7));
- const warm=base*(.28+.18*(1-conflict));
+ const warm=base*(.28+.18*(1-conflict))+expression.warmth*.035*(1-conflict);
  value=base*(1-amount)+warm*amount;
  }
  if(role==='teeth'&&name.startsWith('jaw'))value=base*(1-amount)+(shapes[name]||0)*amount;
- if(role==='head'&&name==='browInnerUp')value+=amount*.025*(.5+.5*Math.sin(time*2));
+ if(role==='head'&&name==='browInnerUp')value+=expression.emphasis*.055;
+ if(role==='head'&&(name==='browOuterUpLeft'||name==='browOuterUpRight'))value+=expression.emphasis*.025;
  return Math.max(0,Math.min(1,value));}
 }
