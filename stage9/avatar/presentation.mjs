@@ -7,15 +7,15 @@ export function connectVoice(context, source, transcript) {
  master.connect(tone);tone.connect(context.destination);
  const nodes=[master,tone];
  const welcome=transcript.startsWith("Welcome to Prime Reception AI. I'm Aurelia,");
- if(welcome){
-  const dry=context.createGain();dry.gain.value=.86;source.connect(dry);dry.connect(master);nodes.push(dry);
+ {
+  const dry=context.createGain();dry.gain.value=welcome?.84:.92;source.connect(dry);dry.connect(master);nodes.push(dry);
   // Quiet, short room reflections; no feedback or long echo masking consonants.
-  for(const [seconds,level] of [[.043,.065],[.079,.04],[.127,.025]]){
+  for(const [seconds,level] of [[.043,.08],[.079,.05],[.127,.03]]){
    const delay=context.createDelay(.2),filter=context.createBiquadFilter(),wet=context.createGain();
-   delay.delayTime.value=seconds;filter.type='lowpass';filter.frequency.value=3800;wet.gain.value=level;
+   delay.delayTime.value=seconds;filter.type='lowpass';filter.frequency.value=3800;wet.gain.value=level*(welcome?1:.55);
    source.connect(delay);delay.connect(filter);filter.connect(wet);wet.connect(master);nodes.push(delay,filter,wet);
   }
- }else source.connect(master);
+ }
  let disposed=false;
  return ()=>{if(disposed)return;disposed=true;for(const node of nodes)node.disconnect();};
 }

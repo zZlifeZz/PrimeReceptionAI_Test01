@@ -50,7 +50,7 @@ export function performanceMotion(track,time,amount){
   const envelope=Math.sin(Math.PI*phase)**2*b.strength*amount;
   const side=(i%3===0?-1:1)*(i%2===0?1:.6);
   out.yaw+=side*.028*envelope;
-  out.pitch+=.021*envelope*Math.sin(Math.PI*2*phase);
+  if(i%3===0)out.pitch+=.007*envelope*Math.sin(Math.PI*2*phase);
   out.roll+=side*.010*envelope;
   // No torso/body movement: expressive head and face only.
 

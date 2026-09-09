@@ -1,5 +1,5 @@
-import {preparePerformance} from './natural-speech.mjs?v=expression1';
-import {connectVoice} from './presentation.mjs?v=expression1';
+import {preparePerformance} from './natural-speech.mjs?v=outputclock1';
+import {connectVoice} from './presentation.mjs?v=outputclock1';
 import {GenerationFence,sha256,validatePacket} from './speech-core.mjs';
 export class SpeechPlayer{
  constructor(onstate){this.fence=new GenerationFence();this.onstate=onstate;this.speaking=false;this.packet=null;this.context=null;this.source=null;this.ready=null;}
@@ -11,24 +11,27 @@ export class SpeechPlayer{
  const epoch=this.fence.begin(p);activeEpoch=epoch;const buffer=await this.context.decodeAudioData(this.bytes.slice(0));if(!this.fence.valid(epoch,p))return;
  if(Math.abs(buffer.duration-p.duration)>.003)throw Error('Audio duration mismatch');
  this.performance=preparePerformance(buffer);
- const media=new Audio();media.preload='auto';media.playbackRate=1.0;media.preservesPitch=true;
- const url=URL.createObjectURL(new Blob([this.bytes],{type:'audio/wav'}));media.src=url;
- const source=this.context.createMediaElementSource(media);this.source=source;this.media=media;this.mediaUrl=url;
- this.disposeVoice=connectVoice(this.context,source,p.transcript);
- media.onended=()=>{if(!this.fence.valid(epoch,p))return;this.stop();};
- media.onerror=()=>{if(!this.fence.valid(epoch,p))return;this.stop();this.onstate('Unable to play — Audio playback failed');};
- await media.play();
- if(!this.fence.valid(epoch,p)){media.pause();return;}
- this.started=this.context.currentTime;this.speaking=true;this.onstate('Speaking');
+ const source=this.context.createBufferSource();source.buffer=buffer;source.playbackRate.value=1;
+ this.source=source;this.disposeVoice=connectVoice(this.context,source,p.transcript);
+ source.onended=()=>{if(!this.fence.valid(epoch,p))return;this.stop();};
+ this.started=this.context.currentTime;this.lastTime=0;
+ source.start(this.started);this.speaking=true;this.onstate('Speaking');
  }catch(e){if(this.fence.epoch!==activeEpoch)return;this.stop();this.onstate('Unable to play — '+e.message);}
  }
- // Media time is in original transcript seconds at the provider-generated speaking pace.
- get time(){return this.media?Math.max(0,this.media.currentTime):0;}
+ // Animation follows the output device clock, not an independently buffered media element.
+ get time(){
+  if(!this.speaking||!this.source)return 0;
+  const c=this.context;let heard=c.currentTime;
+  const stamp=c.getOutputTimestamp?.();
+  if(stamp&&stamp.performanceTime>0&&Number.isFinite(stamp.contextTime)){
+   heard=stamp.contextTime+(c.state==='running'?Math.max(0,performance.now()-stamp.performanceTime)/1000:0);
+  }else heard-=Math.max(0,c.outputLatency||0)+Math.max(0,c.baseLatency||0);
+  const t=Math.min(this.packet.duration,Math.max(0,Math.min(c.currentTime,heard)-this.started));
+  this.lastTime=Math.max(this.lastTime||0,t);return this.lastTime;
+ }
  get cueTime(){return this.time;}
  stop(){this.fence.stop();this.speaking=false;
- if(this.media){this.media.onended=null;this.media.onerror=null;this.media.pause();this.media.removeAttribute('src');this.media.load();this.media=null;}
- this.disposeVoice?.();this.disposeVoice=null;
- if(this.source){this.source.disconnect();this.source=null;}
- if(this.mediaUrl){URL.revokeObjectURL(this.mediaUrl);this.mediaUrl=null;}
+ if(this.source){this.source.onended=null;try{this.source.stop();}catch{}this.source.disconnect();this.source=null;}
+ this.disposeVoice?.();this.disposeVoice=null;this.lastTime=0;
  this.onstate('Ready');}
 }
