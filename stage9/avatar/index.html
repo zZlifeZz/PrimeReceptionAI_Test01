@@ -75,9 +75,9 @@
   <script type="module">
     import * as THREE from 'three';
     import {FacialMixer} from './speech-core.mjs';
-    import {CurrentModelAdapter} from './current-model-adapter.mjs?v=phrasing1';
-    import {createBridge,parentOrigin} from './bridge.mjs?v=phrasing1';
-    import {naturalVisemes,performanceMotion,performanceExpression} from './natural-speech.mjs?v=phrasing1';
+    import {CurrentModelAdapter} from './current-model-adapter.mjs?v=pauseclock1';
+    import {createBridge,parentOrigin} from './bridge.mjs?v=pauseclock1';
+    import {naturalVisemes,performanceMotion,performanceExpression} from './natural-speech.mjs?v=pauseclock1';
     let speakingLife=0, speakingLifeTime=0;
     const facialMixer=new FacialMixer(new CurrentModelAdapter());
     const speechPlayer=createBridge();

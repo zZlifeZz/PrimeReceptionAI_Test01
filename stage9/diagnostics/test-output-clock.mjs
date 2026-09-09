@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {SpeechPlayer} from '../avatar/speech-player.mjs';
 import {performanceMotion} from '../avatar/natural-speech.mjs';
 const p=new SpeechPlayer(()=>{});let stopped=0,disconnected=0;
-p.source={stop(){stopped++;},disconnect(){disconnected++;}};p.speaking=true;p.started=10;p.packet={duration:5};
+p.source={disconnect(){disconnected++;}};p.sources=[{stop(){stopped++;},disconnect(){}}];p.speaking=true;p.started=10;p.packet={duration:5};
 p.context={currentTime:11,state:'running',getOutputTimestamp:()=>({contextTime:10.9,performanceTime:performance.now()})};
 assert(Math.abs(p.time-.9)<.005);assert(Math.abs(p.cueTime-.9)<.005);
 p.context.state='suspended';p.context.getOutputTimestamp=()=>({contextTime:10.8,performanceTime:1});assert(Math.abs(p.time-.9)<.005);

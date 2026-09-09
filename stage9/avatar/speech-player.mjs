@@ -1,5 +1,6 @@
-import {preparePerformance} from './natural-speech.mjs?v=phrasing1';
-import {connectVoice} from './presentation.mjs?v=phrasing1';
+import {welcomePause,mapPlaybackTime} from './playback-timeline.mjs?v=pauseclock1';
+import {preparePerformance} from './natural-speech.mjs?v=pauseclock1';
+import {connectVoice} from './presentation.mjs?v=pauseclock1';
 import {GenerationFence,sha256,validatePacket} from './speech-core.mjs';
 export class SpeechPlayer{
  constructor(onstate){this.fence=new GenerationFence();this.onstate=onstate;this.speaking=false;this.packet=null;this.context=null;this.source=null;this.ready=null;}
@@ -11,27 +12,48 @@ export class SpeechPlayer{
  const epoch=this.fence.begin(p);activeEpoch=epoch;const buffer=await this.context.decodeAudioData(this.bytes.slice(0));if(!this.fence.valid(epoch,p))return;
  if(Math.abs(buffer.duration-p.duration)>.003)throw Error('Audio duration mismatch');
  this.performance=preparePerformance(buffer);
- const source=this.context.createBufferSource();source.buffer=buffer;source.playbackRate.value=1;
- this.source=source;this.disposeVoice=connectVoice(this.context,source,p.transcript);
- source.onended=()=>{if(!this.fence.valid(epoch,p))return;this.stop();};
- this.started=this.context.currentTime;this.lastTime=0;
- source.start(this.started);this.speaking=true;this.onstate('Speaking');
+ this.pause=welcomePause(p);this.started=this.context.currentTime+.01;this.lastTime=0;
+ this.totalDuration=buffer.duration+(this.pause?.length||0);this.sources=[];
+ const output=this.context.createGain();this.source=output;
+ this.disposeVoice=connectVoice(this.context,output,p.transcript);
+ const schedule=(when,offset,duration)=>{
+  const source=this.context.createBufferSource();source.buffer=buffer;source.playbackRate.value=1;
+  source.connect(output);this.sources.push(source);source.start(when,offset,duration);return source;
+ };
+ let last;
+ if(this.pause){
+  schedule(this.started,0,this.pause.at);
+  last=schedule(this.started+this.pause.at+this.pause.length,this.pause.at,buffer.duration-this.pause.at);
+ }else last=schedule(this.started,0,buffer.duration);
+ // Rendering completes before the device has played its buffered sound. Keep the
+ // face/audio graph alive until the output clock and short room tail have ended.
+ last.onended=()=>{
+  const finish=()=>{
+   if(!this.fence.valid(epoch,p))return;
+   if(this.elapsed<this.totalDuration+.15){this.finishTimer=setTimeout(finish,20);return;}
+   this.stop();
+  };finish();
+ };
+ this.speaking=true;this.onstate('Speaking');
  }catch(e){if(this.fence.epoch!==activeEpoch)return;this.stop();this.onstate('Unable to play — '+e.message);}
  }
  // Animation follows the output device clock, not an independently buffered media element.
- get time(){
+ get elapsed(){
   if(!this.speaking||!this.source)return 0;
   const c=this.context;let heard=c.currentTime;
   const stamp=c.getOutputTimestamp?.();
   if(stamp&&stamp.performanceTime>0&&Number.isFinite(stamp.contextTime)){
    heard=stamp.contextTime+(c.state==='running'?Math.max(0,performance.now()-stamp.performanceTime)/1000:0);
   }else heard-=Math.max(0,c.outputLatency||0)+Math.max(0,c.baseLatency||0);
-  const t=Math.min(this.packet.duration,Math.max(0,Math.min(c.currentTime,heard)-this.started));
+  const t=Math.max(0,Math.min(c.currentTime,heard)-this.started);
   this.lastTime=Math.max(this.lastTime||0,t);return this.lastTime;
  }
- get cueTime(){return this.time;}
+ get time(){return mapPlaybackTime(this.elapsed,this.packet?.duration||0,this.pause).time;}
+ get cueTime(){const mapped=mapPlaybackTime(this.elapsed,this.packet?.duration||0,this.pause);return mapped.paused?-1:mapped.time;}
  stop(){this.fence.stop();this.speaking=false;
- if(this.source){this.source.onended=null;try{this.source.stop();}catch{}this.source.disconnect();this.source=null;}
+ clearTimeout(this.finishTimer);this.finishTimer=null;
+ for(const source of this.sources||[]){source.onended=null;try{source.stop();}catch{}source.disconnect();}this.sources=[];
+ if(this.source){this.source.disconnect();this.source=null;}
  this.disposeVoice?.();this.disposeVoice=null;this.lastTime=0;
  this.onstate('Ready');}
 }
