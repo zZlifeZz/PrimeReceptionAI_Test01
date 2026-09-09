@@ -1,4 +1,5 @@
-import {connectVoice} from './presentation.mjs?v=polish3';
+import {preparePerformance} from './natural-speech.mjs?v=natural1';
+import {connectVoice} from './presentation.mjs?v=natural1';
 import {GenerationFence,sha256,validatePacket} from './speech-core.mjs';
 export class SpeechPlayer{
  constructor(onstate){this.fence=new GenerationFence();this.onstate=onstate;this.speaking=false;this.packet=null;this.context=null;this.source=null;this.ready=null;}
@@ -9,6 +10,7 @@ export class SpeechPlayer{
  const p=await this.load();if(this.fence.epoch!==intent)return;
  const epoch=this.fence.begin(p);activeEpoch=epoch;const buffer=await this.context.decodeAudioData(this.bytes.slice(0));if(!this.fence.valid(epoch,p))return;
  if(Math.abs(buffer.duration-p.duration)>.003)throw Error('Audio duration mismatch');
+ this.performance=preparePerformance(buffer);
  const media=new Audio();media.preload='auto';media.playbackRate=.5;media.preservesPitch=true;
  const url=URL.createObjectURL(new Blob([this.bytes],{type:'audio/wav'}));media.src=url;
  const source=this.context.createMediaElementSource(media);this.source=source;this.media=media;this.mediaUrl=url;
@@ -22,7 +24,7 @@ export class SpeechPlayer{
  }
  // Media time is in original transcript seconds even at half-speed playback.
  get time(){return this.media?Math.max(0,this.media.currentTime):0;}
- get cueTime(){return this.time+.025;}
+ get cueTime(){return this.time;}
  stop(){this.fence.stop();this.speaking=false;
  if(this.media){this.media.onended=null;this.media.onerror=null;this.media.pause();this.media.removeAttribute('src');this.media.load();this.media=null;}
  this.disposeVoice?.();this.disposeVoice=null;

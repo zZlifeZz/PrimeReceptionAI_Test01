@@ -74,11 +74,13 @@
   </script>
   <script type="module">
     import * as THREE from 'three';
-    import {FacialMixer,evaluate} from './speech-core.mjs';
-    import {CurrentModelAdapter} from './current-model-adapter.mjs?v=polish3';
-    import {createBridge,parentOrigin} from './bridge.mjs?v=polish3';
-    import {speakingMotion} from './presentation.mjs?v=polish3';
+    import {FacialMixer} from './speech-core.mjs';
+    import {CurrentModelAdapter} from './current-model-adapter.mjs?v=natural1';
+    import {createBridge,parentOrigin} from './bridge.mjs?v=natural1';
+    import {naturalVisemes,performanceMotion} from './natural-speech.mjs?v=natural1';
     let speakingLife=0, speakingLifeTime=0;
+    let baseModelQuaternion=null;
+    const bodyMotionQuaternion=new THREE.Quaternion(),bodyMotionEuler=new THREE.Euler();
     const facialMixer=new FacialMixer(new CurrentModelAdapter());
     const speechPlayer=createBridge();
     window.primeReview={facialMixer,speechPlayer};
@@ -1018,6 +1020,7 @@
         if (lowerArmR) baseLowerArmRRotation = lowerArmR.rotation.clone();
         if (handL) baseHandLRotation = handL.rotation.clone();
         if (handR) baseHandRRotation = handR.rotation.clone();
+        baseModelQuaternion=model.quaternion.clone();
         const box = new THREE.Box3().setFromObject(model);
         modelSize = box.getSize(new THREE.Vector3());
         const center = box.getCenter(new THREE.Vector3());
@@ -1250,8 +1253,14 @@
 
       applyEyeLookMorphs(normalizedEyeX, normalizedEyeY);
       speakingLife=damp(speakingLife,Number(speechPlayer.speaking),3.5,delta);
-      if(speechPlayer.speaking)speakingLifeTime=speechPlayer.time*2;
-      const speechMotion=speakingMotion(speakingLifeTime,speakingLife);
+      if(speechPlayer.speaking)speakingLifeTime=speechPlayer.time;
+      const speechMotion=performanceMotion(speechPlayer.performance,speakingLifeTime,speakingLife);
+      const neckMotion=performanceMotion(speechPlayer.performance,Math.max(0,speakingLifeTime-.055),speakingLife);
+      if(model&&baseModelQuaternion){
+        bodyMotionEuler.set(0,speechMotion.bodyYaw,speechMotion.bodyRoll);
+        bodyMotionQuaternion.setFromEuler(bodyMotionEuler);
+        model.quaternion.copy(baseModelQuaternion).premultiply(bodyMotionQuaternion);
+      }
       if (headBone && baseHeadRotation) {
         headBone.rotation.copy(baseHeadRotation);
         headBone.rotation.x += headHorizontal + speechMotion.yaw;
@@ -1262,9 +1271,9 @@
       }
       if (neck02 && baseNeck02Rotation) {
         neck02.rotation.copy(baseNeck02Rotation);
-        neck02.rotation.x += neckHorizontal;
+        neck02.rotation.x += neckHorizontal + neckMotion.yaw*.24;
         neck02.rotation.z +=
-          neckVertical +
+          neckVertical + neckMotion.pitch*.24 +
           THREE.MathUtils.degToRad(-0.55) * swallowStrength;
         neck02.rotation.y = baseNeck02Rotation.y;
       }
@@ -1288,7 +1297,7 @@
 
       updateNetworkBackdrop(now, delta);
 
-      facialMixer.apply(delta,speechPlayer.speaking,speechPlayer.speaking?evaluate(speechPlayer.packet.speechCues,speechPlayer.cueTime):{},speechPlayer.time||0);
+      facialMixer.apply(delta,speechPlayer.speaking,speechPlayer.speaking?naturalVisemes(speechPlayer.packet.speechCues,speechPlayer.cueTime):{},speechPlayer.time||0);
       renderer.render(scene, camera);
     }
     animate();

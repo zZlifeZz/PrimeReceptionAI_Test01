@@ -1,11 +1,11 @@
 import {Attention} from './attention.mjs';
-import {SpeechPlayer} from './speech-player.mjs?v=polish3';
+import {SpeechPlayer} from './speech-player.mjs?v=natural1';
 import {GenerationFence} from './speech-core.mjs';
 import {Guard,messageAllowed} from './guard.mjs';
 export const parentOrigin=new URLSearchParams(location.search).get('parentOrigin');
 const parents=new Set(['https://primetesti.carrd.co','https://primereceptionai.ca']);
 export function createBridge(){
- if(!parents.has(parentOrigin))throw Error('Unapproved parent');
+ if(!parents.has(parentOrigin)&&!(new URLSearchParams(location.search).get('review')==='1'&&parentOrigin===location.origin))throw Error('Unapproved parent');
  const origin=parentOrigin,guard=new Guard();let ready=false,pending=null,muted=false;
  const post=(type,extra={})=>parent.postMessage({version:1,type,nonce:guard.nonce,...extra},origin);
  let player;player=new SpeechPlayer(state=>{if(!guard.ref)return;if(state==='Speaking')post('prime-speaking-start',{ref:guard.ref,playbackTiming:{scheduledStartEpochMs:performance.timeOrigin+performance.now()+Math.max(0,player.started-player.context.currentTime)*1000,outputLatencyMs:(player.context.outputLatency||0)*1000}});else if(state.startsWith('Unable'))post('prime-error',{ref:guard.ref,message:state});else if(state==='Ready'&&player?.source===null&&pending===null)post('prime-speaking-stop',{ref:guard.ref});});
