@@ -6,7 +6,7 @@ export function connectVoice(context, source, transcript) {
  const tone=context.createBiquadFilter();tone.type='highshelf';tone.frequency.value=3200;tone.gain.value=-2.5;
  master.connect(tone);tone.connect(context.destination);
  const nodes=[master,tone];
- const welcome=transcript.startsWith("Welcome to Prime Reception AI. I'm Aurelia,");
+ const welcome=transcript.startsWith("Welcome to Prime Reception AI.");
  {
   const dry=context.createGain();dry.gain.value=welcome?.84:.92;source.connect(dry);dry.connect(master);nodes.push(dry);
   // Quiet, short room reflections; no feedback or long echo masking consonants.

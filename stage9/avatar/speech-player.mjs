@@ -1,5 +1,5 @@
-import {preparePerformance} from './natural-speech.mjs?v=outputclock1';
-import {connectVoice} from './presentation.mjs?v=outputclock1';
+import {preparePerformance} from './natural-speech.mjs?v=phrasing1';
+import {connectVoice} from './presentation.mjs?v=phrasing1';
 import {GenerationFence,sha256,validatePacket} from './speech-core.mjs';
 export class SpeechPlayer{
  constructor(onstate){this.fence=new GenerationFence();this.onstate=onstate;this.speaking=false;this.packet=null;this.context=null;this.source=null;this.ready=null;}
