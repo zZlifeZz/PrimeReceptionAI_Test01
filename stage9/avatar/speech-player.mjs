@@ -35,7 +35,7 @@ export class SpeechPlayer{
   };finish();
  };
  this.speaking=true;this.onstate('Speaking');
- }catch(e){if(this.fence.epoch!==activeEpoch)return;this.stop();this.onstate('Unable to play — '+e.message);}
+ }catch(e){if(this.fence.epoch!==activeEpoch)return;this.stop(false);this.onstate('Unable to play — '+e.message);}
  }
  // Animation follows the output device clock, not an independently buffered media element.
  get elapsed(){
@@ -50,10 +50,10 @@ export class SpeechPlayer{
  }
  get time(){return mapPlaybackTime(this.elapsed,this.packet?.duration||0,this.pause).time;}
  get cueTime(){const mapped=mapPlaybackTime(this.elapsed,this.packet?.duration||0,this.pause);return mapped.paused?-1:mapped.time;}
- stop(){this.fence.stop();this.speaking=false;
+ stop(notify=true){this.fence.stop();this.speaking=false;
  clearTimeout(this.finishTimer);this.finishTimer=null;
  for(const source of this.sources||[]){source.onended=null;try{source.stop();}catch{}source.disconnect();}this.sources=[];
  if(this.source){this.source.disconnect();this.source=null;}
  this.disposeVoice?.();this.disposeVoice=null;this.lastTime=0;
- this.onstate('Ready');}
+ if(notify)this.onstate('Ready');}
 }

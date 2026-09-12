@@ -47,10 +47,11 @@ window.addEventListener('message',async e=>{
  if(d.type==='prime-audio-blocked'){voiceRequested=false;voiceButton.disabled=false;return;}
  if(!matches(d.ref,active))return;
  const ack={'prime-speaking-start':'speaking','prime-speaking-stop':'ended','prime-error':'error'}[d.type];if(!ack)return;
- const ref=active;
+ const ref=active;const playbackCode=ack==='error'&&typeof d.code==='string'?d.code:'unknown';
+ if(ack==='error')console.error('Prime playback failed',{code:playbackCode});
  // Reflect playback immediately; network acknowledgement cannot delay the expression.
  if(ack==='speaking'){if(welcomeActive)welcome.speaking();face('speaking');status.textContent='';}else idle();
- try{await raw('ack',{...ref,state:ack});if(ref!==active)return;if(ack!=='speaking'){clear();if(ack==='error')fail();else finishWelcome();}}catch{if(ref===active){clear();fail();}}
+ try{await raw('ack',{...ref,state:ack,...(ack==='error'?{playbackCode}: {})});if(ref!==active)return;if(ack!=='speaking'){clear();if(ack==='error')fail();else finishWelcome();}}catch{if(ref===active){clear();fail();}}
 });
 async function submit(text,kind='turn'){
  if(kind!=='welcome'&&welcome.queue(text,kind)){status.textContent=welcomeActive?'Aurelia will answer after her welcome.':'Enable Voice to meet Aurelia.';return;}

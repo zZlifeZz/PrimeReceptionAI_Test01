@@ -1,14 +1,18 @@
 import {Attention} from './attention.mjs';
-import {SpeechPlayer} from './speech-player.mjs?v=pauseclock1';
+import {SpeechPlayer} from './speech-player.mjs?v=playbackdiagnostic1';
 import {GenerationFence} from './speech-core.mjs';
 import {Guard,messageAllowed} from './guard.mjs';
 export const parentOrigin=new URLSearchParams(location.search).get('parentOrigin');
+const playbackCode=message=>{
+ const codes={'Audio not ready':'audio_not_ready','Stale turn':'stale_turn','Speech identity rejected':'identity_rejected','Hash rejected':'hash_rejected','Invalid packet':'invalid_packet','Invalid timing':'invalid_timing','Audio size rejected':'audio_size_rejected','Audio unavailable':'audio_unavailable','Audio duration mismatch':'audio_duration_mismatch'};
+ const plain=String(message||'').replace(/^Unable to play — /,'');return codes[plain]||'audio_playback_failed';
+};
 const parents=new Set(['https://primetesti.carrd.co','https://primereceptionai.ca']);
 export function createBridge(){
  if(!parents.has(parentOrigin)&&!(new URLSearchParams(location.search).get('review')==='1'&&parentOrigin===location.origin))throw Error('Unapproved parent');
  const origin=parentOrigin,guard=new Guard();let ready=false,pending=null,muted=false;
  const post=(type,extra={})=>parent.postMessage({version:1,type,nonce:guard.nonce,...extra},origin);
- let player;player=new SpeechPlayer(state=>{if(!guard.ref)return;if(state==='Speaking')post('prime-speaking-start',{ref:guard.ref,playbackTiming:{scheduledStartEpochMs:performance.timeOrigin+performance.now()+Math.max(0,player.started-player.context.currentTime)*1000,outputLatencyMs:(player.context.outputLatency||0)*1000}});else if(state.startsWith('Unable'))post('prime-error',{ref:guard.ref,message:state});else if(state==='Ready'&&player?.source===null&&pending===null)post('prime-speaking-stop',{ref:guard.ref});});
+ let player;player=new SpeechPlayer(state=>{if(!guard.ref)return;if(state==='Speaking')post('prime-speaking-start',{ref:guard.ref,playbackTiming:{scheduledStartEpochMs:performance.timeOrigin+performance.now()+Math.max(0,player.started-player.context.currentTime)*1000,outputLatencyMs:(player.context.outputLatency||0)*1000}});else if(state.startsWith('Unable'))post('prime-error',{ref:guard.ref,message:state,code:playbackCode(state)});else if(state==='Ready'&&player?.source===null&&pending===null)post('prime-speaking-stop',{ref:guard.ref});});
  // Supply a packet through a transport adapter; frozen player and mixer are untouched.
  player.load=async()=>{
  const p=pending,serial=guard.serial;let bytes;
@@ -44,7 +48,7 @@ export function createBridge(){
  if(d.type==='prime-speech-stop'){guard.stop();pending=null;player.stop();return;}
  if(d.type==='prime-sound'){muted=d.muted===true;if(muted){guard.stop();pending=null;player.stop();}return;}
  if(d.type==='prime-speech-play'){
- try{if(muted||!ready)throw Error('Audio not ready');guard.expect(d.expectedRef);pending=d.packet;await player.play();}catch(err){post('prime-error',{ref:d.packet,message:'Speech rejected or unavailable'});}
+ try{if(muted||!ready)throw Error('Audio not ready');guard.expect(d.expectedRef);pending=d.packet;await player.play();}catch(err){post('prime-error',{ref:d.packet,message:'Speech rejected or unavailable',code:playbackCode(err.message)});}
  }
  });
  return player;
