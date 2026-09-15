@@ -1,0 +1,10 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {build} from 'esbuild';
+const root=fileURLToPath(new URL('../avatar/',import.meta.url));
+const bundled=await build({entryPoints:[path.join(root,'studio-review.mjs')],bundle:true,format:'iife',target:'es2022',minify:true,write:false,logLevel:'silent',define:{'import.meta.url':JSON.stringify('file:///studio-review.html')}});
+const template=await fs.readFile(path.join(root,'studio-review-template.html'),'utf8');
+const css=await fs.readFile(path.join(root,'studio.css'),'utf8');
+const html=template.replace('__STUDIO_CSS__',css).replace('__BUNDLE__',()=>bundled.outputFiles[0].text.replace(/<\/script/gi,'<\\/script'));
+const output=process.argv[2]||path.join(root,'studio-review.html');await fs.writeFile(output,html);console.log(output);
