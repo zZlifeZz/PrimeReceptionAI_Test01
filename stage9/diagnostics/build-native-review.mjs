@@ -1,0 +1,16 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {build} from 'esbuild';
+const root=fileURLToPath(new URL('../avatar/',import.meta.url));
+const [avatar,office,wav,poster,output]=process.argv.slice(2);
+if(!output)throw Error('Pass avatar.glb office.glb saved.wav poster.png output.html');
+const [a,o,w,p]=await Promise.all([avatar,office,wav,poster].map(f=>fs.readFile(f)));
+const sample=JSON.parse(await fs.readFile(new URL('../review/sample.json',import.meta.url),'utf8'));
+if(createHash('sha256').update(w).digest('hex')!==sample.audioSha256)throw Error('WAV must match the original timing packet');
+const bundle=await build({entryPoints:[path.join(root,'native-review.mjs')],bundle:true,format:'iife',target:'es2022',minify:true,write:false,logLevel:'silent',define:{'import.meta.url':JSON.stringify('file:///native-review.html')}});
+const [template,css]=await Promise.all([fs.readFile(path.join(root,'native-review-template.html'),'utf8'),fs.readFile(path.join(root,'studio.css'),'utf8')]);
+const payload={avatar:a.toString('base64'),office:o.toString('base64'),wav:w.toString('base64'),poster:'data:image/png;base64,'+p.toString('base64')};
+const html=template.replace('__STUDIO_CSS__',()=>css).replace('__PRIVATE_ASSETS__',()=>JSON.stringify(payload)).replace('__BUNDLE__',()=>bundle.outputFiles[0].text.replace(/<\/script/gi,'<\\/script'));
+await fs.writeFile(output,html);console.log('PRIVATE_REVIEW_BUILT',output,Buffer.byteLength(html));
