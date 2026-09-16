@@ -1,0 +1,1 @@
+{"private":true,"type":"module","description":"Dependencies for the studio loader check and private preview build","dependencies":{"three":"0.180.0","sharp":"0.35.4","esbuild":"0.25.9"}}
