@@ -11,6 +11,24 @@
 </head>
 <body>
   <main id="stage" aria-label="Prime Reception virtual receptionist"></main>
+  <script>
+    // Staging-only receipt probe. This changes no rendering, materials, or motion.
+    (() => {
+      if (new URLSearchParams(location.search).get('parentOrigin') !== 'https://primetesti.carrd.co') return;
+      const stage = document.getElementById('stage');
+      stage.dataset.pointerProbe = 'receipt-20260916';
+      stage.dataset.pointerMessages = '0';
+      window.addEventListener('message', event => {
+        if (event.source !== parent || event.origin !== 'https://primetesti.carrd.co' ||
+            event.data?.type !== 'prime-pointer') return;
+        const x = Number(event.data.x), y = Number(event.data.y);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+        stage.dataset.pointerMessages = String(Number(stage.dataset.pointerMessages) + 1);
+        stage.dataset.pointerReceivedX = String(x);
+        stage.dataset.pointerReceivedY = String(y);
+      });
+    })();
+  </script>
   <script type="module" src="https://prime-backend-stage4.onrender.com/_receptionist/native-tie-20260916/studio-entry.mjs" crossorigin="anonymous"></script>
 </body>
 </html>
